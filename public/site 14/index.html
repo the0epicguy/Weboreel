@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoidRealm — Enter the Dark Dimension</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#030008;
+  --surface:rgba(120,0,255,0.05);
+  --border:rgba(180,0,255,0.2);
+  --purple:#b400ff;
+  --red:#ff003c;
+  --gold:#ffd700;
+  --text:#f0e6ff;
+  --muted:rgba(240,230,255,0.5);
+  --glow:0 0 40px rgba(180,0,255,0.4);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;cursor:none;}
+
+/* CURSOR - CROSSHAIR */
+#cursor{position:fixed;z-index:9999;pointer-events:none;top:0;left:0;}
+.c-h,.c-v{position:absolute;background:var(--red);transform:translate(-50%,-50%);}
+.c-h{width:28px;height:2px;}
+.c-v{width:2px;height:28px;}
+.c-circle{width:16px;height:16px;border:2px solid var(--red);border-radius:50%;position:absolute;transform:translate(-50%,-50%);animation:pulseCursor 1.5s infinite;}
+.c-dot{width:4px;height:4px;background:var(--red);border-radius:50%;position:absolute;transform:translate(-50%,-50%);}
+@keyframes pulseCursor{0%,100%{box-shadow:0 0 0 0 rgba(255,0,60,0.5)}50%{box-shadow:0 0 0 8px rgba(255,0,60,0)}}
+body.hovering .c-circle{width:30px;height:30px;border-color:var(--gold);}
+
+/* CANVAS */
+#bg-canvas{position:fixed;top:0;left:0;z-index:0;}
+
+/* SOUND */
+#sound-toggle{position:fixed;top:24px;right:80px;z-index:1000;background:rgba(180,0,255,0.1);border:1px solid var(--border);border-radius:4px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:none;font-size:18px;transition:all .3s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 60px;height:70px;display:flex;align-items:center;justify-content:space-between;background:rgba(3,0,8,0.85);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:4px;color:var(--purple);text-shadow:0 0 20px var(--purple);}
+.nav-links{display:flex;gap:40px;}
+.nav-links a{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s;}
+.nav-links a:hover{color:var(--purple);text-shadow:0 0 10px var(--purple);}
+.nav-btn{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;padding:10px 24px;border:1px solid var(--purple);background:transparent;color:var(--purple);cursor:none;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .3s;}
+.nav-btn:hover{background:var(--purple);color:#000;box-shadow:var(--glow);}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 40px;position:relative;z-index:10;}
+.hero-eyebrow{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:4px;color:var(--red);margin-bottom:24px;animation:flicker 3s infinite;}
+@keyframes flicker{0%,98%,100%{opacity:1}99%{opacity:0.3}}
+h1.game-title{font-family:'Orbitron',monospace;font-size:clamp(50px,9vw,110px);font-weight:900;line-height:.95;margin-bottom:32px;letter-spacing:-2px;}
+.title-void{display:block;color:var(--purple);text-shadow:0 0 60px var(--purple),0 0 120px rgba(180,0,255,0.3);}
+.title-realm{display:block;-webkit-text-stroke:2px var(--red);-webkit-text-fill-color:transparent;text-shadow:none;}
+.hero-desc{font-size:18px;color:var(--muted);max-width:500px;margin:0 auto 48px;line-height:1.6;}
+.hero-actions{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+.btn-play{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:3px;padding:16px 48px;background:linear-gradient(135deg,var(--purple),var(--red));border:none;color:#fff;cursor:none;clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);transition:all .3s;text-transform:uppercase;}
+.btn-play:hover{transform:scale(1.05);box-shadow:var(--glow);}
+.btn-trailer{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;padding:16px 32px;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:none;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .3s;}
+.btn-trailer:hover{border-color:var(--purple);color:var(--text);}
+
+/* RATING BAR */
+.rating-bar{display:flex;align-items:center;justify-content:center;gap:40px;margin-top:80px;padding-top:60px;border-top:1px solid var(--border);}
+.rating-item{text-align:center;}
+.rating-score{font-family:'Orbitron',monospace;font-size:36px;font-weight:900;color:var(--gold);text-shadow:0 0 20px var(--gold);}
+.rating-label{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+
+/* STORY */
+#story{padding:120px 0;position:relative;z-index:10;}
+.container{max-width:1200px;margin:0 auto;padding:0 60px;}
+.section-label{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--red);margin-bottom:12px;}
+.section-title{font-family:'Orbitron',monospace;font-size:clamp(28px,4vw,48px);font-weight:900;margin-bottom:24px;line-height:1.1;}
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:64px;}
+.story-text p{color:var(--muted);line-height:1.8;margin-bottom:16px;font-size:16px;}
+.story-visual{background:var(--surface);border:1px solid var(--border);border-radius:4px;height:400px;display:flex;align-items:center;justify-content:center;font-size:100px;position:relative;overflow:hidden;}
+.story-visual::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(180,0,255,0.1),rgba(255,0,60,0.05));}
+.lore-box{background:rgba(180,0,255,0.05);border-left:3px solid var(--purple);padding:20px 24px;margin-top:24px;font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);line-height:1.8;}
+
+/* CLASSES */
+#classes{padding:120px 0;position:relative;z-index:10;}
+.classes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:64px;}
+.class-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:28px;text-align:center;transition:all .4s;position:relative;overflow:hidden;cursor:none;}
+.class-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:.3s;}
+.class-card:hover::after{opacity:1;}
+.class-card:hover{transform:translateY(-8px);border-color:var(--purple);box-shadow:var(--glow);}
+.class-icon{font-size:52px;margin-bottom:16px;display:block;}
+.class-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:2px;margin-bottom:8px;}
+.class-type{font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
+.void{color:#b400ff;}.shadow{color:#ff003c;}.storm{color:#00bfff;}.warden{color:#ffd700;}
+.class-stats{display:flex;flex-direction:column;gap:6px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.stat-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;flex:1;margin:0 10px;overflow:hidden;}
+.stat-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.void .stat-fill{background:var(--purple);}
+.shadow .stat-fill{background:var(--red);}
+.storm .stat-fill{background:#00bfff;}
+.warden .stat-fill{background:var(--gold);}
+
+/* GAMEPLAY */
+#gameplay{padding:120px 0;position:relative;z-index:10;}
+.gameplay-features{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px;}
+.gf-card{background:var(--surface);border:1px solid var(--border);padding:36px;position:relative;transition:all .4s;}
+.gf-card:hover{border-color:var(--purple);box-shadow:var(--glow);}
+.gf-num{font-family:'Orbitron',monospace;font-size:60px;font-weight:900;opacity:0.08;position:absolute;top:20px;right:20px;}
+.gf-icon{font-size:36px;margin-bottom:20px;}
+.gf-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;margin-bottom:12px;color:var(--purple);}
+.gf-desc{font-size:14px;color:var(--muted);line-height:1.7;}
+
+/* LEADERBOARD */
+#leaderboard{padding:120px 0;position:relative;z-index:10;}
+.lb-table{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:64px;}
+.lb-header{display:grid;grid-template-columns:60px 1fr 120px 120px 120px;padding:16px 24px;background:rgba(180,0,255,0.1);font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.lb-row{display:grid;grid-template-columns:60px 1fr 120px 120px 120px;padding:18px 24px;border-top:1px solid rgba(255,255,255,0.04);align-items:center;transition:background .3s;}
+.lb-row:hover{background:rgba(180,0,255,0.05);}
+.lb-row.gold .lb-rank{color:var(--gold);text-shadow:0 0 10px var(--gold);}
+.lb-row.silver .lb-rank{color:#c0c0c0;}
+.lb-row.bronze .lb-rank{color:#cd7f32;}
+.lb-rank{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;text-align:center;}
+.lb-player{display:flex;align-items:center;gap:12px;}
+.player-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--red));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.player-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;}
+.player-class{font-size:11px;color:var(--muted);}
+.lb-val{font-family:'Share Tech Mono',monospace;font-size:14px;text-align:right;}
+.lb-kd{color:var(--gold);}
+.lb-score{color:var(--purple);}
+
+/* REVIEWS */
+#reviews{padding:120px 0;position:relative;z-index:10;}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:64px;}
+.review-card{background:var(--surface);border:1px solid var(--border);padding:28px;position:relative;}
+.review-source{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--purple);margin-bottom:12px;}
+.review-score{font-family:'Orbitron',monospace;font-size:42px;font-weight:900;color:var(--gold);margin-bottom:12px;}
+.review-text{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;font-style:italic;}
+.review-author{font-size:12px;color:var(--muted);}
+
+/* BATTLE PASS */
+#battlepass{padding:120px 0;position:relative;z-index:10;}
+.pass-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px;}
+.pass-card{padding:48px;border-radius:4px;border:1px solid var(--border);transition:all .4s;}
+.pass-card.free{background:rgba(255,255,255,0.02);}
+.pass-card.premium{background:linear-gradient(135deg,rgba(180,0,255,0.15),rgba(255,0,60,0.1));border-color:var(--purple);box-shadow:var(--glow);}
+.pass-label{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;}
+.pass-label.free-label{color:var(--muted);}
+.pass-label.prem-label{color:var(--purple);}
+.pass-price{font-family:'Orbitron',monospace;font-size:52px;font-weight:900;margin-bottom:4px;}
+.pass-duration{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.pass-items{list-style:none;margin-bottom:32px;}
+.pass-items li{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;display:flex;gap:10px;align-items:center;}
+.pass-items li span.check{color:var(--gold);}
+.btn-pass{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;width:100%;padding:16px;border:1px solid;cursor:none;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .3s;text-transform:uppercase;}
+.btn-pass.free{border-color:var(--border);color:var(--muted);background:transparent;}
+.btn-pass.premium{border-color:var(--purple);color:#fff;background:linear-gradient(135deg,var(--purple),var(--red));}
+.btn-pass:hover{transform:translateY(-2px);}
+
+/* FAQ */
+#faq{padding:120px 0;position:relative;z-index:10;}
+.faq-list{max-width:760px;margin:64px auto 0;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{padding:22px 0;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;cursor:none;display:flex;justify-content:space-between;align-items:center;transition:color .3s;letter-spacing:1px;}
+.faq-q:hover{color:var(--purple);}
+.faq-icon{color:var(--purple);transition:transform .3s;font-size:18px;}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .4s,padding .3s;}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:20px;}
+.faq-item.open .faq-icon{transform:rotate(45deg);}
+
+/* FOOTER */
+footer{padding:60px 0 40px;border-top:1px solid var(--border);position:relative;z-index:10;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px;}
+.footer-logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--purple);text-shadow:0 0 20px var(--purple);margin-bottom:16px;display:block;}
+.footer-brand p{font-size:13px;color:var(--muted);line-height:1.7;}
+.footer-col h5{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--red);margin-bottom:20px;text-transform:uppercase;}
+.footer-col a{display:block;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:10px;transition:color .3s;}
+.footer-col a:hover{color:var(--purple);}
+.footer-bottom{display:flex;justify-content:space-between;padding-top:40px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
+
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .container{padding:0 20px;}
+  .story-grid,.pass-cards{grid-template-columns:1fr;}
+  .classes-grid{grid-template-columns:1fr 1fr;}
+  .gameplay-features,.reviews-grid{grid-template-columns:1fr;}
+  .lb-header,.lb-row{grid-template-columns:40px 1fr 80px;}
+  .lb-header span:nth-child(4),.lb-header span:nth-child(5),
+  .lb-row span:nth-child(4),.lb-row span:nth-child(5){display:none;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  body{cursor:auto;}#cursor{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor">
+  <div class="c-circle"></div>
+  <div class="c-dot"></div>
+  <div class="c-h"></div>
+  <div class="c-v"></div>
+</div>
+
+<button id="sound-toggle">🔇</button>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <div class="logo">VOIDREALM</div>
+  <div class="nav-links">
+    <a href="#story">LORE</a>
+    <a href="#classes">CLASSES</a>
+    <a href="#gameplay">GAMEPLAY</a>
+    <a href="#leaderboard">RANKINGS</a>
+    <a href="#battlepass">BATTLE PASS</a>
+  </div>
+  <button class="nav-btn">PLAY NOW</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="z-index:10;position:relative;">
+  <div>
+    <div class="hero-eyebrow">◈ SEASON 4 — THE VOID AWAKENS ◈</div>
+    <h1 class="game-title">
+      <span class="title-void">VOID</span>
+      <span class="title-realm">REALM</span>
+    </h1>
+    <p class="hero-desc">Fall into the abyss. Command darkness. Rule the void. The most brutal interdimensional battle arena ever crafted.</p>
+    <div class="hero-actions">
+      <button class="btn-play">▶ Play Free</button>
+      <button class="btn-trailer">⬡ Watch Trailer</button>
+    </div>
+    <div class="rating-bar container">
+      <div class="rating-item"><div class="rating-score">9.4</div><div class="rating-label">IGN Score</div></div>
+      <div class="rating-item"><div class="rating-score">4.8M</div><div class="rating-label">Active Players</div></div>
+      <div class="rating-item"><div class="rating-score">#1</div><div class="rating-label">Battle Arena 2024</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section id="story">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-text reveal">
+        <div class="section-label">◈ THE LORE</div>
+        <h2 class="section-title">Before Time<br>Had a Name</h2>
+        <p>The Void existed before the universe. A formless expanse of raw dimensional energy, it consumed entire realities like a black hole consumes light — completely, without remorse, without end.</p>
+        <p>Then came the Fracture. A single crack in the dimensional membrane, and from it poured the first Void-touched warriors — beings neither fully material nor entirely lost to the darkness.</p>
+        <p>You are one of them. Born from the collision of existence and oblivion. Your only purpose: fight, evolve, dominate — or be consumed by the Void you claim to command.</p>
+        <div class="lore-box">
+          > VOID TRANSMISSION 4.0.1<br>
+          > COORDINATES: NEXUS RIFT — SECTOR 7<br>
+          > THREAT LEVEL: CATASTROPHIC<br>
+          > NEW CHAMPIONS DETECTED: 3<br>
+          > SEASON ENDS IN: 47:12:09:44
+        </div>
+      </div>
+      <div class="story-visual reveal"><span>⚔️</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSES -->
+<section id="classes">
+  <div class="container">
+    <div class="section-label reveal">◈ CHOOSE YOUR PATH</div>
+    <h2 class="section-title reveal">Four Champions.<br>One Void.</h2>
+    <div class="classes-grid">
+      <div class="class-card void reveal">
+        <span class="class-icon">👁️</span>
+        <div class="class-name">VOID WEAVER</div>
+        <div class="class-type void">Arcane Assassin</div>
+        <div class="class-stats">
+          <div class="stat-row"><span>Power</span><div class="stat-bar"><div class="stat-fill void" style="width:95%"></div></div><span>95</span></div>
+          <div class="stat-row"><span>Speed</span><div class="stat-bar"><div class="stat-fill void" style="width:78%"></div></div><span>78</span></div>
+          <div class="stat-row"><span>Defense</span><div class="stat-bar"><div class="stat-fill void" style="width:42%"></div></div><span>42</span></div>
+        </div>
+      </div>
+      <div class="class-card shadow reveal">
+        <span class="class-icon">🗡️</span>
+        <div class="class-name">SHADOW BLADE</div>
+        <div class="class-type shadow">Stealth Striker</div>
+        <div class="class-stats">
+          <div class="stat-row"><span>Power</span><div class="stat-bar"><div class="stat-fill shadow" style="width:82%"></div></div><span>82</span></div>
+          <div class="stat-row"><span>Speed</span><div class="stat-bar"><div class="stat-fill shadow" style="width:97%"></div></div><span>97</span></div>
+          <div class="stat-row"><span>Defense</span><div class="stat-bar"><div class="stat-fill shadow" style="width:55%"></div></div><span>55</span></div>
+        </div>
+      </div>
+      <div class="class-card storm reveal">
+        <span class="class-icon">⚡</span>
+        <div class="class-name">STORM CALLER</div>
+        <div class="class-type storm">Elemental Mage</div>
+        <div class="class-stats">
+          <div class="stat-row"><span>Power</span><div class="stat-bar"><div class="stat-fill storm" style="width:90%"></div></div><span>90</span></div>
+          <div class="stat-row"><span>Speed</span><div class="stat-bar"><div class="stat-fill storm" style="width:65%"></div></div><span>65</span></div>
+          <div class="stat-row"><span>Defense</span><div class="stat-bar"><div class="stat-fill storm" style="width:60%"></div></div><span>60</span></div>
+        </div>
+      </div>
+      <div class="class-card warden reveal">
+        <span class="class-icon">🛡️</span>
+        <div class="class-name">VOID WARDEN</div>
+        <div class="class-type warden">Titan Guardian</div>
+        <div class="class-stats">
+          <div class="stat-row"><span>Power</span><div class="stat-bar"><div class="stat-fill warden" style="width:75%"></div></div><span>75</span></div>
+          <div class="stat-row"><span>Speed</span><div class="stat-bar"><div class="stat-fill warden" style="width:50%"></div></div><span>50</span></div>
+          <div class="stat-row"><span>Defense</span><div class="stat-bar"><div class="stat-fill warden" style="width:99%"></div></div><span>99</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAMEPLAY -->
+<section id="gameplay">
+  <div class="container">
+    <div class="section-label reveal">◈ MECHANICS</div>
+    <h2 class="section-title reveal">Every Match.<br>A New Reality.</h2>
+    <div class="gameplay-features">
+      <div class="gf-card reveal">
+        <div class="gf-num">01</div>
+        <div class="gf-icon">🌀</div>
+        <div class="gf-title">Dimensional Rifts</div>
+        <div class="gf-desc">Maps shift in real-time as dimensional rifts open and close. No two matches play the same — terrain collapses, new pathways appear, and the Void claims territory every 90 seconds.</div>
+      </div>
+      <div class="gf-card reveal">
+        <div class="gf-num">02</div>
+        <div class="gf-icon">⚔️</div>
+        <div class="gf-title">Void Combat System</div>
+        <div class="gf-desc">144-frame precision combat with directional parry, chain cancels, and Void Surge mechanics. Every ability can be modified mid-cast. The skill ceiling is virtually limitless.</div>
+      </div>
+      <div class="gf-card reveal">
+        <div class="gf-num">03</div>
+        <div class="gf-icon">🏆</div>
+        <div class="gf-title">7-Tier Ranked System</div>
+        <div class="gf-desc">From Void Initiate to Dimensional Sovereign — a fully tracked ranked ladder with role-specific MMR, performance badges, and seasonal placement rewards that actually matter.</div>
+      </div>
+      <div class="gf-card reveal">
+        <div class="gf-num">04</div>
+        <div class="gf-icon">🧬</div>
+        <div class="gf-title">Champion Evolution</div>
+        <div class="gf-desc">Champions gain Void Essence from kills, evolving their abilities in real-time. Reach Ascended state within a match to unlock ultimate forms — or lose it all on death.</div>
+      </div>
+      <div class="gf-card reveal">
+        <div class="gf-num">05</div>
+        <div class="gf-icon">👥</div>
+        <div class="gf-title">6v6 Team Warfare</div>
+        <div class="gf-desc">Coordinated team play with strategic role compositions, real-time pings, and shared Void energy pools. Synchronized ultimate chains can turn a losing fight instantly.</div>
+      </div>
+      <div class="gf-card reveal">
+        <div class="gf-num">06</div>
+        <div class="gf-icon">🌍</div>
+        <div class="gf-title">Seasonal World Events</div>
+        <div class="gf-desc">Every 8 weeks, a global story event reshapes the lore, introduces new map zones, and challenges the entire playerbase to cooperatively unlock new champion lore and cosmetics.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboard">
+  <div class="container">
+    <div class="section-label reveal">◈ SEASON 4 RANKINGS</div>
+    <h2 class="section-title reveal">Global Leaderboard</h2>
+    <div class="lb-table reveal">
+      <div class="lb-header"><span>RANK</span><span>PLAYER</span><span>K/D</span><span>WIN%</span><span>SCORE</span></div>
+      <div class="lb-row gold"><span class="lb-rank">1</span><div class="lb-player"><div class="player-avatar">Vx</div><div><div class="player-name">VoidXepher</div><div class="player-class">Void Weaver · Sovereign</div></div></div><span class="lb-val lb-kd">8.4</span><span class="lb-val">73%</span><span class="lb-val lb-score">142,890</span></div>
+      <div class="lb-row silver"><span class="lb-rank">2</span><div class="lb-player"><div class="player-avatar">Sk</div><div><div class="player-name">Shadow_Kryne</div><div class="player-class">Shadow Blade · Apex</div></div></div><span class="lb-val lb-kd">7.9</span><span class="lb-val">69%</span><span class="lb-val lb-score">138,240</span></div>
+      <div class="lb-row bronze"><span class="lb-rank">3</span><div class="lb-player"><div class="player-avatar">Zs</div><div><div class="player-name">ZeroStrike</div><div class="player-class">Storm Caller · Apex</div></div></div><span class="lb-val lb-kd">7.2</span><span class="lb-val">67%</span><span class="lb-val lb-score">129,100</span></div>
+      <div class="lb-row"><span class="lb-rank" style="color:var(--muted)">4</span><div class="lb-player"><div class="player-avatar">Nm</div><div><div class="player-name">NullMancer</div><div class="player-class">Void Weaver · Diamond</div></div></div><span class="lb-val lb-kd">6.8</span><span class="lb-val">64%</span><span class="lb-val lb-score">118,750</span></div>
+      <div class="lb-row"><span class="lb-rank" style="color:var(--muted)">5</span><div class="lb-player"><div class="player-avatar">Iv</div><div><div class="player-name">IronVoid</div><div class="player-class">Void Warden · Diamond</div></div></div><span class="lb-val lb-kd">5.4</span><span class="lb-val">61%</span><span class="lb-val lb-score">109,300</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-label reveal">◈ CRITICAL ACCLAIM</div>
+    <h2 class="section-title reveal">The Press Has Spoken</h2>
+    <div class="reviews-grid">
+      <div class="review-card reveal"><div class="review-source">IGN</div><div class="review-score">9.4</div><p class="review-text">"VoidRealm doesn't just push the genre forward — it obliterates what we thought was possible in arena combat. The Dimensional Rift system alone is worth the price of entry."</p><div class="review-author">— Marcus Holden, Senior Editor</div></div>
+      <div class="review-card reveal"><div class="review-source">PC GAMER</div><div class="review-score">91%</div><p class="review-text">"Mechanically deep, visually stunning, and endlessly replayable. The champion evolution system creates emergent moments that feel genuinely electric. A genuine modern classic."</p><div class="review-author">— Alex Torres, Reviews Editor</div></div>
+      <div class="review-card reveal"><div class="review-source">GAMESPOT</div><div class="review-score">9.0</div><p class="review-text">"The world of VoidRealm is oppressive and beautiful in equal measure. Combat feels weighty and precise. If you play one competitive game this year, make it this one."</p><div class="review-author">— Priya Nair, Games Writer</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BATTLE PASS -->
+<section id="battlepass">
+  <div class="container">
+    <div class="section-label reveal">◈ SEASON 4 PASS</div>
+    <h2 class="section-title reveal">The Void Awakens Pass</h2>
+    <div class="pass-cards">
+      <div class="pass-card free reveal">
+        <div class="pass-label free-label">FREE TRACK</div>
+        <div class="pass-price" style="color:var(--muted)">$0</div>
+        <div class="pass-duration">Season 4 · 8 weeks</div>
+        <ul class="pass-items">
+          <li><span class="check">✓</span>15 Void Shards</li>
+          <li><span class="check">✓</span>1 Rare Weapon Skin</li>
+          <li><span class="check">✓</span>Basic Champion Emote</li>
+          <li><span class="check">✓</span>500 Season XP Boost</li>
+        </ul>
+        <button class="btn-pass free">Claim Free Track</button>
+      </div>
+      <div class="pass-card premium reveal">
+        <div class="pass-label prem-label">◈ PREMIUM PASS</div>
+        <div class="pass-price" style="color:var(--gold)">$9.99</div>
+        <div class="pass-duration">Season 4 · 8 weeks · 100 Tiers</div>
+        <ul class="pass-items">
+          <li><span class="check">⚡</span>Void Sovereign Skin Set (5 pieces)</li>
+          <li><span class="check">⚡</span>Legendary Weapon — Nullblade</li>
+          <li><span class="check">⚡</span>Champion Loading Screen Art</li>
+          <li><span class="check">⚡</span>Exclusive Player Banner Frame</li>
+          <li><span class="check">⚡</span>3,000 Void Shards</li>
+          <li><span class="check">⚡</span>2x Season XP Boost (all 8 weeks)</li>
+          <li><span class="check">⚡</span>Season 4 Animated Title</li>
+        </ul>
+        <button class="btn-pass premium">Unlock Premium Pass</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-label reveal" style="text-align:center;">◈ SUPPORT</div>
+    <h2 class="section-title reveal" style="text-align:center;">Player FAQ</h2>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q">Is VoidRealm free to play? <span class="faq-icon">+</span></div><div class="faq-a">Yes, VoidRealm is completely free to download and play. All champions are unlockable through gameplay. Purchases are cosmetic only and have zero impact on competitive balance.</div></div>
+      <div class="faq-item"><div class="faq-q">What platforms is VoidRealm available on? <span class="faq-icon">+</span></div><div class="faq-a">VoidRealm is available on PC (Steam and direct), PlayStation 5, Xbox Series X/S, and Nintendo Switch. Full cross-platform play and cross-progression are supported across all platforms.</div></div>
+      <div class="faq-item"><div class="faq-q">Are there anti-cheat systems in place? <span class="faq-icon">+</span></div><div class="faq-a">VoidRealm uses a multi-layered anti-cheat system including kernel-level detection, machine learning behavioral analysis, and a dedicated Trust & Safety team. We have a zero-tolerance policy — bans are permanent.</div></div>
+      <div class="faq-item"><div class="faq-q">How often is new content added? <span class="faq-icon">+</span></div><div class="faq-a">New seasons launch every 8 weeks, each introducing new champions, maps, and ranked mechanics. Hotfixes and balance patches are deployed weekly. Major expansions that add new game modes launch twice yearly.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><span class="footer-logo">VOIDREALM</span><p>The interdimensional battle arena where the void consumes the weak and the strong ascend to sovereignty.</p></div>
+      <div class="footer-col"><h5>Game</h5><a href="#">Champions</a><a href="#">Maps</a><a href="#">Ranked</a><a href="#">Esports</a></div>
+      <div class="footer-col"><h5>Store</h5><a href="#">Battle Pass</a><a href="#">Skins</a><a href="#">Bundles</a><a href="#">Gift Cards</a></div>
+      <div class="footer-col"><h5>Support</h5><a href="#">Help Center</a><a href="#">Report Bug</a><a href="#">Community</a><a href="#">Discord</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2024 VoidRealm Studios. All rights reserved. ESRB: T (Teen)</span><span>PC · PS5 · XBOX · SWITCH</span></div>
+  </div>
+</footer>
+
+<script>
+// THREE.JS VOID PARTICLE SYSTEM
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 60;
+
+// Void particles
+const count = window.innerWidth < 768 ? 800 : 2000;
+const geo = new THREE.BufferGeometry();
+const pos = new Float32Array(count*3);
+const vel = new Float32Array(count*3);
+const col = new Float32Array(count*3);
+for(let i=0;i<count;i++){
+  const r = 20 + Math.random()*60;
+  const theta = Math.random()*Math.PI*2;
+  const phi = Math.acos(2*Math.random()-1);
+  pos[i*3] = r*Math.sin(phi)*Math.cos(theta);
+  pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+  pos[i*3+2] = r*Math.cos(phi)-(Math.random()-0.5)*60;
+  vel[i*3] = (Math.random()-0.5)*0.01;
+  vel[i*3+1] = (Math.random()-0.5)*0.01;
+  vel[i*3+2] = -Math.random()*0.05;
+  const t2 = Math.random();
+  col[i*3] = t2*0.7;
+  col[i*3+1] = 0;
+  col[i*3+2] = t2 > 0.5 ? 1 : 0.3;
+}
+geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+const mat = new THREE.PointsMaterial({size:0.5, vertexColors:true, transparent:true, opacity:0.8});
+const particles = new THREE.Points(geo, mat);
+scene.add(particles);
+
+// Void rings
+for(let i=0;i<4;i++){
+  const ringGeo = new THREE.TorusGeometry(8+i*6, 0.05, 8, 60);
+  const ringMat = new THREE.MeshBasicMaterial({color: i%2===0 ? 0xb400ff : 0xff003c, transparent:true, opacity:0.2-i*0.03});
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI/2;
+  ring.userData.rotSpeed = 0.002*(i%2===0?1:-1);
+  scene.add(ring);
+}
+
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=(e.clientX/window.innerWidth-0.5);my=(e.clientY/window.innerHeight-0.5);});
+
+let t=0;
+function animate(){
+  requestAnimationFrame(animate);
+  t+=0.005;
+  const p = particles.geometry.attributes.position.array;
+  for(let i=0;i<count;i++){
+    p[i*3+2] += vel[i*3+2];
+    if(p[i*3+2] < -60) p[i*3+2] = 60;
+    p[i*3] += Math.sin(t+i)*0.002;
+    p[i*3+1] += Math.cos(t+i*0.7)*0.002;
+  }
+  particles.geometry.attributes.position.needsUpdate = true;
+  scene.children.forEach(c=>{
+    if(c.userData.rotSpeed) c.rotation.z += c.userData.rotSpeed;
+  });
+  camera.position.x += (mx*4 - camera.position.x)*0.03;
+  camera.position.y += (-my*4 - camera.position.y)*0.03;
+  camera.lookAt(scene.position);
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// CURSOR
+const cursor = document.getElementById('cursor');
+const circle = cursor.querySelector('.c-circle');
+const dot = cursor.querySelector('.c-dot');
+const ch = cursor.querySelector('.c-h');
+const cv = cursor.querySelector('.c-v');
+let cx2=0,cy2=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  cx2=e.clientX;cy2=e.clientY;
+  dot.style.left=cx2+'px';dot.style.top=cy2+'px';
+  ch.style.left=cx2+'px';ch.style.top=cy2+'px';
+  cv.style.left=cx2+'px';cv.style.top=cy2+'px';
+});
+function lerpC(){
+  rx+=(cx2-rx)*0.15;ry+=(cy2-ry)*0.15;
+  circle.style.left=rx+'px';circle.style.top=ry+'px';
+  requestAnimationFrame(lerpC);
+}lerpC();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+
+// AUDIO
+let audioCtx2, muted2=true;
+function initA(){if(!audioCtx2)audioCtx2=new(window.AudioContext||window.webkitAudioContext)();}
+function playFx(freq,type='sawtooth',dur=0.2){
+  if(muted2||!audioCtx2)return;
+  const o=audioCtx2.createOscillator(),g=audioCtx2.createGain();
+  o.connect(g);g.connect(audioCtx2.destination);
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(0.06,audioCtx2.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx2.currentTime+dur);
+  o.start();o.stop(audioCtx2.currentTime+dur);
+}
+document.getElementById('sound-toggle').addEventListener('click',()=>{
+  initA();muted2=!muted2;
+  document.getElementById('sound-toggle').textContent=muted2?'🔇':'🔊';
+  playFx(220,'square',0.3);
+});
+document.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>playFx(330,'square',0.15));
+  b.addEventListener('mouseenter',()=>playFx(660,'sine',0.05));
+});
+
+// REVEAL
+const obs = new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// FAQ
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const was=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!was)item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZARA NOVA — Sound Without Limits</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Unbounded:wght@200;400;700;900&display=swap');
+
+:root{
+  --bg:#04020a;
+  --cyan:#00f5ff;
+  --magenta:#ff00aa;
+  --pink:#ff6ef7;
+  --surface:rgba(0,245,255,0.04);
+  --border:rgba(0,245,255,0.15);
+  --text:#f0f8ff;
+  --muted:rgba(240,248,255,0.5);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;cursor:none;}
+
+#cursor{position:fixed;z-index:9999;pointer-events:none;}
+.c-ring{width:32px;height:32px;border:2px solid var(--cyan);border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:all .3s;box-shadow:0 0 15px var(--cyan);}
+.c-dot{width:5px;height:5px;background:var(--magenta);border-radius:50%;position:absolute;transform:translate(-50%,-50%);}
+body.hovering .c-ring{width:50px;height:50px;border-color:var(--magenta);box-shadow:0 0 20px var(--magenta);}
+
+#bg-canvas{position:fixed;top:0;left:0;z-index:0;}
+
+#sound-toggle{position:fixed;top:24px;right:80px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:none;font-size:18px;transition:all .3s;backdrop-filter:blur(10px);}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:20px 60px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);background:rgba(4,2,10,0.7);}
+.logo{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-links{display:flex;gap:40px;}
+.nav-links a{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s;}
+.nav-links a:hover{color:var(--cyan);}
+.stream-btn{font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;background:linear-gradient(135deg,var(--cyan),var(--magenta));border:none;color:#000;cursor:none;font-weight:700;border-radius:4px;transition:all .3s;}
+.stream-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(0,245,255,0.4);}
+
+section{position:relative;z-index:10;}
+.container{max-width:1200px;margin:0 auto;padding:0 60px;}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;align-items:center;padding:100px 0;position:relative;}
+.hero-content{max-width:700px;}
+.hero-tag{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--cyan);margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+.live-dot{width:8px;height:8px;background:var(--magenta);border-radius:50%;animation:livePulse 1s infinite;}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,170,0.6)}50%{box-shadow:0 0 0 10px rgba(255,0,170,0)}}
+h1.hero-title{font-family:'Unbounded',sans-serif;font-size:clamp(48px,7vw,88px);font-weight:900;line-height:.95;margin-bottom:24px;}
+.ht1{display:block;color:var(--text);}
+.ht2{display:block;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-desc{color:var(--muted);font-size:17px;line-height:1.7;max-width:480px;margin-bottom:40px;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:60px;}
+.btn-listen{background:linear-gradient(135deg,var(--cyan),var(--magenta));color:#000;padding:14px 40px;border:none;border-radius:4px;font-weight:700;font-size:14px;letter-spacing:1px;cursor:none;transition:all .3s;}
+.btn-listen:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,245,255,0.3);}
+.btn-tickets{background:transparent;color:var(--text);padding:14px 40px;border:1px solid var(--border);border-radius:4px;font-size:14px;letter-spacing:1px;cursor:none;transition:all .3s;}
+.btn-tickets:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* VISUALIZER */
+.visualizer{display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:0;}
+.vbar{width:4px;background:linear-gradient(to top,var(--magenta),var(--cyan));border-radius:2px;animation:vbeat 0.5s infinite alternate;}
+@keyframes vbeat{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}
+
+/* STATS */
+.hero-stats{display:flex;gap:60px;padding-top:40px;border-top:1px solid var(--border);}
+.hs-item{}.hs-num{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hs-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
+/* DISCOGRAPHY */
+#discography{padding:120px 0;}
+.section-label{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;}
+.section-title{font-family:'Unbounded',sans-serif;font-size:clamp(28px,4vw,52px);font-weight:900;margin-bottom:16px;line-height:1.1;}
+.albums-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px;}
+.album-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all .4s;cursor:none;}
+.album-card:hover{transform:translateY(-8px);border-color:var(--cyan);box-shadow:0 20px 40px rgba(0,245,255,0.15);}
+.album-art{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;}
+.album-art::after{content:'▶';position:absolute;font-size:32px;opacity:0;transition:.3s;color:var(--text);}
+.album-card:hover .album-art::after{opacity:0.9;}
+.album-info{padding:16px;}
+.album-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px;}
+.album-year{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.album-streams{font-size:11px;color:var(--cyan);}
+
+/* FEATURED TRACK */
+#now-playing{padding:120px 0;background:rgba(0,245,255,0.02);border-top:1px solid var(--border);}
+.player-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px;backdrop-filter:blur(20px);}
+.player-layout{display:grid;grid-template-columns:1fr 2fr;gap:60px;align-items:center;}
+.player-art{aspect-ratio:1;background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(255,0,170,0.2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:120px;}
+.player-info .section-label{margin-bottom:8px;}
+.track-name{font-family:'Unbounded',sans-serif;font-size:clamp(24px,3vw,40px);font-weight:900;margin-bottom:8px;line-height:1;}
+.track-album{font-size:14px;color:var(--muted);margin-bottom:32px;}
+.progress-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:8px;position:relative;cursor:none;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--magenta));border-radius:2px;width:38%;transition:width .3s;}
+.progress-times{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:24px;}
+.player-controls{display:flex;align-items:center;gap:24px;margin-bottom:32px;}
+.ctrl-btn{background:transparent;border:none;color:var(--muted);font-size:20px;cursor:none;transition:color .3s;}
+.ctrl-btn:hover{color:var(--cyan);}
+.play-btn{width:56px;height:56px;background:linear-gradient(135deg,var(--cyan),var(--magenta));border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:none;transition:all .3s;}
+.play-btn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(0,245,255,0.4);}
+.waveform{display:flex;align-items:center;gap:2px;height:40px;}
+.wv{width:3px;background:rgba(0,245,255,0.3);border-radius:2px;}
+.wv.active{background:var(--cyan);}
+
+/* TOUR */
+#tour{padding:120px 0;}
+.tour-list{margin-top:64px;}
+.tour-item{display:grid;grid-template-columns:120px 1fr auto;align-items:center;padding:24px 0;border-bottom:1px solid var(--border);gap:40px;transition:all .3s;}
+.tour-item:hover{padding-left:16px;}
+.tour-date{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);}
+.tour-venue{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;}
+.tour-city{font-size:12px;color:var(--muted);}
+.tour-status{font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:4px;}
+.tour-status.available{background:rgba(0,245,255,0.1);border:1px solid var(--cyan);color:var(--cyan);}
+.tour-status.sold-out{background:rgba(255,0,170,0.1);border:1px solid var(--magenta);color:var(--magenta);}
+.btn-tix{font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:none;border-radius:4px;transition:all .3s;margin-left:16px;}
+.btn-tix:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* VIDEOS */
+#videos{padding:120px 0;}
+.videos-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:20px;margin-top:64px;}
+.video-card{border-radius:12px;overflow:hidden;position:relative;background:var(--surface);border:1px solid var(--border);cursor:none;transition:all .4s;}
+.video-card:hover{transform:scale(1.02);border-color:var(--cyan);}
+.video-thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;}
+.video-thumb.large{aspect-ratio:4/3;}
+.play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;}
+.play-overlay span{width:60px;height:60px;background:linear-gradient(135deg,var(--cyan),var(--magenta));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.video-card:hover .play-overlay{opacity:1;}
+.video-info{padding:16px;}
+.video-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.video-views{font-size:11px;color:var(--muted);}
+
+/* PRESS */
+#press{padding:120px 0;border-top:1px solid var(--border);}
+.press-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px;}
+.press-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;transition:all .4s;}
+.press-card:hover{border-color:var(--cyan);}
+.press-source{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:16px;letter-spacing:2px;}
+.press-quote{font-size:15px;color:var(--muted);line-height:1.7;font-style:italic;margin-bottom:16px;}
+.press-author{font-size:11px;color:var(--muted);}
+
+/* MERCH */
+#merch{padding:120px 0;}
+.merch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:64px;}
+.merch-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:none;transition:all .4s;}
+.merch-item:hover{border-color:var(--magenta);transform:translateY(-6px);}
+.merch-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(135deg,rgba(0,245,255,0.05),rgba(255,0,170,0.05));}
+.merch-info{padding:16px;}
+.merch-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+.merch-price{font-size:13px;color:var(--cyan);}
+
+/* NEWSLETTER */
+#newsletter{padding:120px 0;}
+.nl-wrap{background:linear-gradient(135deg,rgba(0,245,255,0.08),rgba(255,0,170,0.08));border:1px solid var(--border);border-radius:20px;padding:80px;text-align:center;}
+.nl-wrap .section-title{margin-bottom:16px;}
+.nl-wrap p{color:var(--muted);margin-bottom:40px;font-size:16px;}
+.nl-form{display:flex;gap:12px;max-width:480px;margin:0 auto;}
+.nl-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:4px;padding:14px 20px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .3s;}
+.nl-input:focus{border-color:var(--cyan);}
+::placeholder{color:var(--muted);}
+.nl-btn{background:linear-gradient(135deg,var(--cyan),var(--magenta));color:#000;padding:14px 32px;border:none;border-radius:4px;font-weight:700;font-size:13px;cursor:none;white-space:nowrap;transition:all .3s;}
+.nl-btn:hover{transform:scale(1.03);}
+
+/* FOOTER */
+footer{padding:60px 0 40px;border-top:1px solid var(--border);}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px;}
+.f-logo{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;margin-bottom:16px;}
+.f-brand p{font-size:13px;color:var(--muted);line-height:1.7;}
+.f-col h5{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;}
+.f-col a{display:block;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:10px;transition:color .3s;}
+.f-col a:hover{color:var(--text);}
+.footer-bottom{display:flex;justify-content:space-between;padding-top:40px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);}
+.socials{display:flex;gap:16px;}
+.social-icon{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:none;transition:all .3s;}
+.social-icon:hover{border-color:var(--cyan);background:rgba(0,245,255,0.1);}
+
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:768px){
+  nav{padding:16px 20px;}.nav-links{display:none;}
+  .container{padding:0 20px;}
+  .albums-grid{grid-template-columns:1fr 1fr;}
+  .player-layout{grid-template-columns:1fr;}
+  .tour-item{grid-template-columns:80px 1fr;}
+  .videos-grid,.merch-grid,.press-grid,.footer-grid{grid-template-columns:1fr 1fr;}
+  .hero-stats{gap:24px;}
+  .nl-form{flex-direction:column;}
+  body{cursor:auto;}#cursor{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"><div class="c-ring"></div><div class="c-dot"></div></div>
+<button id="sound-toggle">🔇</button>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <div class="logo">ZARA NOVA</div>
+  <div class="nav-links">
+    <a href="#discography">Music</a>
+    <a href="#tour">Tour</a>
+    <a href="#videos">Videos</a>
+    <a href="#merch">Merch</a>
+    <a href="#press">Press</a>
+  </div>
+  <button class="stream-btn">Stream Now</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-tag"><div class="live-dot"></div>New Album Out Now — "VOID FREQUENCIES"</div>
+      <h1 class="hero-title">
+        <span class="ht1">Sound</span>
+        <span class="ht2">Without</span>
+        <span class="ht1">Limits.</span>
+      </h1>
+      <p class="hero-desc">Electronic visionary. Genre-defying producer. Live performer. Zara Nova crafts sonic worlds where bass meets orchestral beauty.</p>
+      <div class="hero-btns">
+        <button class="btn-listen">▶ Listen Now</button>
+        <button class="btn-tickets">Get Tour Tickets</button>
+      </div>
+      <div class="visualizer" id="viz">
+        <script>for(let i=0;i<32;i++)document.write(`<div class="vbar" style="height:${20+Math.random()*40}px;animation-delay:${Math.random()*0.5}s;animation-duration:${0.3+Math.random()*0.4}s"></div>`);</script>
+      </div>
+      <div class="hero-stats">
+        <div class="hs-item"><div class="hs-num">2.1B</div><div class="hs-label">Total Streams</div></div>
+        <div class="hs-item"><div class="hs-num">840K</div><div class="hs-label">Monthly Listeners</div></div>
+        <div class="hs-item"><div class="hs-num">47</div><div class="hs-label">Countries Toured</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCOGRAPHY -->
+<section id="discography">
+  <div class="container">
+    <div class="section-label reveal">Discography</div>
+    <h2 class="section-title reveal">The Complete Works</h2>
+    <div class="albums-grid">
+      <div class="album-card reveal">
+        <div class="album-art" style="background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(255,0,170,0.15))">🌌</div>
+        <div class="album-info">
+          <div class="album-name">VOID FREQUENCIES</div>
+          <div class="album-year">2024 · 14 Tracks</div>
+          <div class="album-streams">142M streams</div>
+        </div>
+      </div>
+      <div class="album-card reveal">
+        <div class="album-art" style="background:linear-gradient(135deg,rgba(255,110,247,0.15),rgba(0,0,80,0.3))">🌸</div>
+        <div class="album-info">
+          <div class="album-name">NEON GHOST</div>
+          <div class="album-year">2022 · 11 Tracks</div>
+          <div class="album-streams">480M streams</div>
+        </div>
+      </div>
+      <div class="album-card reveal">
+        <div class="album-art" style="background:linear-gradient(135deg,rgba(255,165,0,0.15),rgba(180,0,255,0.15))">🔥</div>
+        <div class="album-info">
+          <div class="album-name">ELECTRIC ORBIT</div>
+          <div class="album-year">2020 · 9 Tracks</div>
+          <div class="album-streams">810M streams</div>
+        </div>
+      </div>
+      <div class="album-card reveal">
+        <div class="album-art" style="background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,100,200,0.2))">🌊</div>
+        <div class="album-info">
+          <div class="album-name">DEEP SIGNAL</div>
+          <div class="album-year">2018 · 12 Tracks</div>
+          <div class="album-streams">620M streams</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOW PLAYING -->
+<section id="now-playing">
+  <div class="container">
+    <div class="section-label reveal">Featured Track</div>
+    <h2 class="section-title reveal">Now Playing</h2>
+    <div class="player-card reveal">
+      <div class="player-layout">
+        <div class="player-art">🌌</div>
+        <div class="player-info">
+          <div class="section-label">VOID FREQUENCIES · TRACK 01</div>
+          <div class="track-name">Event Horizon</div>
+          <div class="track-album">feat. Lyra Dusk · 4:42</div>
+          <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+          <div class="progress-times"><span id="elapsed">1:47</span><span>4:42</span></div>
+          <div class="player-controls">
+            <button class="ctrl-btn">⏮</button>
+            <button class="ctrl-btn">⏪</button>
+            <button class="play-btn" id="playBtn">▶</button>
+            <button class="ctrl-btn">⏩</button>
+            <button class="ctrl-btn">⏭</button>
+          </div>
+          <div class="waveform" id="waveform"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOUR -->
+<section id="tour">
+  <div class="container">
+    <div class="section-label reveal">Live Dates</div>
+    <h2 class="section-title reveal">The Void Frequencies Tour</h2>
+    <div class="tour-list">
+      <div class="tour-item reveal"><div class="tour-date">JAN 15</div><div><div class="tour-venue">O2 Arena</div><div class="tour-city">London, United Kingdom</div></div><div style="display:flex;align-items:center;"><span class="tour-status available">Tickets Available</span><button class="btn-tix">Buy</button></div></div>
+      <div class="tour-item reveal"><div class="tour-date">JAN 22</div><div><div class="tour-venue">Accor Arena</div><div class="tour-city">Paris, France</div></div><div style="display:flex;align-items:center;"><span class="tour-status sold-out">Sold Out</span><button class="btn-tix">Waitlist</button></div></div>
+      <div class="tour-item reveal"><div class="tour-date">FEB 3</div><div><div class="tour-venue">Barclays Center</div><div class="tour-city">New York, USA</div></div><div style="display:flex;align-items:center;"><span class="tour-status available">Tickets Available</span><button class="btn-tix">Buy</button></div></div>
+      <div class="tour-item reveal"><div class="tour-date">FEB 14</div><div><div class="tour-venue">United Center</div><div class="tour-city">Chicago, USA</div></div><div style="display:flex;align-items:center;"><span class="tour-status available">Tickets Available</span><button class="btn-tix">Buy</button></div></div>
+      <div class="tour-item reveal"><div class="tour-date">FEB 28</div><div><div class="tour-venue">Crypto.com Arena</div><div class="tour-city">Los Angeles, USA</div></div><div style="display:flex;align-items:center;"><span class="tour-status sold-out">Sold Out</span><button class="btn-tix">Waitlist</button></div></div>
+      <div class="tour-item reveal"><div class="tour-date">MAR 10</div><div><div class="tour-venue">Mercedes-Benz Arena</div><div class="tour-city">Berlin, Germany</div></div><div style="display:flex;align-items:center;"><span class="tour-status available">Tickets Available</span><button class="btn-tix">Buy</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos">
+  <div class="container">
+    <div class="section-label reveal">Videos</div>
+    <h2 class="section-title reveal">Visual Worlds</h2>
+    <div class="videos-grid">
+      <div class="video-card reveal"><div class="video-thumb large">🌌<div class="play-overlay"><span>▶</span></div></div><div class="video-info"><div class="video-title">Event Horizon — Official Music Video</div><div class="video-views">12.4M views</div></div></div>
+      <div class="video-card reveal"><div class="video-thumb">🎤<div class="play-overlay"><span>▶</span></div></div><div class="video-info"><div class="video-title">VOID FREQUENCIES — Live at O2</div><div class="video-views">4.1M views</div></div></div>
+      <div class="video-card reveal"><div class="video-thumb">🎹<div class="play-overlay"><span>▶</span></div></div><div class="video-info"><div class="video-title">In the Studio — Making of VF</div><div class="video-views">2.8M views</div></div></div>
+      <div class="video-card reveal"><div class="video-thumb">✨<div class="play-overlay"><span>▶</span></div></div><div class="video-info"><div class="video-title">Neon Ghost — Lyric Video</div><div class="video-views">8.9M views</div></div></div>
+      <div class="video-card reveal"><div class="video-thumb">🌊<div class="play-overlay"><span>▶</span></div></div><div class="video-info"><div class="video-title">Deep Signal — Live Session</div><div class="video-views">3.2M views</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRESS -->
+<section id="press">
+  <div class="container">
+    <div class="section-label reveal">Press</div>
+    <h2 class="section-title reveal">Critical Acclaim</h2>
+    <div class="press-grid">
+      <div class="press-card reveal"><div class="press-source">PITCHFORK · 8.4</div><p class="press-quote">"VOID FREQUENCIES is the year's most immersive electronic album — a labyrinth of sound where every turn reveals something astonishing."</p><div class="press-author">— A. Okonkwo, December 2024</div></div>
+      <div class="press-card reveal"><div class="press-source">NME · ★★★★★</div><p class="press-quote">"Zara Nova doesn't make records — she builds universes. This album is five years ahead of the scene and will still feel ahead in ten."</p><div class="press-author">— M. Fraser, November 2024</div></div>
+      <div class="press-card reveal"><div class="press-source">ROLLING STONE</div><p class="press-quote">"The most technically accomplished and emotionally devastating electronic album since Burial's Untrue. A generational statement."</p><div class="press-author">— P. Reyes, November 2024</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MERCH -->
+<section id="merch">
+  <div class="container">
+    <div class="section-label reveal">Official Merch</div>
+    <h2 class="section-title reveal">Wear the Sound</h2>
+    <div class="merch-grid">
+      <div class="merch-item reveal"><div class="merch-img">👕</div><div class="merch-info"><div class="merch-name">VF Tour Tee — Black</div><div class="merch-price">$45</div></div></div>
+      <div class="merch-item reveal"><div class="merch-img">🧢</div><div class="merch-info"><div class="merch-name">Neon Ghost Cap</div><div class="merch-price">$38</div></div></div>
+      <div class="merch-item reveal"><div class="merch-img">🎧</div><div class="merch-info"><div class="merch-name">Void Frequencies Vinyl</div><div class="merch-price">$36</div></div></div>
+      <div class="merch-item reveal"><div class="merch-img">🌌</div><div class="merch-info"><div class="merch-name">Tour Hoodie — Limited</div><div class="merch-price">$80</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section id="newsletter">
+  <div class="container">
+    <div class="nl-wrap reveal">
+      <div class="section-label" style="text-align:center;">Stay Connected</div>
+      <h2 class="section-title" style="text-align:center;">Join the Signal</h2>
+      <p>Be the first to know about new releases, exclusive sessions, tour announcements, and limited drops.</p>
+      <div class="nl-form">
+        <input type="email" placeholder="Enter your email" class="nl-input">
+        <button class="nl-btn">Subscribe</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="f-brand"><span class="f-logo">ZARA NOVA</span><p>Genre-defying electronic artist. Touring the world. Building sound universes since 2016.</p><div class="socials" style="margin-top:20px;"><div class="social-icon">✕</div><div class="social-icon">📷</div><div class="social-icon">🎵</div><div class="social-icon">▶</div></div></div>
+      <div class="f-col"><h5>Music</h5><a href="#">Discography</a><a href="#">Lyrics</a><a href="#">Sheet Music</a><a href="#">Remixes</a></div>
+      <div class="f-col"><h5>Live</h5><a href="#">Tour Dates</a><a href="#">VIP Packages</a><a href="#">Press Passes</a><a href="#">Past Shows</a></div>
+      <div class="f-col"><h5>Connect</h5><a href="#">Newsletter</a><a href="#">Fan Club</a><a href="#">Booking</a><a href="#">Press Kit</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2024 Zara Nova. All rights reserved. Managed by SonicWave Agency.</span></div>
+  </div>
+</footer>
+
+<script>
+// AUDIO VISUALIZER BACKGROUND
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 50;
+
+// Wave ribbons
+const waveCount = 6;
+const wavePoints = 100;
+for(let w=0;w<waveCount;w++){
+  const pts = [];
+  for(let i=0;i<wavePoints;i++){
+    pts.push(new THREE.Vector3((i/wavePoints-0.5)*120, Math.sin(i*0.2)*4, (w-waveCount/2)*6));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const col = w%2===0 ? 0x00f5ff : 0xff00aa;
+  const mat = new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.15-w*0.01});
+  const line = new THREE.Line(geo, mat);
+  line.userData.w = w;
+  scene.add(line);
+}
+
+// Particles
+const count = window.innerWidth < 768 ? 600 : 1800;
+const geo2 = new THREE.BufferGeometry();
+const pos2 = new Float32Array(count*3);
+for(let i=0;i<count;i++){
+  pos2[i*3]=(Math.random()-0.5)*140;
+  pos2[i*3+1]=(Math.random()-0.5)*100;
+  pos2[i*3+2]=(Math.random()-0.5)*60;
+}
+geo2.setAttribute('position',new THREE.BufferAttribute(pos2,3));
+const mat2 = new THREE.PointsMaterial({size:0.3, color:0x00f5ff, transparent:true, opacity:0.5});
+const pts2 = new THREE.Points(geo2, mat2);
+scene.add(pts2);
+
+let mx=0,my=0,t=0;
+document.addEventListener('mousemove',e=>{mx=(e.clientX/window.innerWidth-0.5);my=(e.clientY/window.innerHeight-0.5);});
+
+function animate(){
+  requestAnimationFrame(animate);
+  t+=0.015;
+  scene.children.forEach(c=>{
+    if(c.userData.w!==undefined){
+      const pos=c.geometry.attributes.position;
+      for(let i=0;i<wavePoints;i++){
+        pos.array[i*3+1]=Math.sin(i*0.12+t+c.userData.w*0.8)*6+Math.sin(i*0.06+t*0.7)*3;
+      }
+      pos.needsUpdate=true;
+    }
+  });
+  pts2.rotation.y+=0.0005;
+  camera.position.x+=(mx*6-camera.position.x)*0.02;
+  camera.position.y+=(-my*4-camera.position.y)*0.02;
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+
+// WAVEFORM
+const wf=document.getElementById('waveform');
+for(let i=0;i<80;i++){const d=document.createElement('div');d.className='wv'+(i<30?' active':'');d.style.height=(8+Math.random()*24)+'px';wf.appendChild(d);}
+
+// PLAYER ANIMATION
+let playing=false,prog=0;
+document.getElementById('playBtn').addEventListener('click',function(){
+  playing=!playing;
+  this.textContent=playing?'⏸':'▶';
+});
+function updatePlayer(){
+  if(playing){
+    prog=Math.min(prog+0.001,1);
+    document.getElementById('prog').style.width=(prog*100)+'%';
+    const secs=Math.floor(prog*282);
+    const m=Math.floor(secs/60);
+    const s=secs%60;
+    document.getElementById('elapsed').textContent=m+':'+(s<10?'0':'')+s;
+    if(prog>=1){playing=false;prog=0;document.getElementById('playBtn').textContent='▶';}
+  }
+  requestAnimationFrame(updatePlayer);
+}
+updatePlayer();
+
+// CURSOR
+const cursor=document.getElementById('cursor');
+const ring=cursor.querySelector('.c-ring');
+const dot=cursor.querySelector('.c-dot');
+let cx=0,cy=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;dot.style.left=cx+'px';dot.style.top=cy+'px';});
+function lC(){rx+=(cx-rx)*0.12;ry+=(cy-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(lC);}lC();
+document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));});
+
+// AUDIO
+let ac,muted=true;
+function initA(){if(!ac)ac=new(window.AudioContext||window.webkitAudioContext)();}
+function tone(f,type='sine',dur=0.2){if(muted||!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);o.start();o.stop(ac.currentTime+dur);}
+document.getElementById('sound-toggle').addEventListener('click',()=>{initA();muted=!muted;document.getElementById('sound-toggle').textContent=muted?'🔇':'🔊';tone(440,'sine',0.5);});
+document.querySelectorAll('button').forEach(b=>{b.addEventListener('click',()=>tone(528,'sine',0.2));b.addEventListener('mouseenter',()=>tone(880,'sine',0.06));});
+
+// REVEAL
+const obs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
