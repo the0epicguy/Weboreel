@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Build Intelligence at Scale</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --neon:#00f5ff;--neon2:#7b2fff;--neon3:#ff006e;
+  --bg:#020408;--bg2:#040d1a;--glass:rgba(0,245,255,0.05);
+  --text:#e0f4ff;--muted:#4a7a9b;
+  --font-head:'Orbitron',monospace;--font-body:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;cursor:none}
+/* CURSOR */
+#cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+.cur-ring{width:40px;height:40px;border:1.5px solid var(--neon);border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .15s ease;box-shadow:0 0 10px var(--neon)}
+.cur-dot{width:4px;height:4px;background:var(--neon);border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.cur-cross::before,.cur-cross::after{content:'';position:absolute;background:var(--neon);top:50%;left:50%}
+.cur-cross::before{width:20px;height:1px;transform:translate(-50%,-50%)}
+.cur-cross::after{width:1px;height:20px;transform:translate(-50%,-50%)}
+body.hovering .cur-ring{width:60px;height:60px;background:rgba(0,245,255,0.08);border-color:var(--neon2)}
+/* MUTE BTN */
+#mute-btn{position:fixed;top:20px;right:20px;z-index:1000;background:var(--glass);border:1px solid var(--neon);color:var(--neon);font-family:var(--font-body);font-size:10px;padding:8px 14px;cursor:none;letter-spacing:2px;backdrop-filter:blur(10px);transition:all .3s}
+#mute-btn:hover{background:rgba(0,245,255,0.15)}
+/* NAV */
+nav{position:fixed;top:0;left:0;width:100%;z-index:100;padding:20px 60px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(2,4,8,0.9) 0%,transparent 100%);backdrop-filter:blur(2px)}
+.logo{font-family:var(--font-head);font-size:22px;font-weight:900;letter-spacing:4px;color:var(--neon);text-shadow:0 0 20px var(--neon)}
+.nav-links{display:flex;gap:40px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:3px;transition:color .3s;text-transform:uppercase}
+.nav-links a:hover{color:var(--neon)}
+.nav-cta{background:transparent;border:1px solid var(--neon);color:var(--neon);padding:10px 24px;font-family:var(--font-body);font-size:11px;letter-spacing:3px;cursor:none;transition:all .3s;text-transform:uppercase}
+.nav-cta:hover{background:var(--neon);color:var(--bg)}
+/* CANVAS */
+#canvas3d{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+/* SECTIONS */
+section{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;padding:120px 60px}
+/* HERO */
+#hero{justify-content:center;align-items:center;text-align:center;flex-direction:column;min-height:100vh}
+.hero-badge{display:inline-block;border:1px solid var(--neon);color:var(--neon);font-size:10px;letter-spacing:4px;padding:6px 20px;margin-bottom:40px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 5px var(--neon)}50%{box-shadow:0 0 25px var(--neon),0 0 50px var(--neon2)}}
+.hero-title{font-family:var(--font-head);font-size:clamp(48px,8vw,110px);font-weight:900;line-height:.95;letter-spacing:-2px;margin-bottom:30px}
+.hero-title span{display:block}
+.nt1{color:var(--text)}
+.nt2{background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+.nt3{color:var(--muted);font-size:40%}
+.hero-sub{max-width:600px;margin:0 auto 50px;color:var(--muted);font-size:14px;line-height:2;letter-spacing:1px}
+.hero-btns{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(135deg,var(--neon),var(--neon2));color:var(--bg);padding:16px 40px;font-family:var(--font-body);font-size:12px;letter-spacing:3px;border:none;cursor:none;font-weight:700;text-transform:uppercase;transition:all .3s;position:relative;overflow:hidden}
+.btn-primary::after{content:'';position:absolute;inset:0;background:white;opacity:0;transition:.3s}
+.btn-primary:hover::after{opacity:.1}
+.btn-secondary{background:transparent;border:1px solid var(--muted);color:var(--text);padding:16px 40px;font-family:var(--font-body);font-size:12px;letter-spacing:3px;cursor:none;transition:all .3s;text-transform:uppercase}
+.btn-secondary:hover{border-color:var(--neon);color:var(--neon)}
+.hero-stats{display:flex;gap:60px;margin-top:80px;justify-content:center}
+.stat{text-align:center}
+.stat-num{font-family:var(--font-head);font-size:36px;font-weight:900;color:var(--neon)}
+.stat-label{font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:5px;text-transform:uppercase}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);font-size:10px;letter-spacing:3px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.scroll-line{width:1px;height:60px;background:linear-gradient(180deg,var(--neon),transparent)}
+/* ABOUT */
+#about{flex-direction:column;gap:80px}
+.section-label{font-size:10px;letter-spacing:5px;color:var(--neon);text-transform:uppercase;margin-bottom:20px}
+.section-title{font-family:var(--font-head);font-size:clamp(28px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:30px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;width:100%;max-width:1200px;margin:0 auto}
+.about-text p{color:var(--muted);line-height:2;font-size:14px;margin-bottom:20px}
+.about-visual{position:relative;height:400px}
+.tech-box{position:absolute;background:var(--glass);border:1px solid rgba(0,245,255,0.2);padding:20px;backdrop-filter:blur(10px)}
+.tech-box:nth-child(1){top:0;left:0;width:200px}
+.tech-box:nth-child(2){top:60px;right:0;width:180px}
+.tech-box:nth-child(3){bottom:0;left:40px;width:220px}
+.tech-box h4{font-family:var(--font-head);font-size:10px;letter-spacing:3px;color:var(--neon);margin-bottom:8px}
+.tech-box p{font-size:11px;color:var(--muted);line-height:1.8}
+.progress-bar{width:100%;height:2px;background:rgba(0,245,255,0.1);margin:8px 0;position:relative;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon2));position:absolute;top:0;left:0;transition:width 1s ease}
+/* FEATURES */
+#features{flex-direction:column;gap:60px;background:linear-gradient(180deg,transparent,var(--bg2),transparent)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1200px;margin:0 auto;width:100%}
+.feat-card{background:var(--glass);border:1px solid rgba(0,245,255,0.1);padding:40px;position:relative;overflow:hidden;transition:all .4s;backdrop-filter:blur(5px)}
+.feat-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);opacity:0;transition:.4s}
+.feat-card:hover::before{opacity:1}
+.feat-card:hover{border-color:rgba(0,245,255,0.3);transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,245,255,0.05)}
+.feat-icon{width:50px;height:50px;margin-bottom:25px;position:relative}
+.feat-icon-inner{width:100%;height:100%;border:1px solid var(--neon);display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(0,245,255,0.05)}
+.feat-title{font-family:var(--font-head);font-size:14px;letter-spacing:2px;margin-bottom:15px;color:var(--text)}
+.feat-desc{color:var(--muted);font-size:12px;line-height:2}
+.feat-tag{display:inline-block;margin-top:20px;font-size:9px;letter-spacing:3px;color:var(--neon2);border:1px solid rgba(123,47,255,0.3);padding:4px 12px}
+/* INTERACTIVE DEMO */
+#demo{flex-direction:column;gap:60px}
+.demo-container{width:100%;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.terminal{background:#010a14;border:1px solid rgba(0,245,255,0.2);padding:30px;font-size:12px;font-family:var(--font-body);min-height:300px}
+.terminal-header{display:flex;gap:8px;margin-bottom:20px;align-items:center}
+.t-dot{width:10px;height:10px;border-radius:50%}
+.t-dot:nth-child(1){background:#ff5f57}
+.t-dot:nth-child(2){background:#febc2e}
+.t-dot:nth-child(3){background:#28c840}
+.terminal-title{margin-left:10px;font-size:10px;letter-spacing:3px;color:var(--muted)}
+.t-line{display:block;margin:4px 0;color:var(--muted)}
+.t-cmd{color:var(--neon)}
+.t-out{color:#7fff7f}
+.t-cursor{display:inline-block;width:8px;height:14px;background:var(--neon);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.demo-info h3{font-family:var(--font-head);font-size:24px;margin-bottom:20px}
+.demo-info p{color:var(--muted);font-size:13px;line-height:2;margin-bottom:30px}
+.api-chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:6px 16px;border:1px solid rgba(0,245,255,0.2);font-size:10px;letter-spacing:2px;color:var(--neon);background:rgba(0,245,255,0.03)}
+/* SHOWCASE */
+#showcase{flex-direction:column;gap:60px;background:linear-gradient(180deg,transparent,var(--bg2),transparent)}
+.showcase-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1200px;width:100%;margin:0 auto}
+.showcase-item{aspect-ratio:3/4;background:var(--glass);border:1px solid rgba(0,245,255,0.1);position:relative;overflow:hidden;cursor:none;transition:all .4s}
+.showcase-item:hover{border-color:var(--neon);transform:scale(1.02)}
+.showcase-item::after{content:'VIEW';position:absolute;inset:0;background:rgba(0,245,255,0.05);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:12px;letter-spacing:4px;color:var(--neon);opacity:0;transition:.4s}
+.showcase-item:hover::after{opacity:1}
+.si-bg{width:100%;height:70%;background:linear-gradient(135deg,rgba(0,245,255,0.1),rgba(123,47,255,0.1));display:flex;align-items:center;justify-content:center;font-size:40px}
+.si-info{padding:15px}
+.si-name{font-family:var(--font-head);font-size:11px;letter-spacing:2px;color:var(--text);margin-bottom:5px}
+.si-cat{font-size:10px;color:var(--muted);letter-spacing:2px}
+/* TESTIMONIALS */
+#testimonials{flex-direction:column;gap:60px}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1200px;width:100%}
+.test-card{background:var(--glass);border:1px solid rgba(0,245,255,0.1);padding:35px;backdrop-filter:blur(5px);transition:all .3s}
+.test-card:hover{border-color:rgba(0,245,255,0.3)}
+.stars{color:var(--neon);font-size:12px;letter-spacing:2px;margin-bottom:15px}
+.test-text{color:var(--muted);font-size:12px;line-height:2;margin-bottom:25px;font-style:italic}
+.test-author{display:flex;align-items:center;gap:15px}
+.test-avatar{width:40px;height:40px;border-radius:50%;border:1px solid var(--neon);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:12px;background:rgba(0,245,255,0.1);color:var(--neon)}
+.test-name{font-size:12px;font-weight:700;color:var(--text)}
+.test-role{font-size:10px;color:var(--muted);letter-spacing:2px}
+/* PRICING */
+#pricing{flex-direction:column;gap:60px;background:linear-gradient(180deg,transparent,var(--bg2),transparent)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1100px;width:100%}
+.price-card{background:var(--glass);border:1px solid rgba(0,245,255,0.1);padding:45px 35px;text-align:center;position:relative;transition:all .4s;backdrop-filter:blur(5px)}
+.price-card.featured{border-color:var(--neon);background:rgba(0,245,255,0.08)}
+.price-card.featured::before{content:'POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--neon);color:var(--bg);font-family:var(--font-head);font-size:9px;letter-spacing:3px;padding:4px 16px}
+.price-card:hover{transform:translateY(-8px)}
+.plan-name{font-family:var(--font-head);font-size:14px;letter-spacing:4px;margin-bottom:10px;color:var(--neon)}
+.plan-price{font-family:var(--font-head);font-size:48px;font-weight:900;color:var(--text);margin:20px 0}
+.plan-price span{font-size:16px;color:var(--muted)}
+.plan-period{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:30px}
+.plan-features{list-style:none;margin-bottom:40px;text-align:left}
+.plan-features li{padding:10px 0;border-bottom:1px solid rgba(0,245,255,0.05);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.plan-features li::before{content:'→';color:var(--neon);font-size:12px}
+/* BLOG */
+#blog{flex-direction:column;gap:60px}
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1200px;width:100%}
+.blog-card{border:1px solid rgba(0,245,255,0.1);overflow:hidden;cursor:none;transition:all .3s}
+.blog-card:hover{border-color:var(--neon)}
+.blog-img{height:180px;background:linear-gradient(135deg,rgba(0,245,255,0.1),rgba(123,47,255,0.2));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative}
+.blog-tag{position:absolute;bottom:15px;left:15px;background:var(--neon);color:var(--bg);font-family:var(--font-head);font-size:8px;letter-spacing:3px;padding:4px 12px}
+.blog-content{padding:25px}
+.blog-date{font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:10px}
+.blog-title{font-family:var(--font-head);font-size:13px;letter-spacing:1px;margin-bottom:12px;line-height:1.6;color:var(--text)}
+.blog-excerpt{font-size:11px;color:var(--muted);line-height:1.8}
+.blog-read{display:inline-block;margin-top:15px;font-size:10px;letter-spacing:3px;color:var(--neon);text-decoration:none}
+/* FAQ */
+#faq{flex-direction:column;gap:60px;background:linear-gradient(180deg,transparent,var(--bg2),transparent)}
+.faq-container{max-width:800px;width:100%}
+.faq-item{border-bottom:1px solid rgba(0,245,255,0.1);overflow:hidden}
+.faq-q{padding:25px 0;display:flex;justify-content:space-between;align-items:center;cursor:none;font-size:13px;letter-spacing:1px;color:var(--text);transition:color .3s}
+.faq-q:hover{color:var(--neon)}
+.faq-toggle{width:24px;height:24px;border:1px solid var(--muted);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .3s;flex-shrink:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease;color:var(--muted);font-size:12px;line-height:2}
+.faq-a.open{max-height:200px;padding-bottom:20px}
+.faq-item.active .faq-toggle{border-color:var(--neon);color:var(--neon);transform:rotate(45deg)}
+/* CONTACT */
+#contact{flex-direction:column;gap:60px;text-align:center;align-items:center}
+.contact-form{width:100%;max-width:600px;display:flex;flex-direction:column;gap:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-field{display:flex;flex-direction:column;gap:8px}
+.form-field label{font-size:10px;letter-spacing:3px;color:var(--neon);text-transform:uppercase}
+.form-field input,.form-field textarea{background:var(--glass);border:1px solid rgba(0,245,255,0.15);color:var(--text);padding:14px 18px;font-family:var(--font-body);font-size:12px;outline:none;transition:border .3s}
+.form-field input:focus,.form-field textarea:focus{border-color:var(--neon)}
+.form-field textarea{min-height:120px;resize:vertical}
+footer{padding:40px 60px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(0,245,255,0.1);background:var(--bg)}
+.footer-logo{font-family:var(--font-head);font-size:16px;letter-spacing:4px;color:var(--neon)}
+.footer-links{display:flex;gap:30px}
+.footer-links a{color:var(--muted);font-size:10px;letter-spacing:2px;text-decoration:none;text-transform:uppercase;transition:color .3s}
+.footer-links a:hover{color:var(--neon)}
+.footer-copy{font-size:10px;color:var(--muted);letter-spacing:2px}
+/* SCANLINES */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9998}
+/* GLITCH */
+.glitch{position:relative}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+.glitch::before{color:var(--neon3);animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.glitch::after{color:var(--neon);animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+@keyframes glitch1{0%,90%,100%{transform:none}92%{transform:translate(-2px,1px)}94%{transform:translate(2px,-1px)}}
+@keyframes glitch2{0%,90%,100%{transform:none}92%{transform:translate(2px,2px)}94%{transform:translate(-2px,-1px)}}
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:15px 20px}
+  .nav-links{display:none}
+  section{padding:100px 20px}
+  .about-grid,.demo-container{grid-template-columns:1fr}
+  .features-grid,.test-grid,.pricing-grid,.blog-grid{grid-template-columns:1fr}
+  .showcase-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-stats{gap:30px}
+  .form-row{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:20px;text-align:center}
+}
+</style>
+</head>
+<body>
+<!-- CURSOR -->
+<div id="cursor">
+  <div class="cur-cross"></div>
+  <div class="cur-ring"></div>
+  <div class="cur-dot"></div>
+</div>
+<!-- MUTE -->
+<button id="mute-btn" onclick="toggleMute()">◐ SOUND</button>
+<!-- 3D CANVAS -->
+<canvas id="canvas3d"></canvas>
+<!-- NAV -->
+<nav>
+  <div class="logo">NEXUS</div>
+  <ul class="nav-links">
+    <li><a href="#about">ABOUT</a></li>
+    <li><a href="#features">PLATFORM</a></li>
+    <li><a href="#showcase">SHOWCASE</a></li>
+    <li><a href="#pricing">PRICING</a></li>
+    <li><a href="#blog">INSIGHTS</a></li>
+  </ul>
+  <button class="nav-cta">GET STARTED</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-badge">NEXT-GEN AI INFRASTRUCTURE</div>
+  <h1 class="hero-title glitch" data-text="BUILD INTELLIGENCE">
+    <span class="nt1">BUILD</span>
+    <span class="nt2">INTELLIGENCE</span>
+    <span class="nt3">AT SCALE</span>
+  </h1>
+  <p class="hero-sub">NEXUS is the unified AI development platform that transforms how engineering teams build, deploy, and scale machine learning infrastructure. Ship faster. Think bigger. Scale infinitely.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="playClick()">START BUILDING FREE</button>
+    <button class="btn-secondary" onclick="playClick()">WATCH DEMO ▶</button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" id="s1">0</div><div class="stat-label">Engineers</div></div>
+    <div class="stat"><div class="stat-num" id="s2">0</div><div class="stat-label">Models Deployed</div></div>
+    <div class="stat"><div class="stat-num" id="s3">0</div><div class="stat-label">Uptime SLA</div></div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>SCROLL TO EXPLORE</span>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="section-label">ABOUT NEXUS</div>
+      <h2 class="section-title">The Platform Built for AI-Native Teams</h2>
+      <p>NEXUS emerged from a simple frustration: building production AI systems was unnecessarily hard. We spent three years embedded inside hyperscale ML teams at Fortune 500 companies, understanding every bottleneck, every failure point, every late-night incident.</p>
+      <p>Today, NEXUS powers 50,000+ engineering teams across 120 countries. We've processed over 2.4 trillion inference requests and helped teams reduce deployment cycles from weeks to hours. Our neural mesh architecture ensures your models stay fast, reliable, and observable at any scale.</p>
+      <p>We believe AI infrastructure should be invisible — so your team can focus on what matters: building exceptional products that transform industries.</p>
+    </div>
+    <div class="about-visual">
+      <div class="tech-box">
+        <h4>NEURAL MESH</h4>
+        <p>Adaptive compute allocation</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div>
+        <small style="color:var(--neon);font-size:9px">92% EFFICIENCY</small>
+      </div>
+      <div class="tech-box">
+        <h4>LATENCY</h4>
+        <p>P99: 4.2ms inference</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:99%"></div></div>
+        <small style="color:var(--neon);font-size:9px">99.9% SLA</small>
+      </div>
+      <div class="tech-box">
+        <h4>GLOBAL NODES</h4>
+        <p>47 edge locations worldwide</p>
+        <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+        <small style="color:var(--neon);font-size:9px">87MS AVG GLOBAL</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div style="text-align:center;width:100%;max-width:1200px;margin:0 auto">
+    <div class="section-label">PLATFORM CAPABILITIES</div>
+    <h2 class="section-title">Everything You Need to Ship AI Products</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">⚡</div></div><h3 class="feat-title">INFERENCE ENGINE</h3><p class="feat-desc">Sub-5ms latency inference across 47 global PoPs. Automatic batching, quantization, and hardware-aware optimization. Supports PyTorch, JAX, ONNX, and TensorRT out of the box.</p><span class="feat-tag">CORE</span></div>
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">🧠</div></div><h3 class="feat-title">MODEL REGISTRY</h3><p class="feat-desc">Version-controlled model storage with lineage tracking, A/B comparison, and automated performance regression detection. One-click rollback and shadow deployment support.</p><span class="feat-tag">MLOps</span></div>
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">📊</div></div><h3 class="feat-title">OBSERVABILITY SUITE</h3><p class="feat-desc">Real-time drift detection, feature importance tracking, and prediction quality monitoring. Automated alerting with root-cause analysis powered by anomaly detection models.</p><span class="feat-tag">MONITORING</span></div>
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">🔗</div></div><h3 class="feat-title">PIPELINE ORCHESTRATION</h3><p class="feat-desc">Declarative ML pipelines with DAG visualization, incremental retraining triggers, and data freshness guarantees. Integrates with Airflow, Prefect, and Kubeflow natively.</p><span class="feat-tag">WORKFLOW</span></div>
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">🛡️</div></div><h3 class="feat-title">ENTERPRISE SECURITY</h3><p class="feat-desc">SOC 2 Type II certified. Zero-trust networking, field-level encryption, RBAC with attribute policies, audit logging, and GDPR/CCPA compliance tooling built-in.</p><span class="feat-tag">SECURITY</span></div>
+    <div class="feat-card"><div class="feat-icon"><div class="feat-icon-inner">🚀</div></div><h3 class="feat-title">AUTO-SCALING FABRIC</h3><p class="feat-desc">Kubernetes-native autoscaling with predictive load forecasting. Spot instance orchestration reduces GPU costs by up to 73%. Supports multi-cloud and on-premise hybrid deployments.</p><span class="feat-tag">INFRA</span></div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div style="text-align:center">
+    <div class="section-label">LIVE DEMO</div>
+    <h2 class="section-title">Ship Your First Model in 3 Minutes</h2>
+  </div>
+  <div class="demo-container">
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+        <span class="terminal-title">NEXUS CLI v4.2.1</span>
+      </div>
+      <span class="t-line"><span style="color:#7fff7f">nexus@</span><span style="color:var(--neon)">cli</span>:~$</span>
+      <span class="t-line t-cmd">nexus init sentiment-model</span>
+      <span class="t-line t-out">✓ Project initialized at ./sentiment-model</span>
+      <span class="t-line t-out">✓ NEXUS runtime v4.2.1 configured</span>
+      <span class="t-line t-cmd">nexus deploy --env production</span>
+      <span class="t-line t-out">⟳ Building container image...</span>
+      <span class="t-line t-out">⟳ Optimizing for A100 tensor cores...</span>
+      <span class="t-line t-out">✓ Model quantized: 4.2GB → 890MB (78% reduction)</span>
+      <span class="t-line t-out">✓ Deployed to 12 global nodes</span>
+      <span class="t-line t-out" style="color:var(--neon)">✓ Endpoint live: api.nexus.io/v1/models/sentiment-v1</span>
+      <span class="t-line t-out">  Latency: 3.7ms P50 | 8.2ms P99</span>
+      <span class="t-line"><span class="t-cursor"></span></span>
+    </div>
+    <div class="demo-info">
+      <h3>Zero-Config Deployment Pipeline</h3>
+      <p>NEXUS handles the entire deployment lifecycle — from model serialization and hardware-specific optimization to global distribution and health monitoring. No Kubernetes expertise required.</p>
+      <p>Our intelligent deployment engine automatically detects your model architecture, applies the optimal inference backend (TensorRT, ONNX Runtime, or custom CUDA kernels), and routes traffic based on latency and load.</p>
+      <div class="api-chips">
+        <span class="chip">REST API</span><span class="chip">gRPC</span><span class="chip">GraphQL</span>
+        <span class="chip">Python SDK</span><span class="chip">TypeScript</span><span class="chip">Go Client</span>
+        <span class="chip">Webhooks</span><span class="chip">Streaming</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section id="showcase">
+  <div style="text-align:center">
+    <div class="section-label">CUSTOMER SHOWCASE</div>
+    <h2 class="section-title">Powering the World's Most Ambitious AI Products</h2>
+  </div>
+  <div class="showcase-grid">
+    <div class="showcase-item"><div class="si-bg">🤖</div><div class="si-info"><div class="si-name">ARIA HEALTH AI</div><div class="si-cat">MEDICAL DIAGNOSIS</div></div></div>
+    <div class="showcase-item"><div class="si-bg">📈</div><div class="si-info"><div class="si-name">QUANT EDGE</div><div class="si-cat">FINTECH · TRADING</div></div></div>
+    <div class="showcase-item"><div class="si-bg">🌍</div><div class="si-info"><div class="si-name">TERRA VISION</div><div class="si-cat">CLIMATE MODELING</div></div></div>
+    <div class="showcase-item"><div class="si-bg">🎵</div><div class="si-info"><div class="si-name">SOUNDCRAFT AI</div><div class="si-cat">MUSIC GENERATION</div></div></div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div style="text-align:center">
+    <div class="section-label">TESTIMONIALS</div>
+    <h2 class="section-title">Trusted by Engineering Leaders</h2>
+  </div>
+  <div class="test-grid">
+    <div class="test-card"><div class="stars">★★★★★</div><p class="test-text">"NEXUS reduced our model deployment time from 3 weeks to 4 hours. The observability suite caught a data drift issue that would have cost us millions in bad predictions. It's fundamentally changed how we operate."</p><div class="test-author"><div class="test-avatar">SL</div><div><div class="test-name">Sarah Lin</div><div class="test-role">VP ENGINEERING · STRIPE</div></div></div></div>
+    <div class="test-card"><div class="stars">★★★★★</div><p class="test-text">"We evaluated every MLOps platform on the market. NEXUS was the only one that could handle our 50,000 requests/second peak load without a single dropped prediction. The auto-scaling fabric is genuinely magical."</p><div class="test-author"><div class="test-avatar">MK</div><div><div class="test-name">Marcus Kim</div><div class="test-role">CTO · ROBINHOOD</div></div></div></div>
+    <div class="test-card"><div class="stars">★★★★★</div><p class="test-text">"As a regulated financial institution, security was non-negotiable. NEXUS's zero-trust architecture and audit logging gave our compliance team exactly what they needed. We were SOC 2 certified 40% faster."</p><div class="test-author"><div class="test-avatar">AR</div><div><div class="test-name">Aisha Rahman</div><div class="test-role">HEAD OF AI · GOLDMAN SACHS</div></div></div></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div style="text-align:center">
+    <div class="section-label">PRICING</div>
+    <h2 class="section-title">Transparent Pricing for Every Scale</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="plan-name">STARTER</div>
+      <div class="plan-price"><span>$</span>0</div>
+      <div class="plan-period">FREE FOREVER</div>
+      <ul class="plan-features">
+        <li>1 production model</li><li>100K monthly inferences</li><li>Community support</li><li>Basic monitoring</li><li>Shared infrastructure</li>
+      </ul>
+      <button class="btn-secondary" style="width:100%">START FREE</button>
+    </div>
+    <div class="price-card featured">
+      <div class="plan-name">GROWTH</div>
+      <div class="plan-price"><span>$</span>299</div>
+      <div class="plan-period">PER MONTH · BILLED ANNUALLY</div>
+      <ul class="plan-features">
+        <li>Unlimited models</li><li>50M monthly inferences</li><li>Priority support 24/7</li><li>Full observability suite</li><li>Multi-region deployment</li><li>SOC 2 audit logs</li>
+      </ul>
+      <button class="btn-primary" style="width:100%">GET STARTED</button>
+    </div>
+    <div class="price-card">
+      <div class="plan-name">ENTERPRISE</div>
+      <div class="plan-price" style="font-size:32px">CUSTOM</div>
+      <div class="plan-period">VOLUME PRICING</div>
+      <ul class="plan-features">
+        <li>Unlimited everything</li><li>Dedicated infrastructure</li><li>SLA guarantee 99.99%</li><li>Custom compliance</li><li>Dedicated CSM</li><li>Professional services</li>
+      </ul>
+      <button class="btn-secondary" style="width:100%">CONTACT SALES</button>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section id="blog">
+  <div style="text-align:center">
+    <div class="section-label">INSIGHTS</div>
+    <h2 class="section-title">From the NEXUS Engineering Blog</h2>
+  </div>
+  <div class="blog-grid">
+    <div class="blog-card"><div class="blog-img">⚡<span class="blog-tag">PERFORMANCE</span></div><div class="blog-content"><div class="blog-date">DEC 12, 2024</div><h4 class="blog-title">How We Achieved Sub-4ms P99 Latency Across 47 Global PoPs</h4><p class="blog-excerpt">A deep dive into our neural mesh routing algorithm, CUDA kernel optimizations, and the surprising role of TCP BBR in cutting tail latency by 61%.</p><a class="blog-read" href="#">READ ARTICLE →</a></div></div>
+    <div class="blog-card"><div class="blog-img">🔬<span class="blog-tag">RESEARCH</span></div><div class="blog-content"><div class="blog-date">NOV 28, 2024</div><h4 class="blog-title">Detecting Silent Model Failures: A New Approach to Production Drift</h4><p class="blog-excerpt">Traditional monitoring misses 73% of production ML failures. We built a multivariate drift detector that catches the ones that matter — before your users notice.</p><a class="blog-read" href="#">READ ARTICLE →</a></div></div>
+    <div class="blog-card"><div class="blog-img">💡<span class="blog-tag">ENGINEERING</span></div><div class="blog-content"><div class="blog-date">NOV 14, 2024</div><h4 class="blog-title">The True Cost of DIY MLOps: What 200 Engineering Teams Taught Us</h4><p class="blog-excerpt">We analyzed 200 teams who built their own ML platforms. The average team spends 40% of their AI engineering time on infrastructure. Here's how to get that time back.</p><a class="blog-read" href="#">READ ARTICLE →</a></div></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div style="text-align:center;width:100%;max-width:800px;margin:0 auto">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Common Questions</h2>
+  </div>
+  <div class="faq-container" id="faqContainer">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>Can NEXUS handle our custom model architectures?</span><div class="faq-toggle">+</div></div><div class="faq-a">Yes. NEXUS supports any ONNX-compatible model, plus native PyTorch and JAX runtimes. Our team has deployed architectures ranging from standard transformers to custom mixture-of-experts models with 500B+ parameters.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>What's your data privacy model?</span><div class="faq-toggle">+</div></div><div class="faq-a">Your inference data never trains any shared models. We support customer-managed encryption keys, VPC peering, and fully on-premise deployments for maximum data sovereignty. GDPR, HIPAA, and CCPA tooling is included at no additional cost.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>How does pricing scale with volume?</span><div class="faq-toggle">+</div></div><div class="faq-a">Growth plan includes 50M inferences/month. Beyond that, you pay per million inferences on a sliding scale — $1.50/M at 100M, $0.80/M at 500M, $0.40/M at 1B+. Enterprise customers get custom volume agreements with committed use discounts up to 65%.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>What's your SLA during incidents?</span><div class="faq-toggle">+</div></div><div class="faq-a">Growth plan: 99.95% uptime SLA with 15-minute response time for P1 incidents. Enterprise: 99.99% uptime with 5-minute response. We publish a real-time status page and post-mortem reports for all incidents affecting customers.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>How long does migration from our existing platform take?</span><div class="faq-toggle">+</div></div><div class="faq-a">Most migrations complete in 1-2 weeks. Our Professional Services team provides hands-on support, and our migration CLI automates 90% of the work. We offer parallel-run mode so you can validate parity before full cutover — zero risk, zero downtime.</div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">GET IN TOUCH</div>
+  <h2 class="section-title">Ready to Build the Future?</h2>
+  <p style="color:var(--muted);max-width:500px;text-align:center;line-height:2;font-size:13px;margin-bottom:40px">Join 50,000+ engineering teams already building on NEXUS. Start free, scale to billions of inferences.</p>
+  <div class="contact-form">
+    <div class="form-row">
+      <div class="form-field"><label>First Name</label><input type="text" placeholder="Ada"></div>
+      <div class="form-field"><label>Last Name</label><input type="text" placeholder="Lovelace"></div>
+    </div>
+    <div class="form-field"><label>Work Email</label><input type="email" placeholder="ada@company.io"></div>
+    <div class="form-field"><label>Company</label><input type="text" placeholder="Your Company"></div>
+    <div class="form-field"><label>Message</label><textarea placeholder="Tell us about your use case..."></textarea></div>
+    <button class="btn-primary" onclick="playClick()" style="align-self:flex-start">SEND MESSAGE →</button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">NEXUS</div>
+  <div class="footer-links">
+    <a href="#">Docs</a><a href="#">API Reference</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Status</a><a href="#">Privacy</a>
+  </div>
+  <div class="footer-copy">© 2025 NEXUS INC. ALL RIGHTS RESERVED.</div>
+</footer>
+
+<script>
+// CURSOR
+const cursor=document.getElementById('cursor');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+function animCursor(){cx+=(mx-cx)*.15;cy+=(my-cy)*.15;cursor.style.left=cx+'px';cursor.style.top=cy+'px';requestAnimationFrame(animCursor)}
+animCursor();
+document.querySelectorAll('button,a,.feat-card,.test-card,.blog-card,.showcase-item,.faq-q').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{document.body.classList.add('hovering');playHover()});
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+// SOUND
+let audioCtx=null,muted=false,started=false;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx}
+function playTone(f,dur,type='sine',vol=0.05){if(muted)return;try{const a=getAudio(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=f;o.type=type;g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);o.start();o.stop(a.currentTime+dur)}catch(e){}}
+function playHover(){playTone(880,.1,'sine',.03)}
+function playClick(){playTone(440,.15,'square',.05);setTimeout(()=>playTone(660,.1,'sine',.04),80)}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'✕ MUTED':'◐ SOUND';if(!started){started=true;startAmbient()}}
+function startAmbient(){if(muted)return;try{const a=getAudio(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=55;o.type='sawtooth';g.gain.value=0.008;o.start()}catch(e){}}
+document.addEventListener('click',()=>{if(!started){started=true}},{ once:true});
+// THREE.JS
+const canvas=document.getElementById('canvas3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.z=30;
+// Particle nodes
+const nodeGeo=new THREE.BufferGeometry();
+const N=300,pos=new Float32Array(N*3);
+for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*80;pos[i*3+1]=(Math.random()-.5)*80;pos[i*3+2]=(Math.random()-.5)*40}
+nodeGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const nodeMat=new THREE.PointsMaterial({color:0x00f5ff,size:.4,transparent:true,opacity:.6,blending:THREE.AdditiveBlending});
+const nodes=new THREE.Points(nodeGeo,nodeMat);
+scene.add(nodes);
+// Lines between nearby nodes
+const lineMat=new THREE.LineBasicMaterial({color:0x00f5ff,transparent:true,opacity:.08,blending:THREE.AdditiveBlending});
+for(let i=0;i<50;i++){
+  const p1=i%N,p2=(i*7)%N;
+  const lineGeo=new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(pos[p1*3],pos[p1*3+1],pos[p1*3+2]),
+    new THREE.Vector3(pos[p2*3],pos[p2*3+1],pos[p2*3+2])
+  ]);
+  scene.add(new THREE.Line(lineGeo,lineMat));
+}
+// Central torus
+const torus=new THREE.Mesh(new THREE.TorusGeometry(8,0.3,16,100),new THREE.MeshBasicMaterial({color:0x7b2fff,wireframe:true,transparent:true,opacity:.3}));
+scene.add(torus);
+const torus2=new THREE.Mesh(new THREE.TorusGeometry(12,0.15,8,80),new THREE.MeshBasicMaterial({color:0x00f5ff,wireframe:true,transparent:true,opacity:.15}));
+scene.add(torus2);
+let scrollY=0;
+window.addEventListener('scroll',()=>scrollY=window.scrollY);
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{mouseX=(e.clientX/window.innerWidth-.5)*2;mouseY=(e.clientY/window.innerHeight-.5)*2});
+function animate(){requestAnimationFrame(animate);const t=Date.now()*.001;nodes.rotation.y=t*.05+scrollY*.0005;nodes.rotation.x=t*.02;torus.rotation.x=t*.3;torus.rotation.y=t*.2;torus2.rotation.x=-t*.15;torus2.rotation.z=t*.1;camera.position.x=mouseX*3;camera.position.y=-mouseY*2;camera.lookAt(scene.position);renderer.render(scene,camera)}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});
+// STATS COUNTER
+function countUp(el,target,suffix=''){let c=0;const inc=target/60;const t=setInterval(()=>{c+=inc;if(c>=target){c=target;clearInterval(t)}el.textContent=Math.floor(c).toLocaleString()+suffix},30)}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){countUp(document.getElementById('s1'),50000,'+');countUp(document.getElementById('s2'),2400000,'+');countUp(document.getElementById('s3'),99,'%');obs.disconnect()}})});
+obs.observe(document.getElementById('hero'));
+// FAQ
+function toggleFaq(el){const item=el.parentElement;const ans=item.querySelector('.faq-a');const wasOpen=item.classList.contains('active');document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('active');i.querySelector('.faq-a').classList.remove('open')});if(!wasOpen){item.classList.add('active');ans.classList.add('open')}}
+// GSAP scroll animations
+gsap.registerPlugin(ScrollTrigger);
+gsap.from('.feat-card',{scrollTrigger:{trigger:'#features',start:'top 70%'},y:60,opacity:0,duration:.8,stagger:.1});
+gsap.from('.test-card',{scrollTrigger:{trigger:'#testimonials',start:'top 70%'},y:40,opacity:0,duration:.8,stagger:.15});
+gsap.from('.price-card',{scrollTrigger:{trigger:'#pricing',start:'top 70%'},y:50,opacity:0,duration:.8,stagger:.2});
+gsap.from('.blog-card',{scrollTrigger:{trigger:'#blog',start:'top 70%'},x:-40,opacity:0,duration:.8,stagger:.2});
+</script>
+</body>
+</html>

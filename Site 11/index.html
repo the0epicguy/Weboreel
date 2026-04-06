@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMINA — Learn Differently</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--teal:#00e5cc;--green:#00ff88;--blue:#0066ff;--dark:#020b0a;--card:rgba(0,229,204,0.06);--border:rgba(0,229,204,0.18);}
+body{background:var(--dark);color:#fff;font-family:'Space Grotesk',sans-serif;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);width:42px;height:42px;}
+#cursor svg{width:100%;height:100%;filter:drop-shadow(0 0 8px var(--teal));}
+#cursor-dot{position:fixed;width:5px;height:5px;background:var(--teal);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--teal);}
+#bg-canvas{position:fixed;top:0;left:0;z-index:0;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 60px;display:flex;justify-content:space-between;align-items:center;background:rgba(2,11,10,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:var(--teal);letter-spacing:2px;}
+.logo span{color:var(--green);}
+.nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;margin-left:30px;transition:color 0.3s;}
+.nav-links a:hover{color:var(--teal);}
+.xp-display{background:rgba(0,229,204,0.1);border:1px solid var(--border);padding:6px 16px;border-radius:20px;font-size:12px;color:var(--teal);font-weight:600;}
+
+/* Hero */
+#hero{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;padding:100px 80px 60px;gap:60px;}
+.hero-left{flex:1;}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);padding:6px 16px;border-radius:30px;font-size:11px;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:30px;}
+.badge::before{content:'●';font-size:8px;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+h1{font-family:'Unbounded',sans-serif;font-size:clamp(32px,5vw,64px);font-weight:700;line-height:1.1;margin-bottom:25px;}
+h1 span{color:var(--teal);}
+.hero-desc{font-size:16px;color:rgba(255,255,255,0.5);line-height:1.8;margin-bottom:40px;max-width:480px;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.btn-start{padding:16px 40px;background:linear-gradient(135deg,var(--teal),var(--green));color:#000;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;border:none;border-radius:4px;cursor:none;transition:all 0.3s;}
+.btn-start:hover{transform:scale(1.05);box-shadow:0 0 40px rgba(0,229,204,0.4);}
+.btn-demo{padding:16px 36px;background:transparent;color:var(--teal);border:1px solid var(--border);font-size:12px;letter-spacing:2px;cursor:none;border-radius:4px;transition:all 0.3s;}
+.btn-demo:hover{background:rgba(0,229,204,0.08);}
+/* Stats */
+.stats{display:flex;gap:40px;margin-top:50px;flex-wrap:wrap;}
+.stat-item{text-align:center;}
+.stat-num{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;color:var(--teal);}
+.stat-l{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+
+/* 3D area */
+.hero-right{flex:0 0 500px;height:500px;display:flex;align-items:center;justify-content:center;position:relative;}
+#module-canvas{border-radius:12px;}
+.module-ui{position:absolute;inset:0;pointer-events:none;}
+.xp-bar-wrap{position:absolute;bottom:20px;left:20px;right:20px;background:rgba(2,11,10,0.7);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.xp-label{font-size:10px;letter-spacing:2px;color:var(--teal);margin-bottom:6px;display:flex;justify-content:space-between;}
+.xp-track{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;}
+.xp-fill{height:100%;width:65%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:3px;box-shadow:0 0 10px var(--teal);}
+.level-badge{position:absolute;top:15px;right:15px;background:linear-gradient(135deg,var(--teal),var(--green));color:#000;font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;}
+
+/* Courses */
+#courses{position:relative;z-index:10;padding:80px;}
+.section-title{font-family:'Unbounded',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:700;margin-bottom:50px;}
+.section-title span{color:var(--teal);}
+.course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;}
+.course-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;cursor:none;transition:all 0.4s;position:relative;overflow:hidden;}
+.course-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--green));transform:scaleX(0);transform-origin:left;transition:transform 0.4s;}
+.course-card:hover{transform:translateY(-6px);border-color:var(--teal);box-shadow:0 20px 40px rgba(0,229,204,0.1);}
+.course-card:hover::before{transform:scaleX(1);}
+.course-icon{font-size:36px;margin-bottom:16px;}
+.course-level{font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+.level-beg{color:var(--green);}
+.level-mid{color:var(--teal);}
+.level-adv{color:var(--blue);}
+.course-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700;margin-bottom:10px;line-height:1.3;}
+.course-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:20px;}
+.course-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+.course-students{color:rgba(255,255,255,0.3);}
+.course-xp{background:rgba(0,229,204,0.1);color:var(--teal);padding:4px 10px;border-radius:20px;font-weight:600;}
+.course-progress{margin-top:16px;}
+.prog-label{font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:5px;display:flex;justify-content:space-between;}
+.prog-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--teal));}
+
+/* Achievements */
+#achieve{position:relative;z-index:10;padding:60px 80px;background:rgba(0,229,204,0.03);border-top:1px solid var(--border);}
+.ach-grid{display:flex;gap:20px;flex-wrap:wrap;}
+.ach-badge{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;flex:1;min-width:120px;transition:all 0.3s;cursor:none;}
+.ach-badge:hover{border-color:var(--teal);transform:scale(1.05);}
+.ach-icon{font-size:32px;margin-bottom:8px;}
+.ach-name{font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);}
+
+footer{position:relative;z-index:10;padding:40px 80px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:1px;}
+@media(max-width:900px){nav{padding:15px 20px;}.nav-links{display:none;}#hero{flex-direction:column;padding:80px 20px 40px;}.hero-right{width:100%;height:300px;flex:0 0 auto;}#courses,#achieve{padding:60px 20px;}footer{padding:30px 20px;flex-direction:column;gap:10px;}}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div>
+<div id="cursor">
+  <svg viewBox="0 0 42 42" fill="none">
+    <polygon points="21,2 40,40 21,32 2,40" stroke="#00e5cc" stroke-width="1.5" fill="none"/>
+    <circle cx="21" cy="21" r="4" fill="#00e5cc" opacity="0.6"/>
+  </svg>
+</div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <div class="logo">LUM<span>INA</span></div>
+  <div class="nav-links">
+    <a href="#">Courses</a><a href="#">Paths</a><a href="#">Community</a><a href="#">Pro</a>
+  </div>
+  <div class="xp-display">⚡ 4,820 XP</div>
+</nav>
+
+<section id="hero">
+  <div class="hero-left">
+    <div class="badge">AI-Powered Learning</div>
+    <h1>Learn Smarter,<br>Grow <span>Faster</span></h1>
+    <p class="hero-desc">Interactive 3D learning experiences that adapt to your pace. 
+    Earn XP, unlock achievements, and master real-world skills through gamified education.</p>
+    <div class="hero-btns">
+      <button class="btn-start">Start Learning Free</button>
+      <button class="btn-demo">View Demo</button>
+    </div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num">2M+</div><div class="stat-l">Learners</div></div>
+      <div class="stat-item"><div class="stat-num">500+</div><div class="stat-l">Courses</div></div>
+      <div class="stat-item"><div class="stat-num">98%</div><div class="stat-l">Satisfaction</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <canvas id="module-canvas" width="450" height="480"></canvas>
+    <div class="module-ui">
+      <div class="level-badge">LVL 12</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-label"><span>XP Progress</span><span>4820 / 5000</span></div>
+        <div class="xp-track"><div class="xp-fill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="courses">
+  <div class="section-title">Featured <span>Courses</span></div>
+  <div class="course-grid">
+    <div class="course-card">
+      <div class="course-icon">🧠</div>
+      <div class="course-level level-adv">Advanced · AI/ML</div>
+      <div class="course-title">Neural Networks Mastery</div>
+      <div class="course-desc">Build and train deep learning models from scratch using modern frameworks.</div>
+      <div class="course-meta"><span class="course-students">👥 12,400 learners</span><span class="course-xp">+2400 XP</span></div>
+      <div class="course-progress"><div class="prog-label"><span>Progress</span><span>34%</span></div><div class="prog-bar"><div class="prog-fill" style="width:34%"></div></div></div>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">⚛️</div>
+      <div class="course-level level-mid">Intermediate · Physics</div>
+      <div class="course-title">Quantum Mechanics</div>
+      <div class="course-desc">Interactive simulations bring wave-particle duality to life like never before.</div>
+      <div class="course-meta"><span class="course-students">👥 8,900 learners</span><span class="course-xp">+1800 XP</span></div>
+      <div class="course-progress"><div class="prog-label"><span>Progress</span><span>67%</span></div><div class="prog-bar"><div class="prog-fill" style="width:67%"></div></div></div>
+    </div>
+    <div class="course-card">
+      <div class="course-icon">🎨</div>
+      <div class="course-level level-beg">Beginner · Design</div>
+      <div class="course-title">3D Design Foundations</div>
+      <div class="course-desc">Create stunning 3D environments with guided projects and instant feedback.</div>
+      <div class="course-meta"><span class="course-students">👥 21,000 learners</span><span class="course-xp">+1200 XP</span></div>
+      <div class="course-progress"><div class="prog-label"><span>Progress</span><span>12%</span></div><div class="prog-bar"><div class="prog-fill" style="width:12%"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="achieve">
+  <div class="section-title" style="font-size:28px;margin-bottom:30px;">Your <span>Achievements</span></div>
+  <div class="ach-grid">
+    <div class="ach-badge"><div class="ach-icon">🔥</div><div class="ach-name">7-Day Streak</div></div>
+    <div class="ach-badge"><div class="ach-icon">⚡</div><div class="ach-name">Speed Learner</div></div>
+    <div class="ach-badge"><div class="ach-icon">🏆</div><div class="ach-name">Top 10%</div></div>
+    <div class="ach-badge"><div class="ach-icon">🧠</div><div class="ach-name">Deep Thinker</div></div>
+    <div class="ach-badge"><div class="ach-icon">🌟</div><div class="ach-name">Star Student</div></div>
+    <div class="ach-badge" style="opacity:0.3;"><div class="ach-icon">🔒</div><div class="ach-name">???</div></div>
+  </div>
+</section>
+
+<footer><span>© 2025 Lumina Education Inc.</span><span>Privacy · Terms · Help</span></footer>
+
+<script>
+// Audio
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function playHover(){const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='triangle';o.frequency.setValueAtTime(600,AC.currentTime);o.frequency.exponentialRampToValueAtTime(900,AC.currentTime+0.1);g.gain.setValueAtTime(0.04,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.15);o.start();o.stop(AC.currentTime+0.15);}
+function playClick(){[440,550,660].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.05,AC.currentTime+i*0.05);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+i*0.05+0.1);o.start(AC.currentTime+i*0.05);o.stop(AC.currentTime+i*0.05+0.1);});}
+document.body.addEventListener('click',()=>{if(AC.state==='suspended')AC.resume();},{once:true});
+
+// Cursor
+const cursor=document.getElementById('cursor'),dot=document.getElementById('cursor-dot');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function loop(){cx+=(mx-cx)*0.1;cy+=(my-cy)*0.1;cursor.style.left=cx+'px';cursor.style.top=cy+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button,.course-card,.ach-badge').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(1.6)';playHover();});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';});
+  el.addEventListener('click',playClick);
+});
+
+// Background Three.js
+const bgCanvas=document.getElementById('bg-canvas');
+const bgR=new THREE.WebGLRenderer({canvas:bgCanvas,antialias:true,alpha:true});
+bgR.setPixelRatio(Math.min(devicePixelRatio,2));bgR.setSize(innerWidth,innerHeight);
+const bgScene=new THREE.Scene(),bgCam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,1000);
+bgCam.position.z=30;
+const pCount=2000,pPos=new Float32Array(pCount*3);
+for(let i=0;i<pCount;i++){pPos[i*3]=(Math.random()-0.5)*100;pPos[i*3+1]=(Math.random()-0.5)*100;pPos[i*3+2]=(Math.random()-0.5)*60;}
+const pGeo=new THREE.BufferGeometry();pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+const pMat=new THREE.PointsMaterial({size:0.25,color:0x00e5cc,transparent:true,opacity:0.4});
+bgScene.add(new THREE.Points(pGeo,pMat));
+
+// Module 3D viewer
+const mCanvas=document.getElementById('module-canvas');
+const mR=new THREE.WebGLRenderer({canvas:mCanvas,antialias:true,alpha:true});
+mR.setPixelRatio(Math.min(devicePixelRatio,2));mR.setSize(450,480);
+const mScene=new THREE.Scene(),mCam=new THREE.PerspectiveCamera(60,450/480,0.1,100);
+mCam.position.z=12;
+const mAmb=new THREE.AmbientLight(0x00e5cc,0.4);mScene.add(mAmb);
+const mPt=new THREE.PointLight(0x00ff88,2,20);mPt.position.set(4,4,6);mScene.add(mPt);
+const mPt2=new THREE.PointLight(0x0066ff,1.5,15);mPt2.position.set(-4,-2,4);mScene.add(mPt2);
+
+// DNA-like helix structure representing learning
+const helixGroup=new THREE.Group();
+const sCount=40;
+for(let i=0;i<sCount;i++){
+  const t2=i/sCount*Math.PI*4;
+  const r=3;
+  const geo=new THREE.SphereGeometry(0.2,8,8);
+  const col=i%3===0?0x00e5cc:i%3===1?0x00ff88:0x0066ff;
+  const mat=new THREE.MeshPhongMaterial({color:col,shininess:100,transparent:true,opacity:0.9});
+  const s1=new THREE.Mesh(geo,mat),s2=new THREE.Mesh(geo.clone(),mat.clone());
+  s1.position.set(Math.cos(t2)*r,i*0.3-6,Math.sin(t2)*r);
+  s2.position.set(Math.cos(t2+Math.PI)*r,i*0.3-6,Math.sin(t2+Math.PI)*r);
+  helixGroup.add(s1,s2);
+  if(i%3===0){
+    const lineGeo=new THREE.BufferGeometry().setFromPoints([s1.position,s2.position]);
+    helixGroup.add(new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color:0x00e5cc,transparent:true,opacity:0.3})));
+  }
+}
+mScene.add(helixGroup);
+
+let mMouseX=0,mMouseY=0;
+document.addEventListener('mousemove',e=>{mMouseX=(e.clientX/innerWidth-0.5)*2;mMouseY=(e.clientY/innerHeight-0.5)*2;});
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t=Date.now()*0.001;
+  helixGroup.rotation.y+=0.008;helixGroup.position.y=Math.sin(t*0.5)*0.5;
+  bgCam.position.x+=(mMouseX*2-bgCam.position.x)*0.02;bgCam.position.y+=(-mMouseY*2-bgCam.position.y)*0.02;bgCam.lookAt(bgScene.position);
+  bgR.render(bgScene,bgCam);mR.render(mScene,mCam);
+}
+animate();
+window.addEventListener('resize',()=>{bgR.setSize(innerWidth,innerHeight);bgCam.aspect=innerWidth/innerHeight;bgCam.updateProjectionMatrix();});
+gsap.from('.hero-left > *',{duration:1,y:40,opacity:0,stagger:0.15,delay:0.4});
+gsap.from('.hero-right',{duration:1.2,scale:0.9,opacity:0,delay:0.7});
+gsap.from('.course-card',{scrollTrigger:{trigger:'#courses',start:'top 70%'},duration:0.8,y:50,opacity:0,stagger:0.15});
+gsap.from('.ach-badge',{scrollTrigger:{trigger:'#achieve',start:'top 80%'},duration:0.6,scale:0.8,opacity:0,stagger:0.08});
+</script>
+</body>
+</html>

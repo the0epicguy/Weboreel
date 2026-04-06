@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEEP BLUE — A Journey Into the Abyss</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500&display=swap');
+
+  :root {
+    --deep: #00030a;
+    --ocean: #020d1c;
+    --mid: #041528;
+    --surface-w: #0a2540;
+    --biolum: #00e5ff;
+    --biolum2: #0088cc;
+    --warm: #e8d5b0;
+    --warm2: #c4a882;
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'Barlow', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+  body {
+    background: var(--deep);
+    color: var(--warm);
+    font-family: var(--serif);
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* CURSOR */
+  #cursor {
+    position: fixed;
+    width: 30px; height: 30px;
+    border: 1px solid rgba(0,229,255,0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.2s, border-color 0.3s, opacity 0.3s;
+  }
+  #cursor::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px; height: 4px;
+    background: var(--biolum);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--biolum);
+  }
+  #cursor.hover { transform: scale(2.5); border-color: var(--biolum); }
+
+  /* PROGRESS BAR */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--biolum2), var(--biolum));
+    z-index: 1000;
+    transition: width 0.1s;
+    box-shadow: 0 0 10px var(--biolum);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+    background: linear-gradient(to bottom, rgba(0,3,10,0.9), transparent);
+    transition: opacity 0.5s;
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 20px;
+    letter-spacing: 0.3em;
+    font-weight: 300;
+    color: var(--warm);
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.6);
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--biolum); }
+
+  /* SCROLL INDICATOR */
+  .scroll-hint {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(232,213,176,0.4);
+    text-transform: uppercase;
+    animation: fadeInUp 2s 3s both;
+  }
+  .scroll-wheel {
+    width: 20px; height: 32px;
+    border: 1px solid rgba(232,213,176,0.3);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    padding-top: 5px;
+  }
+  .scroll-wheel::after {
+    content: '';
+    width: 3px; height: 6px;
+    background: rgba(232,213,176,0.5);
+    border-radius: 2px;
+    animation: scrollAnim 1.5s infinite;
+  }
+  @keyframes scrollAnim { 0%,100% { transform:translateY(0); opacity:1; } 50% { transform:translateY(8px); opacity:0; } }
+
+  /* SECTIONS */
+  section {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--deep);
+    position: relative;
+  }
+
+  /* STARS/PARTICLES */
+  #particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float var(--d) var(--delay) infinite ease-in-out;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0) scale(1); opacity: var(--op); }
+    50% { transform: translateY(-30px) scale(1.2); opacity: calc(var(--op) * 0.5); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 40px;
+  }
+  .hero-eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--biolum);
+    opacity: 0;
+    animation: fadeInUp 1s 0.5s both;
+  }
+  .hero-title {
+    font-size: clamp(60px, 10vw, 120px);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--warm);
+    margin: 20px 0;
+    opacity: 0;
+    animation: fadeInUp 1.2s 0.8s both;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232,213,176,0.4);
+  }
+  .hero-sub {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(232,213,176,0.5);
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeInUp 1s 1.1s both;
+  }
+  .hero-depth {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(0,229,255,0.4);
+    opacity: 0;
+    animation: fadeInUp 1s 1.4s both;
+  }
+
+  /* OCEAN GRADIENT */
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, transparent, var(--ocean));
+    pointer-events: none;
+  }
+
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+  /* CHAPTER SECTIONS */
+  .chapter {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .chapter.reversed { direction: rtl; }
+  .chapter.reversed > * { direction: ltr; }
+
+  .chapter-visual {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .chapter-visual .bg-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.1s;
+  }
+
+  .depth-0 { background: radial-gradient(ellipse at center, #041528 0%, #020d1c 40%, #00030a 100%); }
+  .depth-200 { background: radial-gradient(ellipse at 30% 60%, #051e3a 0%, #031220 50%, #010812 100%); }
+  .depth-600 { background: radial-gradient(ellipse at 70% 40%, #021530 0%, #010a1a 50%, #000508 100%); }
+  .depth-1000 { background: radial-gradient(ellipse at 50% 70%, #010e22 0%, #000812 50%, #000305 100%); }
+  .depth-4000 { background: radial-gradient(ellipse at 50% 50%, #010a18 0%, #000509 50%, #000102 100%); }
+
+  /* BIOLUMINESCENCE EFFECTS */
+  .bio-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: bioAnim var(--d, 4s) infinite ease-in-out;
+    pointer-events: none;
+  }
+  @keyframes bioAnim {
+    0%,100% { transform: scale(1) translate(0,0); opacity: var(--op, 0.3); }
+    33% { transform: scale(1.3) translate(10px,-10px); opacity: calc(var(--op, 0.3)*1.5); }
+    66% { transform: scale(0.8) translate(-5px,15px); opacity: calc(var(--op, 0.3)*0.7); }
+  }
+
+  .chapter-text {
+    padding: 80px 60px;
+    position: relative;
+    z-index: 10;
+  }
+  .chapter-number {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--biolum);
+    opacity: 0.7;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .chapter-number::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--biolum);
+    opacity: 0.4;
+  }
+  .chapter-title {
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--warm);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .chapter-title em {
+    font-style: italic;
+    color: var(--warm2);
+  }
+  .chapter-body {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(196,168,130,0.7);
+    font-weight: 300;
+    margin-bottom: 32px;
+    max-width: 480px;
+  }
+  .depth-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.07);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--biolum);
+    letter-spacing: 0.1em;
+  }
+  .depth-badge::before { content: '▼'; font-size: 8px; }
+
+  .creature-card {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.1);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: background 0.3s;
+  }
+  .creature-card:hover { background: rgba(0,229,255,0.08); }
+  .creature-name {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--warm);
+    margin-bottom: 4px;
+  }
+  .creature-name em { font-style: italic; font-size: 13px; color: var(--warm2); margin-left: 6px; }
+  .creature-fact { font-family: var(--sans); font-size: 12px; color: rgba(196,168,130,0.6); line-height: 1.6; }
+
+  /* STATS SECTION */
+  .stats-section {
+    background: var(--ocean);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    max-width: 1000px;
+    width: 100%;
+    border: 1px solid rgba(0,229,255,0.1);
+    border-radius: 2px;
+    position: relative;
+    z-index: 10;
+  }
+  .stat-item {
+    padding: 60px 40px;
+    border-right: 1px solid rgba(0,229,255,0.1);
+    text-align: center;
+    position: relative;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-value {
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 300;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232,213,176,0.8);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .stat-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.4);
+  }
+  .stat-accent { color: var(--biolum); -webkit-text-stroke: 0; }
+
+  /* QUOTE SECTION */
+  .quote-section {
+    background: var(--deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .quote-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,136,204,0.08) 0%, transparent 70%);
+  }
+  blockquote {
+    position: relative;
+    z-index: 10;
+    max-width: 800px;
+    text-align: center;
+    padding: 40px;
+  }
+  blockquote p {
+    font-size: clamp(24px, 3.5vw, 48px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--warm);
+    margin-bottom: 32px;
+  }
+  blockquote cite {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(232,213,176,0.4);
+  }
+  .quote-line {
+    width: 60px; height: 1px;
+    background: rgba(0,229,255,0.3);
+    margin: 0 auto 24px;
+  }
+
+  /* FINAL CTA */
+  .cta-section {
+    background: var(--deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-content { position: relative; z-index: 10; padding: 60px 40px; }
+  .cta-title {
+    font-size: clamp(48px, 8vw, 100px);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--warm);
+    margin-bottom: 24px;
+  }
+  .cta-sub {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(232,213,176,0.5);
+    max-width: 400px;
+    margin: 0 auto 48px;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 16px 48px;
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--biolum);
+    text-decoration: none;
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+  }
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,229,255,0.05);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+  .cta-btn:hover { border-color: var(--biolum); box-shadow: 0 0 30px rgba(0,229,255,0.2); }
+  .cta-btn:hover::before { transform: translateX(0); }
+
+  /* CHAPTER BG VISUALS */
+  .jellyfish {
+    position: absolute;
+    font-size: 80px;
+    opacity: 0.15;
+    animation: jellyFloat 6s infinite ease-in-out;
+    filter: hue-rotate(180deg) blur(1px);
+  }
+  @keyframes jellyFloat { 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-20px) rotate(5deg);} }
+
+  #mute-btn {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 40px; height: 40px;
+    background: rgba(0,3,10,0.8);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none; z-index: 1000; font-size:14px;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+  }
+  #mute-btn:hover { border-color: var(--biolum); box-shadow: 0 0 15px rgba(0,229,255,0.2); }
+
+  /* DEPTH INDICATOR */
+  #depth-indicator {
+    position: fixed;
+    right: 24px; top: 50%;
+    transform: translateY(-50%);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: rgba(0,229,255,0.4);
+  }
+  .depth-dots { display: flex; flex-direction:column; gap:8px; }
+  .depth-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,229,255,0.3);
+    cursor: none;
+    transition: all 0.3s;
+  }
+  .depth-dot.active { background: var(--biolum); border-color: var(--biolum); box-shadow: 0 0 8px var(--biolum); }
+
+  /* PARALLAX FISH */
+  .parallax-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .chapter { grid-template-columns: 1fr; }
+    .chapter.reversed { direction: ltr; }
+    .chapter-visual { height: 50vh; }
+    .chapter-text { padding: 40px 24px; }
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    nav { padding: 16px 24px; }
+    .nav-links { display:none; }
+  }
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="progress"></div>
+
+<nav>
+  <div class="nav-logo">Deep Blue</div>
+  <ul class="nav-links">
+    <li><a href="#surface">Surface</a></li>
+    <li><a href="#twilight">Twilight</a></li>
+    <li><a href="#midnight">Midnight</a></li>
+    <li><a href="#abyss">Abyss</a></li>
+    <li><a href="#explore">Explore</a></li>
+  </ul>
+</nav>
+
+<div id="depth-indicator">
+  <div class="depth-dots">
+    <div class="depth-dot active" data-section="0"></div>
+    <div class="depth-dot" data-section="1"></div>
+    <div class="depth-dot" data-section="2"></div>
+    <div class="depth-dot" data-section="3"></div>
+    <div class="depth-dot" data-section="4"></div>
+    <div class="depth-dot" data-section="5"></div>
+    <div class="depth-dot" data-section="6"></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="surface">
+  <div id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">An Ocean Documentary Experience</div>
+    <h1 class="hero-title">Deep<br><em>Blue</em></h1>
+    <p class="hero-sub">Descend through the layers of the ocean — from sunlit shallows to lightless depths — and discover a world that still holds its mysteries.</p>
+    <div class="hero-depth">↓ Scroll to dive deeper · 0m below the surface</div>
+  </div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%, rgba(0,136,204,0.15) 0%, transparent 60%);pointer-events:none;"></div>
+</section>
+
+<!-- SUNLIT ZONE -->
+<section class="chapter" id="sunlit">
+  <div class="chapter-visual depth-0">
+    <div class="bio-glow" style="width:300px;height:300px;background:rgba(0,180,220,0.2);top:20%;left:10%;--d:5s;--op:0.4;"></div>
+    <div class="bio-glow" style="width:200px;height:200px;background:rgba(0,229,255,0.15);bottom:30%;right:20%;--d:7s;--op:0.3;"></div>
+    <div class="jellyfish" style="top:30%;left:40%;">🪼</div>
+    <div class="jellyfish" style="top:60%;left:20%;animation-delay:-2s;font-size:50px;">🐟</div>
+    <div class="jellyfish" style="top:50%;right:15%;animation-delay:-4s;font-size:40px;">🐠</div>
+    <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,transparent,var(--ocean));"></div>
+  </div>
+  <div class="chapter-text">
+    <div class="chapter-number">Chapter 01 — Sunlit Zone</div>
+    <h2 class="chapter-title">Where Light Still <em>Reaches</em></h2>
+    <p class="chapter-body">The epipelagic zone stretches from the ocean's surface down to 200 meters. Here, sunlight penetrates with enough intensity to support photosynthesis — the very foundation of marine life. Coral reefs, kelp forests, and millions of species call this layer home.</p>
+    <div class="depth-badge">0 — 200 meters depth</div>
+    <div style="margin-top:24px;">
+      <div class="creature-card">
+        <div class="creature-name">Blue Whale <em>Balaenoptera musculus</em></div>
+        <div class="creature-fact">The largest animal ever to have lived on Earth, reaching up to 33 meters. Feeds on tiny krill in massive surface blooms.</div>
+      </div>
+      <div class="creature-card">
+        <div class="creature-name">Great White Shark <em>Carcharodon carcharias</em></div>
+        <div class="creature-fact">Apex predator of the sunlit zone, with electroreceptors that detect prey's heartbeat from over a kilometer away.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%, rgba(0,136,204,0.06) 0%, transparent 70%);pointer-events:none;"></div>
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-value stat-accent">71%</div>
+      <div class="stat-label">Earth covered by ocean</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">11km</div>
+      <div class="stat-label">Maximum depth (Mariana Trench)</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value stat-accent">95%</div>
+      <div class="stat-label">Unexplored ocean floor</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">2.2M+</div>
+      <div class="stat-label">Known marine species</div>
+    </div>
+  </div>
+</section>
+
+<!-- TWILIGHT ZONE -->
+<section class="chapter reversed" id="twilight">
+  <div class="chapter-visual depth-200">
+    <div class="bio-glow" style="width:150px;height:150px;background:rgba(0,229,255,0.3);top:40%;left:30%;--d:3s;--op:0.5;"></div>
+    <div class="bio-glow" style="width:80px;height:80px;background:rgba(0,100,255,0.4);bottom:40%;right:30%;--d:4s;--op:0.4;"></div>
+    <div class="bio-glow" style="width:50px;height:50px;background:rgba(0,229,200,0.5);top:60%;left:60%;--d:2.5s;--op:0.6;"></div>
+    <div class="jellyfish" style="top:25%;left:35%;font-size:60px;opacity:0.2;">🦑</div>
+    <div class="jellyfish" style="top:65%;right:25%;font-size:40px;opacity:0.15;animation-delay:-3s;">🐙</div>
+  </div>
+  <div class="chapter-text">
+    <div class="chapter-number">Chapter 02 — Twilight Zone</div>
+    <h2 class="chapter-title">Fading into <em>Darkness</em></h2>
+    <p class="chapter-body">At 200–1000 meters, the mesopelagic zone exists in perpetual twilight. Bioluminescence becomes the primary light source — creatures have evolved their own light-producing organs to hunt, hide, and communicate in the dim blue gloom.</p>
+    <div class="depth-badge">200 — 1,000 meters depth</div>
+    <div style="margin-top:24px;">
+      <div class="creature-card">
+        <div class="creature-name">Giant Squid <em>Architeuthis dux</em></div>
+        <div class="creature-fact">Grows to 13 meters with eyes the size of dinner plates — the largest eyes in the animal kingdom, evolved to detect the faintest traces of light.</div>
+      </div>
+      <div class="creature-card">
+        <div class="creature-name">Lanternfish <em>Myctophidae</em></div>
+        <div class="creature-fact">Perhaps the world's most abundant vertebrate, undertaking massive daily vertical migrations from the twilight zone to the surface to feed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-section">
+  <blockquote>
+    <div class="quote-line"></div>
+    <p>"The sea, once it casts its spell, holds one in its net of wonder forever."</p>
+    <cite>— Jacques Yves Cousteau</cite>
+  </blockquote>
+</section>
+
+<!-- MIDNIGHT ZONE -->
+<section class="chapter" id="midnight">
+  <div class="chapter-visual depth-1000">
+    <div class="bio-glow" style="width:100px;height:100px;background:rgba(0,229,255,0.4);top:50%;left:50%;--d:2s;--op:0.7;"></div>
+    <div class="bio-glow" style="width:60px;height:60px;background:rgba(100,0,255,0.3);top:30%;right:40%;--d:3.5s;--op:0.5;"></div>
+    <div class="bio-glow" style="width:40px;height:40px;background:rgba(0,255,150,0.4);bottom:35%;left:40%;--d:1.8s;--op:0.6;"></div>
+    <div class="jellyfish" style="top:40%;left:40%;font-size:70px;opacity:0.25;">🐡</div>
+  </div>
+  <div class="chapter-text">
+    <div class="chapter-number">Chapter 03 — Midnight Zone</div>
+    <h2 class="chapter-title">Where No Light <em>Survives</em></h2>
+    <p class="chapter-body">Below 1000 meters, absolute darkness reigns. The bathypelagic zone is cold, pressurized, and defined by bioluminescence — not from the sun, but from the creatures themselves. Here, nearly every animal produces its own light.</p>
+    <div class="depth-badge">1,000 — 4,000 meters depth</div>
+    <div style="margin-top:24px;">
+      <div class="creature-card">
+        <div class="creature-name">Anglerfish <em>Lophiiformes</em></div>
+        <div class="creature-fact">Uses a bioluminescent lure to attract prey in total darkness. Females carry parasitic males fused to their body — a bizarre evolutionary solution to finding mates in the dark.</div>
+      </div>
+      <div class="creature-card">
+        <div class="creature-name">Vampire Squid <em>Vampyroteuthis infernalis</em></div>
+        <div class="creature-fact">Despite its name, feeds on marine snow. Can turn its body inside out, covering itself in spines — earning its Latin name: "vampire squid from Hell."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section" id="explore">
+  <div style="position:absolute;inset:0;">
+    <div class="bio-glow" style="width:600px;height:600px;background:rgba(0,136,204,0.05);top:50%;left:50%;transform:translate(-50%,-50%);--d:8s;--op:0.3;"></div>
+  </div>
+  <div class="cta-content">
+    <div style="font-family:var(--sans);font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:var(--biolum);opacity:0.7;margin-bottom:16px;">The Journey Continues</div>
+    <h2 class="cta-title">Dive<br><em>Deeper</em></h2>
+    <p class="cta-sub">Only 5% of Earth's oceans have been explored. Every descent reveals new species, new behaviors, new mysteries. The abyss is calling.</p>
+    <a href="#" class="cta-btn">Begin Your Expedition</a>
+    <div style="margin-top:48px;display:flex;justify-content:center;gap:40px;">
+      <div style="text-align:center;">
+        <div style="font-size:11px;font-family:var(--sans);color:rgba(0,229,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;">Documentary</div>
+        <div style="font-size:13px;color:var(--warm2);">6 Chapters</div>
+      </div>
+      <div style="width:1px;background:rgba(0,229,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;font-family:var(--sans);color:rgba(0,229,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;">Species</div>
+        <div style="font-size:13px;color:var(--warm2);">48 Featured</div>
+      </div>
+      <div style="width:1px;background:rgba(0,229,255,0.1);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;font-family:var(--sans);color:rgba(0,229,255,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;">Depth</div>
+        <div style="font-size:13px;color:var(--warm2);">11,000m</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="scroll-hint">
+  <div class="scroll-wheel"></div>
+  Scroll to Dive
+</div>
+
+<button id="mute-btn">🔊</button>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  let mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  function animC() { cx+=(mx-cx)*0.12; cy+=(my-cy)*0.12; cursor.style.left=(cx-15)+'px'; cursor.style.top=(cy-15)+'px'; requestAnimationFrame(animC); }
+  animC();
+  document.querySelectorAll('a,.cta-btn,.creature-card,#mute-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+
+  // PROGRESS
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+    progress.style.width = pct + '%';
+
+    // Depth indicator
+    const sections = document.querySelectorAll('section');
+    const dots = document.querySelectorAll('.depth-dot');
+    sections.forEach((s,i) => {
+      const rect = s.getBoundingClientRect();
+      if(rect.top <= window.innerHeight/2 && rect.bottom >= window.innerHeight/2) {
+        dots.forEach(d=>d.classList.remove('active'));
+        if(dots[i]) dots[i].classList.add('active');
+      }
+    });
+  });
+
+  // PARTICLES
+  const pContainer = document.getElementById('particles');
+  for(let i=0;i<60;i++) {
+    const p = document.createElement('div');
+    p.className='particle';
+    const size = Math.random()*3+1;
+    const isBio = Math.random() > 0.7;
+    p.style.cssText = `width:${size}px;height:${size}px;background:${isBio?'rgba(0,229,255,0.8)':'rgba(232,213,176,0.3)'};left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${Math.random()*6+3}s;--delay:${Math.random()*-6}s;--op:${Math.random()*0.6+0.1};box-shadow:${isBio?'0 0 6px rgba(0,229,255,0.5)':'none'};`;
+    pContainer.appendChild(p);
+  }
+
+  // PARALLAX on scroll
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.bg-layer').forEach(l => {
+      const section = l.closest('section');
+      const rect = section.getBoundingClientRect();
+      const pct = rect.top / window.innerHeight;
+      l.style.transform = `translateY(${pct*30}px)`;
+    });
+  });
+
+  // SOUND
+  let muted = false;
+  let audioCtx;
+  function getAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+  function playWave() {
+    if(muted) return;
+    try {
+      const a=getAudio(),o=a.createOscillator(),g=a.createGain();
+      o.type='sine'; o.frequency.value=120;
+      g.gain.setValueAtTime(0.05,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+1.5);
+      o.connect(g); g.connect(a.destination);
+      o.start(); o.stop(a.currentTime+1.5);
+    } catch(e){}
+  }
+  document.querySelectorAll('.creature-card,.cta-btn').forEach(el => el.addEventListener('mouseenter', () => { playWave(); cursor.classList.add('hover'); }));
+
+  document.getElementById('mute-btn').addEventListener('click', () => {
+    muted = !muted;
+    document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+  });
+
+  // Hide scroll hint after scroll
+  window.addEventListener('scroll', () => {
+    document.querySelector('.scroll-hint').style.opacity = window.scrollY > 100 ? '0' : '1';
+  }, { passive:true });
+</script>
+</body>
+</html>
