@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroMap — Brain Activity OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #030712;
+  --bg2: #070d1a;
+  --mint: #00ffd1;
+  --mint2: #00c4a7;
+  --purple: #7b61ff;
+  --red: #ff4b6e;
+  --amber: #ffb800;
+  --text: #e8f4f8;
+  --muted: #4a6070;
+  --border: rgba(0,255,209,0.12);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+html{scroll-behavior:smooth}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+#cursor {
+  position: fixed;
+  width: 12px; height: 12px;
+  background: var(--mint);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
+  mix-blend-mode: screen;
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,255,209,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.12s ease-out, width 0.2s, height 0.2s;
+}
+body:has(a:hover) #cursor, body:has(button:hover) #cursor { width:20px; height:20px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(3,7,18,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(2px);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--mint);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+  box-shadow: 0 0 8px var(--mint);
+}
+@keyframes pulse-dot {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.5;transform:scale(1.4)}
+}
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 0.08em;
+  color: var(--muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--mint); }
+.nav-cta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--mint);
+  color: var(--mint);
+  padding: 10px 20px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: background 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.nav-cta::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--mint);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  z-index: -1;
+}
+.nav-cta:hover::before { transform: translateX(0); }
+.nav-cta:hover { color: var(--bg); box-shadow: 0 0 20px rgba(0,255,209,0.3); }
+
+/* LIVE INDICATOR */
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--red);
+  text-transform: uppercase;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: pulse-dot 1s infinite;
+  box-shadow: 0 0 6px var(--red);
+}
+
+/* HERO */
+#hero {
+  position: relative;
+  height: 100vh;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+#brain-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+}
+.hero-content {
+  position: relative; z-index: 10;
+  padding: 0 48px;
+  max-width: 700px;
+  animation: fadeUp 1.2s ease both;
+}
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.2em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-tag::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--mint);
+}
+h1 {
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin-bottom: 28px;
+  color: var(--text);
+}
+h1 span {
+  color: var(--mint);
+  display: block;
+}
+.hero-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 480px;
+  margin-bottom: 44px;
+}
+.hero-actions {
+  display: flex; gap: 16px; align-items: center;
+}
+.btn-primary {
+  background: var(--mint);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 16px 32px;
+  border: none; cursor: none;
+  transition: box-shadow 0.2s, transform 0.15s;
+  position: relative; overflow: hidden;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 40px rgba(0,255,209,0.5);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 16px 0;
+  border: none; cursor: none;
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.btn-ghost:hover { opacity: 1; }
+.btn-ghost::after {
+  content: '→';
+  transition: transform 0.2s;
+}
+.btn-ghost:hover::after { transform: translateX(4px); }
+
+/* HUD PANELS */
+.hud-panel {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(3,7,18,0.75);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  z-index: 20;
+  padding: 16px;
+  animation: fadeIn 2s ease both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.hud-top-right {
+  top: 100px; right: 48px;
+  width: 200px;
+  animation-delay: 0.8s;
+}
+.hud-bottom-right {
+  bottom: 80px; right: 48px;
+  width: 220px;
+  animation-delay: 1.2s;
+}
+.hud-bottom-left {
+  bottom: 80px; left: 48px;
+  width: 180px;
+  animation-delay: 1.0s;
+}
+.hud-label {
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  font-size: 9px;
+}
+.hud-value {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--mint);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hud-unit {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.hud-bar {
+  height: 2px;
+  background: rgba(0,255,209,0.15);
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.hud-bar-fill {
+  height: 100%;
+  background: var(--mint);
+  animation: bar-scan 3s ease-in-out infinite;
+}
+@keyframes bar-scan {
+  0%{width:20%} 50%{width:85%} 100%{width:20%}
+}
+.metric-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0,255,209,0.06);
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-name { color: var(--muted); font-size: 10px; }
+.metric-val { color: var(--text); font-size: 11px; }
+.metric-val.active { color: var(--mint); }
+.metric-val.warn { color: var(--amber); }
+.crosshair {
+  position: absolute;
+  width: 40px; height: 40px;
+  top: 50%; left: 60%;
+  transform: translate(-50%,-50%);
+  border: 1px solid rgba(0,255,209,0.3);
+  z-index: 20;
+  animation: rotate-cross 8s linear infinite;
+}
+.crosshair::before,.crosshair::after {
+  content:'';
+  position: absolute;
+  background: rgba(0,255,209,0.3);
+}
+.crosshair::before { width:1px;height:100%;left:50%;top:0; }
+.crosshair::after { width:100%;height:1px;top:50%;left:0; }
+@keyframes rotate-cross { to{transform:translate(-50%,-50%) rotate(360deg)} }
+
+/* SCAN LINE */
+.scanline-hero {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0,255,209,0.15), transparent);
+  animation: scanline 8s linear infinite;
+  z-index: 5;
+  pointer-events: none;
+}
+@keyframes scanline {
+  0%{top:-2px} 100%{top:100%}
+}
+
+/* DATA TICKER */
+.ticker-wrap {
+  background: rgba(0,255,209,0.04);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  overflow: hidden;
+  position: relative;
+}
+.ticker-track {
+  display: flex; gap: 48px;
+  animation: ticker 30s linear infinite;
+  width: max-content;
+}
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 10px;
+  white-space: nowrap;
+}
+.ticker-item .ti-label { color: var(--mint); }
+.ticker-item .ti-up { color: #22c55e; }
+.ticker-item .ti-down { color: var(--red); }
+
+/* SECTION BASE */
+section {
+  padding: 120px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.section-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-tag::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--mint);
+}
+
+/* FEATURES */
+#features {
+  max-width: 1400px;
+}
+.features-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+  align-items: end;
+}
+h2 {
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--text);
+}
+.features-intro {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.feat-card {
+  background: var(--bg);
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.feat-card:hover {
+  background: rgba(0,255,209,0.03);
+}
+.feat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--mint);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+  transform-origin: left;
+}
+.feat-card:hover::after { transform: scaleX(1); }
+.feat-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+.feat-icon canvas {
+  width: 32px; height: 32px;
+}
+.feat-num {
+  position: absolute;
+  top: -8px; right: -8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--mint);
+  letter-spacing: 0.1em;
+}
+.feat-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.feat-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.feat-tag {
+  display: inline-block;
+  margin-top: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mint);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+}
+
+/* DASHBOARD PREVIEW */
+#preview {
+  max-width: 1400px;
+  padding-bottom: 0;
+}
+.preview-label {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 32px;
+}
+.preview-window {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  position: relative;
+  overflow: hidden;
+}
+.pw-titlebar {
+  background: rgba(0,255,209,0.04);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.pw-dots { display: flex; gap: 6px; }
+.pw-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.pw-dot:nth-child(1){background:#ff5f57}
+.pw-dot:nth-child(2){background:#febc2e}
+.pw-dot:nth-child(3){background:#28c840}
+.pw-title {
+  flex: 1;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.pw-body {
+  display: grid;
+  grid-template-columns: 200px 1fr 240px;
+  height: 520px;
+}
+.pw-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  background: rgba(3,7,18,0.6);
+}
+.pw-nav-item {
+  padding: 10px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 10px;
+  cursor: none;
+  transition: color 0.2s, background 0.2s;
+  border-left: 2px solid transparent;
+}
+.pw-nav-item.active {
+  color: var(--mint);
+  border-left-color: var(--mint);
+  background: rgba(0,255,209,0.05);
+}
+.pw-nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.pw-nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+.pw-main {
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 20px;
+  overflow: hidden;
+}
+.pw-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+}
+.pw-stat {
+  background: rgba(0,255,209,0.04);
+  border: 1px solid var(--border);
+  padding: 14px;
+}
+.pw-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.12em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 6px;
+}
+.pw-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px; font-weight: 500; color: var(--mint);
+}
+.pw-stat-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: #22c55e;
+}
+.pw-chart-area {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.pw-chart-label {
+  position: absolute;
+  top: 12px; left: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+#eeg-canvas {
+  width: 100%; height: 100%;
+  position: absolute; inset: 0;
+}
+.pw-right {
+  border-left: 1px solid var(--border);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  background: rgba(3,7,18,0.6);
+}
+.pw-region-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--muted); text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.region-item {
+  margin-bottom: 14px;
+}
+.region-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: flex; justify-content: space-between;
+}
+.region-pct {
+  font-size: 10px; color: var(--mint);
+}
+.region-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.region-bar-fill {
+  height: 100%;
+  background: var(--mint);
+  border-radius: 1px;
+  transition: width 2s ease;
+}
+.region-bar-fill.purple { background: var(--purple); }
+.region-bar-fill.red { background: var(--red); }
+.region-bar-fill.amber { background: var(--amber); }
+.alert-panel {
+  background: rgba(255,75,110,0.08);
+  border: 1px solid rgba(255,75,110,0.2);
+  padding: 12px;
+  margin-top: auto;
+}
+.alert-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--red); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.alert-msg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; line-height: 1.6;
+  color: rgba(255,75,110,0.7);
+}
+
+/* SPECS / METRICS */
+#specs {
+  max-width: 1400px;
+}
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.spec-cell {
+  background: var(--bg);
+  padding: 48px 36px;
+  position: relative;
+}
+.spec-num {
+  font-size: clamp(48px, 5vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.spec-num span { color: var(--mint); }
+.spec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em;
+  color: var(--muted); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.spec-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.7;
+  color: rgba(74,96,112,0.7);
+}
+
+/* CTA */
+#cta {
+  max-width: 1400px;
+  text-align: center;
+  position: relative;
+}
+.cta-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 600px 300px at 50% 50%, rgba(0,255,209,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-content { position: relative; z-index: 1; }
+.cta-title {
+  font-size: clamp(44px, 6vw, 80px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin-bottom: 24px;
+}
+.cta-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 48px;
+  line-height: 1.7;
+}
+.cta-input-row {
+  display: flex; gap: 0; max-width: 480px; margin: 0 auto 16px;
+}
+.cta-input {
+  flex: 1;
+  background: rgba(0,255,209,0.04);
+  border: 1px solid var(--border);
+  border-right: none;
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.cta-input:focus { border-color: rgba(0,255,209,0.4); }
+.cta-input::placeholder { color: var(--muted); }
+.cta-submit {
+  background: var(--mint);
+  color: var(--bg);
+  border: none;
+  padding: 16px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: none;
+  transition: box-shadow 0.2s;
+  white-space: nowrap;
+}
+.cta-submit:hover { box-shadow: 0 0 30px rgba(0,255,209,0.4); }
+.cta-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+.footer-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.footer-links {
+  display: flex; gap: 28px;
+  list-style: none;
+}
+.footer-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--mint); }
+
+/* SCROLL REVEALS */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-dot"></div>
+    NeuroMap
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#preview">Interface</a></li>
+    <li><a href="#specs">Specs</a></li>
+    <li><a href="#cta">Research</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:24px">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Live data
+    </div>
+    <button class="nav-cta">Request Access</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <canvas id="brain-canvas"></canvas>
+  <div class="scanline-hero"></div>
+
+  <div class="hud-panel hud-top-right">
+    <div class="hud-label">Alpha Wave Activity</div>
+    <div class="hud-value" id="alpha-val">8.4</div>
+    <div class="hud-unit">Hz · Frontal Lobe</div>
+    <div class="hud-bar"><div class="hud-bar-fill" style="width:72%"></div></div>
+  </div>
+
+  <div class="hud-panel hud-bottom-right">
+    <div class="hud-label">Active Regions</div>
+    <div class="metric-row">
+      <span class="metric-name">Prefrontal Cortex</span>
+      <span class="metric-val active" id="m1">87%</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-name">Hippocampus</span>
+      <span class="metric-val active" id="m2">64%</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-name">Amygdala</span>
+      <span class="metric-val warn" id="m3">41%</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-name">Cerebellum</span>
+      <span class="metric-val" id="m4">23%</span>
+    </div>
+  </div>
+
+  <div class="hud-panel hud-bottom-left">
+    <div class="hud-label">Neural Sync</div>
+    <div class="hud-value" id="sync-val">94.2</div>
+    <div class="hud-unit">% Coherence</div>
+    <div class="hud-bar"><div class="hud-bar-fill" style="width:94%;animation-duration:4s"></div></div>
+  </div>
+
+  <div class="crosshair" style="top:45%;left:58%"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">Neural Interface v3.1.0</div>
+    <h1>
+      The Operating System<br>
+      <span>for Human</span>
+      Cognition.
+    </h1>
+    <p class="hero-sub">
+      Real-time brain activity mapping at 256-channel resolution.
+      Visualize thought patterns, cognitive states, and neural pathways
+      as living, interactive topology.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary">Begin Neural Scan</button>
+      <button class="btn-ghost">Watch Demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-header reveal">
+    <div>
+      <div class="section-tag">Core Systems</div>
+      <h2>Neural intelligence,<br>made visible.</h2>
+    </div>
+    <p class="features-intro">
+      NeuroMap processes raw EEG streams through our proprietary
+      CortexNet™ pipeline — transforming 256 channels of electrical
+      noise into a coherent, navigable model of your brain state.
+    </p>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feat-card">
+      <div class="feat-icon">
+        <canvas id="icon-canvas-1" width="32" height="32"></canvas>
+        <span class="feat-num">01</span>
+      </div>
+      <div class="feat-title">3D Neural Mesh</div>
+      <p class="feat-desc">WebGL-rendered volumetric brain model with vertex-level activation data. Navigate inside your own cognition at 60fps.</p>
+      <span class="feat-tag">WebGL · Three.js</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <canvas id="icon-canvas-2" width="32" height="32"></canvas>
+        <span class="feat-num">02</span>
+      </div>
+      <div class="feat-title">Live EEG Streaming</div>
+      <p class="feat-desc">Sub-4ms latency from electrode to visualization. 256 channels sampled at 1000Hz. Full frequency decomposition in real time.</p>
+      <span class="feat-tag">WebSocket · DSP</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <canvas id="icon-canvas-3" width="32" height="32"></canvas>
+        <span class="feat-num">03</span>
+      </div>
+      <div class="feat-title">Cognitive State AI</div>
+      <p class="feat-desc">Transformer-based classifier identifies 47 distinct cognitive and emotional states from neural signatures with 91.3% accuracy.</p>
+      <span class="feat-tag">TensorFlow · ONNX</span>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section id="preview">
+  <div class="preview-label reveal">
+    <div>
+      <div class="section-tag">Interface Preview</div>
+      <h2>The NeuroMap OS</h2>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Simulated live session
+    </div>
+  </div>
+  <div class="preview-window reveal">
+    <div class="pw-titlebar">
+      <div class="pw-dots">
+        <div class="pw-dot"></div>
+        <div class="pw-dot"></div>
+        <div class="pw-dot"></div>
+      </div>
+      <div class="pw-title">NEUROMAP OS · SESSION_4281 · SUBJECT_ANON</div>
+    </div>
+    <div class="pw-body">
+      <div class="pw-sidebar">
+        <div class="pw-nav-item active"><div class="pw-nav-dot"></div>Neural Map</div>
+        <div class="pw-nav-item"><div class="pw-nav-dot"></div>EEG Stream</div>
+        <div class="pw-nav-item"><div class="pw-nav-dot"></div>Frequency</div>
+        <div class="pw-nav-item"><div class="pw-nav-dot"></div>Connectivity</div>
+        <div class="pw-nav-item"><div class="pw-nav-dot"></div>States</div>
+        <div class="pw-nav-item"><div class="pw-nav-dot"></div>History</div>
+        <div style="margin-top:auto;padding:20px;border-top:1px solid var(--border)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em">SESSION</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text)" id="session-timer">00:14:32</div>
+        </div>
+      </div>
+      <div class="pw-main">
+        <div class="pw-stats">
+          <div class="pw-stat">
+            <div class="pw-stat-label">Focus Score</div>
+            <div class="pw-stat-val" id="focus-stat">8.7</div>
+            <div class="pw-stat-delta" id="focus-delta">+0.3</div>
+          </div>
+          <div class="pw-stat">
+            <div class="pw-stat-label">Alpha (Hz)</div>
+            <div class="pw-stat-val" id="alpha-stat">10.2</div>
+            <div class="pw-stat-delta">↑ Relaxed</div>
+          </div>
+          <div class="pw-stat">
+            <div class="pw-stat-label">Beta (Hz)</div>
+            <div class="pw-stat-val" id="beta-stat">24.8</div>
+            <div class="pw-stat-delta" style="color:var(--amber)">↑ Alert</div>
+          </div>
+          <div class="pw-stat">
+            <div class="pw-stat-label">Coherence</div>
+            <div class="pw-stat-val">91%</div>
+            <div class="pw-stat-delta">Optimal</div>
+          </div>
+        </div>
+        <div class="pw-chart-area">
+          <div class="pw-chart-label">EEG · Channels 1–8 · 4 sec window</div>
+          <canvas id="eeg-canvas"></canvas>
+        </div>
+      </div>
+      <div class="pw-right">
+        <div>
+          <div class="pw-region-title">Region Activity</div>
+          <div class="region-item">
+            <div class="region-name">Prefrontal Cortex <span class="region-pct" id="r1-pct">87%</span></div>
+            <div class="region-bar"><div class="region-bar-fill" id="r1" style="width:87%"></div></div>
+          </div>
+          <div class="region-item">
+            <div class="region-name">Motor Cortex <span class="region-pct">52%</span></div>
+            <div class="region-bar"><div class="region-bar-fill purple" style="width:52%"></div></div>
+          </div>
+          <div class="region-item">
+            <div class="region-name">Occipital <span class="region-pct">38%</span></div>
+            <div class="region-bar"><div class="region-bar-fill amber" style="width:38%"></div></div>
+          </div>
+          <div class="region-item">
+            <div class="region-name">Temporal <span class="region-pct">71%</span></div>
+            <div class="region-bar"><div class="region-bar-fill" style="width:71%"></div></div>
+          </div>
+          <div class="region-item">
+            <div class="region-name">Amygdala <span class="region-pct">29%</span></div>
+            <div class="region-bar"><div class="region-bar-fill red" style="width:29%"></div></div>
+          </div>
+        </div>
+        <div class="alert-panel">
+          <div class="alert-title">⚡ Anomaly Detected</div>
+          <div class="alert-msg">Theta burst at F3–Fz. Duration: 240ms. Consistent with memory consolidation event.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPECS -->
+<section id="specs">
+  <div class="section-tag reveal">By the numbers</div>
+  <div class="specs-grid reveal">
+    <div class="spec-cell">
+      <div class="spec-num">256<span>ch</span></div>
+      <div class="spec-label">EEG Resolution</div>
+      <div class="spec-desc">Full cortical coverage from a single lightweight headset. 4× standard clinical EEG density.</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-num">&lt;4<span>ms</span></div>
+      <div class="spec-label">Latency</div>
+      <div class="spec-desc">Electrode-to-pixel pipeline. Faster than any competing neural visualization platform.</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-num">91<span>%</span></div>
+      <div class="spec-label">State Accuracy</div>
+      <div class="spec-desc">CortexNet™ AI correctly classifies cognitive state across 47 categories in real time.</div>
+    </div>
+    <div class="spec-cell">
+      <div class="spec-num">1K<span>Hz</span></div>
+      <div class="spec-label">Sample Rate</div>
+      <div class="spec-desc">Per-channel sampling captures transient events as brief as 1 millisecond in duration.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-bg"></div>
+  <div class="cta-content reveal">
+    <div class="section-tag" style="justify-content:center;margin-bottom:20px">Early Access</div>
+    <div class="cta-title">
+      Your brain.<br>
+      <span style="color:var(--mint)">Mapped.</span>
+    </div>
+    <p class="cta-sub">
+      Join 2,400+ neuroscientists and BCI researchers<br>
+      on the waitlist for NeuroMap v1.0.
+    </p>
+    <div class="cta-input-row">
+      <input class="cta-input" type="email" placeholder="neural@institute.edu">
+      <button class="cta-submit">Request Access</button>
+    </div>
+    <p class="cta-note">IRB approval not required for demo access · No credit card</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2026 NeuroMap Systems · All neural data anonymized and encrypted</div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Research</a></li>
+    <li><a href="#">API Docs</a></li>
+    <li><a href="#">GitHub</a></li>
+  </ul>
+</footer>
+
+<script>
+/* CURSOR */
+const cur=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+/* TICKER */
+const tickerItems=[
+  {label:'ALPHA',val:'8.4 Hz',delta:'+0.2',up:true},
+  {label:'BETA',val:'24.8 Hz',delta:'+1.1',up:true},
+  {label:'THETA',val:'6.1 Hz',delta:'-0.3',up:false},
+  {label:'GAMMA',val:'42.3 Hz',delta:'+3.2',up:true},
+  {label:'DELTA',val:'2.8 Hz',delta:'-0.1',up:false},
+  {label:'FOCUS',val:'8.7/10',delta:'+0.3',up:true},
+  {label:'COHERENCE',val:'94.2%',delta:'+0.8',up:true},
+  {label:'SYNC',val:'97 nodes',delta:'+4',up:true},
+  {label:'LOAD',val:'128 ch',delta:'active',up:true},
+  {label:'ENTROPY',val:'0.82',delta:'-0.02',up:false},
+];
+const ticker=document.getElementById('ticker');
+[...tickerItems,...tickerItems].forEach(t=>{
+  const el=document.createElement('div');
+  el.className='ticker-item';
+  el.innerHTML=`<span class="ti-label">${t.label}</span> ${t.val} <span class="${t.up?'ti-up':'ti-down'}">${t.delta}</span>`;
+  ticker.appendChild(el);
+});
+
+/* BRAIN CANVAS */
+const bc=document.getElementById('brain-canvas');
+const bctx=bc.getContext('2d');
+let W,H;
+function resize(){
+  W=bc.width=bc.offsetWidth;
+  H=bc.height=bc.offsetHeight;
+}
+resize();
+window.addEventListener('resize',resize);
+
+/* Generate brain-like point cloud */
+const NODES=[];
+const NODE_COUNT=180;
+function generateBrain(){
+  NODES.length=0;
+  for(let i=0;i<NODE_COUNT;i++){
+    const theta=Math.random()*Math.PI*2;
+    const phi=Math.acos(2*Math.random()-1);
+    const r=0.18+(Math.random()*0.12);
+    // Squish into brain-ish ellipsoid
+    const x=Math.cos(phi)*Math.cos(theta)*r*1.4;
+    const y=Math.cos(phi)*Math.sin(theta)*r*1.1;
+    const z=Math.sin(phi)*r*0.9;
+    NODES.push({
+      ox:x,oy:y,oz:z,
+      x:0,y:0,
+      fireTime:-Math.random()*4000,
+      period:2000+Math.random()*4000,
+      size:1+Math.random()*2.5,
+      connected:[]
+    });
+  }
+  // Build connections (nearby nodes)
+  for(let i=0;i<NODES.length;i++){
+    for(let j=i+1;j<NODES.length;j++){
+      const n1=NODES[i],n2=NODES[j];
+      const d=Math.hypot(n1.ox-n2.ox,n1.oy-n2.oy,n1.oz-n2.oz);
+      if(d<0.12 && n1.connected.length<4){
+        n1.connected.push(j);
+      }
+    }
+  }
+}
+generateBrain();
+
+let rotY=0,rotX=0.2;
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=(e.clientX/window.innerWidth-0.5)*0.4;
+  mouseY=(e.clientY/window.innerHeight-0.5)*0.2;
+});
+
+function project(x,y,z,ry,rx){
+  // Rotate Y
+  const cx=x*Math.cos(ry)-z*Math.sin(ry);
+  const cz=x*Math.sin(ry)+z*Math.cos(ry);
+  // Rotate X
+  const cy2=y*Math.cos(rx)-cz*Math.sin(rx);
+  const cz2=y*Math.sin(rx)+cz*Math.cos(rx);
+  const fov=900;
+  const scale=fov/(fov+cz2+0.5);
+  return {sx:cx*scale,sy:cy2*scale,depth:cz2};
+}
+
+let lastTime=0;
+function drawBrain(ts){
+  requestAnimationFrame(drawBrain);
+  const dt=(ts-lastTime)/1000;lastTime=ts;
+  rotY+=dt*0.18+(mouseX-rotY*0.05)*dt*2;
+  rotX+=(mouseY*0.3-rotX)*dt*1.5;
+
+  const cx=W*0.62, cy=H*0.5;
+  const scale=Math.min(W,H)*0.7;
+
+  bctx.clearRect(0,0,W,H);
+
+  // Atmosphere glow
+  const grd=bctx.createRadialGradient(cx,cy,0,cx,cy,scale*0.5);
+  grd.addColorStop(0,'rgba(0,255,209,0.04)');
+  grd.addColorStop(0.6,'rgba(0,100,200,0.02)');
+  grd.addColorStop(1,'transparent');
+  bctx.fillStyle=grd;
+  bctx.fillRect(0,0,W,H);
+
+  // Project all nodes
+  NODES.forEach(n=>{
+    const p=project(n.ox,n.oy,n.oz,rotY,rotX);
+    n.x=cx+p.sx*scale;
+    n.y=cy+p.sy*scale;
+    n.depth=p.depth;
+  });
+
+  // Sort by depth
+  const sorted=[...NODES.keys()].sort((a,b)=>NODES[a].depth-NODES[b].depth);
+
+  // Draw connections
+  sorted.forEach(i=>{
+    const n=NODES[i];
+    const fire=Math.sin((ts-n.fireTime)/n.period*Math.PI*2);
+    const alpha=0.04+(fire>0?fire*0.12:0);
+    n.connected.forEach(j=>{
+      const n2=NODES[j];
+      const fire2=Math.sin((ts-n2.fireTime)/n2.period*Math.PI*2);
+      const synapse=(fire+fire2)*0.5;
+      if(synapse>0.3){
+        bctx.beginPath();
+        bctx.moveTo(n.x,n.y);
+        bctx.lineTo(n2.x,n2.y);
+        bctx.strokeStyle=`rgba(0,255,209,${(synapse-0.3)*0.4})`;
+        bctx.lineWidth=0.5;
+        bctx.stroke();
+        // Pulse dot along connection
+        const t2=(ts*0.001*0.5)%1;
+        const px2=n.x+(n2.x-n.x)*t2;
+        const py2=n.y+(n2.y-n.y)*t2;
+        bctx.beginPath();
+        bctx.arc(px2,py2,1.5,0,Math.PI*2);
+        bctx.fillStyle=`rgba(0,255,209,${synapse*0.6})`;
+        bctx.fill();
+      } else {
+        bctx.beginPath();
+        bctx.moveTo(n.x,n.y);
+        bctx.lineTo(n2.x,n2.y);
+        bctx.strokeStyle=`rgba(0,255,209,${alpha})`;
+        bctx.lineWidth=0.3;
+        bctx.stroke();
+      }
+    });
+  });
+
+  // Draw nodes
+  sorted.forEach(i=>{
+    const n=NODES[i];
+    const fire=Math.sin((ts-n.fireTime)/n.period*Math.PI*2);
+    const active=fire>0.5;
+    const alpha=0.3+Math.max(0,fire)*0.7;
+    const r=n.size*(0.8+Math.max(0,fire)*0.8);
+    if(active){
+      bctx.beginPath();
+      bctx.arc(n.x,n.y,r*3,0,Math.PI*2);
+      bctx.fillStyle=`rgba(0,255,209,${alpha*0.08})`;
+      bctx.fill();
+    }
+    bctx.beginPath();
+    bctx.arc(n.x,n.y,r,0,Math.PI*2);
+    if(active){
+      bctx.fillStyle=`rgba(0,255,209,${alpha})`;
+      bctx.shadowColor='#00ffd1';
+      bctx.shadowBlur=8;
+    } else {
+      bctx.fillStyle=`rgba(100,180,220,${alpha*0.4})`;
+      bctx.shadowBlur=0;
+    }
+    bctx.fill();
+    bctx.shadowBlur=0;
+  });
+}
+requestAnimationFrame(drawBrain);
+
+/* EEG CANVAS */
+const eegC=document.getElementById('eeg-canvas');
+const eegCtx=eegC.getContext('2d');
+const CHANNELS=8;
+const EEG_COLORS=['#00ffd1','#7b61ff','#ff4b6e','#ffb800','#22c55e','#00d4ff','#ff6b9d','#a78bfa'];
+const eegData=Array.from({length:CHANNELS},()=>Array(300).fill(0));
+const eegFreqs=[10.2,24.8,6.1,42.3,14.5,30.1,8.8,18.4];
+
+function updateEEG(){
+  eegC.width=eegC.offsetWidth;
+  eegC.height=eegC.offsetHeight;
+  const cw=eegC.width,ch=eegC.height;
+  const chH=ch/CHANNELS;
+
+  eegData.forEach((ch2,ci)=>{
+    const t=Date.now()/1000;
+    const v=Math.sin(t*eegFreqs[ci]*0.2)*0.4
+            +Math.sin(t*eegFreqs[ci]*0.07)*0.3
+            +Math.sin(t*eegFreqs[ci]*0.5)*0.15
+            +(Math.random()-0.5)*0.15;
+    ch2.push(v);
+    if(ch2.length>300)ch2.shift();
+  });
+
+  eegCtx.clearRect(0,0,cw,ch);
+  eegData.forEach((ch2,ci)=>{
+    const y0=(ci+0.5)*chH;
+    const amp=chH*0.38;
+    eegCtx.beginPath();
+    ch2.forEach((v,xi)=>{
+      const px=(xi/300)*cw;
+      const py=y0+v*amp;
+      xi===0?eegCtx.moveTo(px,py):eegCtx.lineTo(px,py);
+    });
+    eegCtx.strokeStyle=EEG_COLORS[ci];
+    eegCtx.globalAlpha=0.7;
+    eegCtx.lineWidth=1;
+    eegCtx.stroke();
+    eegCtx.globalAlpha=1;
+    // Channel label
+    eegCtx.fillStyle=EEG_COLORS[ci];
+    eegCtx.font=`9px 'JetBrains Mono'`;
+    eegCtx.fillText(`Ch${ci+1}`,4,y0-2);
+    // Divider
+    if(ci<CHANNELS-1){
+      eegCtx.beginPath();
+      eegCtx.moveTo(0,(ci+1)*chH);
+      eegCtx.lineTo(cw,(ci+1)*chH);
+      eegCtx.strokeStyle='rgba(0,255,209,0.06)';
+      eegCtx.lineWidth=1;
+      eegCtx.stroke();
+    }
+  });
+}
+setInterval(updateEEG,50);
+
+/* FEATURE ICONS */
+function drawFeatureIcon(id,type){
+  const c=document.getElementById(id);
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  const w=32,h=32;
+  ctx.clearRect(0,0,w,h);
+  if(type===1){
+    // Brain outline
+    for(let i=0;i<12;i++){
+      const a=(i/12)*Math.PI*2;
+      const r=10+Math.sin(i*1.3)*3;
+      ctx.beginPath();ctx.arc(16+Math.cos(a)*r,16+Math.sin(a)*r,1.5,0,Math.PI*2);
+      ctx.fillStyle='#00ffd1';ctx.globalAlpha=0.7;ctx.fill();
+      if(i<8){
+        ctx.beginPath();ctx.moveTo(16+Math.cos(a)*r,16+Math.sin(a)*r);
+        const a2=(((i+3)/12))*Math.PI*2;
+        const r2=10+Math.sin((i+3)*1.3)*3;
+        ctx.lineTo(16+Math.cos(a2)*r2,16+Math.sin(a2)*r2);
+        ctx.strokeStyle='rgba(0,255,209,0.3)';ctx.lineWidth=1;ctx.stroke();
+      }
+    }
+  } else if(type===2){
+    // Wave
+    ctx.beginPath();
+    for(let x=0;x<=32;x++){
+      const y=16+Math.sin(x/32*Math.PI*3)*6;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='#00ffd1';ctx.globalAlpha=0.8;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();
+    for(let x=0;x<=32;x++){
+      const y=16+Math.sin(x/32*Math.PI*3+1)*4;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(0,212,255,0.5)';ctx.lineWidth=1;ctx.stroke();
+  } else {
+    // Grid/AI
+    for(let i=0;i<3;i++) for(let j=0;j<3;j++){
+      ctx.beginPath();ctx.arc(8+i*8,8+j*8,2,0,Math.PI*2);
+      ctx.fillStyle='#00ffd1';ctx.globalAlpha=0.4+i*j*0.1;ctx.fill();
+    }
+    ctx.globalAlpha=0.3;ctx.strokeStyle='#00ffd1';ctx.lineWidth=0.5;
+    [[0,4],[0,8],[4,8]].forEach(([a,b])=>{
+      ctx.beginPath();ctx.moveTo(8+a%3*8,8+Math.floor(a/3)*8);
+      ctx.lineTo(8+b%3*8,8+Math.floor(b/3)*8);ctx.stroke();
+    });
+  }
+  ctx.globalAlpha=1;
+}
+setTimeout(()=>{drawFeatureIcon('icon-canvas-1',1);drawFeatureIcon('icon-canvas-2',2);drawFeatureIcon('icon-canvas-3',3);},200);
+
+/* LIVE METRICS UPDATE */
+function randBetween(a,b){return a+(b-a)*Math.random();}
+function updateMetrics(){
+  const metrics=[
+    [document.getElementById('alpha-val'),'5','12',1],
+    [document.getElementById('sync-val'),'85','99',1],
+    [document.getElementById('m1'),'70','97','%'],
+    [document.getElementById('m2'),'50','80','%'],
+    [document.getElementById('m3'),'30','55','%'],
+    [document.getElementById('m4'),'15','35','%'],
+    [document.getElementById('focus-stat'),'7','9.5',1],
+    [document.getElementById('alpha-stat'),'8','12',1],
+    [document.getElementById('beta-stat'),'20','30',1],
+  ];
+  metrics.forEach(([el,min,max,unit])=>{
+    if(el){
+      const v=randBetween(parseFloat(min),parseFloat(max));
+      el.textContent=v.toFixed(1)+(unit==='%'?'%':'');
+    }
+  });
+}
+setInterval(updateMetrics,2000);
+
+/* SESSION TIMER */
+let sessionSec=872;
+setInterval(()=>{
+  sessionSec++;
+  const h=Math.floor(sessionSec/3600),m=Math.floor((sessionSec%3600)/60),s=sessionSec%60;
+  const el=document.getElementById('session-timer');
+  if(el) el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+},1000);
+
+/* SCROLL REVEAL */
+const revealEls=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.15});
+revealEls.forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
