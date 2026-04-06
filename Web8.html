@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALEX NOVA — Creative Developer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--white:#f0ece4;--accent:#e8ff57;--dim:#888;--dark:#0a0a0a;--line:rgba(240,236,228,0.1);}
+body{background:var(--dark);color:var(--white);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none;}
+#cursor{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);width:36px;height:36px;transition:transform 0.1s,width 0.2s,height 0.2s;}
+#cursor svg{width:100%;height:100%;}
+#cursor-dot{position:fixed;width:4px;height:4px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);}
+#bg-canvas{position:fixed;top:0;left:0;z-index:0;opacity:0.4;}
+
+/* Layout */
+header{position:fixed;top:0;left:0;right:0;z-index:100;padding:28px 60px;display:flex;justify-content:space-between;align-items:center;mix-blend-mode:difference;}
+.logo-mark{font-family:'Syne Mono',monospace;font-size:16px;letter-spacing:2px;color:var(--white);}
+.nav-links a{color:rgba(240,236,228,0.5);text-decoration:none;font-size:13px;letter-spacing:1px;margin-left:32px;transition:color 0.3s;}
+.nav-links a:hover{color:var(--white);}
+.nav-status{font-family:'Syne Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;display:flex;align-items:center;gap:6px;}
+.nav-status::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.5);}}
+
+/* Hero */
+#hero{position:relative;z-index:10;height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 60px 80px;}
+.hero-index{font-family:'Syne Mono',monospace;font-size:13px;color:var(--dim);letter-spacing:3px;margin-bottom:24px;}
+h1{font-size:clamp(56px,9vw,120px);font-weight:800;line-height:0.9;letter-spacing:-3px;max-width:1000px;margin-bottom:40px;}
+h1 span{color:var(--accent);}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;}
+.hero-desc{font-size:16px;color:var(--dim);max-width:360px;line-height:1.7;font-weight:400;}
+.hero-ctas{display:flex;gap:16px;align-items:center;}
+.btn-hire{padding:16px 40px;background:var(--accent);color:var(--dark);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;border:none;cursor:none;transition:all 0.3s;}
+.btn-hire:hover{transform:scale(1.04);}
+.btn-work{padding:16px 32px;background:transparent;color:var(--white);border:1px solid var(--line);font-size:13px;letter-spacing:2px;cursor:none;transition:all 0.3s;}
+.btn-work:hover{border-color:rgba(240,236,228,0.4);}
+
+/* Marquee */
+.marquee-wrap{position:relative;z-index:10;overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;}
+.marquee{display:flex;animation:marquee 20s linear infinite;width:max-content;}
+.marquee span{font-family:'Syne Mono',monospace;font-size:13px;letter-spacing:3px;color:var(--dim);padding:0 40px;text-transform:uppercase;}
+.marquee span.accent{color:var(--accent);}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* Work */
+#work{position:relative;z-index:10;padding:80px 60px;}
+.work-count{font-family:'Syne Mono',monospace;font-size:13px;color:var(--dim);letter-spacing:3px;margin-bottom:50px;}
+.project-list{max-width:1100px;}
+.project-item{display:flex;align-items:center;justify-content:space-between;padding:32px 0;border-bottom:1px solid var(--line);cursor:none;transition:all 0.3s;position:relative;overflow:hidden;}
+.project-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:0;height:100%;background:rgba(232,255,87,0.03);transition:width 0.4s;}
+.project-item:hover::before{width:100%;}
+.project-item:hover{padding-left:16px;}
+.proj-num{font-family:'Syne Mono',monospace;font-size:12px;color:var(--dim);letter-spacing:2px;min-width:50px;}
+.proj-name{font-size:clamp(20px,3vw,36px);font-weight:700;letter-spacing:-1px;transition:color 0.3s;flex:1;padding:0 30px;}
+.project-item:hover .proj-name{color:var(--accent);}
+.proj-tags{display:flex;gap:8px;}
+.proj-tag{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);border:1px solid var(--line);padding:4px 10px;}
+.proj-arrow{font-size:20px;color:var(--dim);transition:all 0.3s;margin-left:20px;}
+.project-item:hover .proj-arrow{color:var(--accent);transform:translate(4px,-4px);}
+
+/* Skills */
+#skills{position:relative;z-index:10;padding:80px 60px;background:rgba(240,236,228,0.02);border-top:1px solid var(--line);}
+.sk-title{font-size:clamp(32px,5vw,60px);font-weight:800;letter-spacing:-2px;margin-bottom:60px;}
+.sk-title span{color:var(--accent);}
+.skills-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;max-width:1000px;}
+.skill-cell{padding:28px 24px;border:1px solid var(--line);transition:all 0.3s;cursor:none;}
+.skill-cell:hover{background:rgba(232,255,87,0.05);border-color:rgba(232,255,87,0.3);}
+.skill-name{font-size:15px;font-weight:700;margin-bottom:6px;}
+.skill-sub{font-family:'Syne Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px;}
+.skill-bar{margin-top:14px;height:2px;background:var(--line);}
+.skill-fill{height:100%;background:var(--accent);}
+
+/* Contact */
+#contact{position:relative;z-index:10;padding:100px 60px;text-align:center;}
+.contact-label{font-family:'Syne Mono',monospace;font-size:12px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:20px;}
+.contact-email{font-size:clamp(28px,5vw,64px);font-weight:800;letter-spacing:-2px;color:var(--white);text-decoration:none;cursor:none;transition:color 0.3s;display:block;margin-bottom:40px;}
+.contact-email:hover{color:var(--accent);}
+.social-links{display:flex;justify-content:center;gap:24px;}
+.social-link{font-family:'Syne Mono',monospace;font-size:12px;letter-spacing:2px;color:var(--dim);text-decoration:none;text-transform:uppercase;cursor:none;transition:color 0.3s;border-bottom:1px solid transparent;}
+.social-link:hover{color:var(--accent);border-bottom-color:var(--accent);}
+
+footer{position:relative;z-index:10;padding:30px 60px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-family:'Syne Mono',monospace;font-size:11px;color:var(--dim);}
+@media(max-width:768px){header{padding:20px;}.nav-links{display:none;}#hero{padding:0 20px 60px;}#work,#skills,#contact{padding:60px 20px;}.skills-grid{grid-template-columns:repeat(2,1fr);}.hero-row{gap:30px;}footer{padding:20px;flex-direction:column;gap:8px;}}
+</style>
+</head>
+<body>
+<div id="cursor-dot"></div>
+<div id="cursor">
+  <svg viewBox="0 0 36 36" fill="none">
+    <line x1="18" y1="0" x2="18" y2="36" stroke="#e8ff57" stroke-width="1"/>
+    <line x1="0" y1="18" x2="36" y2="18" stroke="#e8ff57" stroke-width="1"/>
+    <circle cx="18" cy="18" r="5" stroke="#e8ff57" stroke-width="1.5" fill="none"/>
+  </svg>
+</div>
+<canvas id="bg-canvas"></canvas>
+
+<header>
+  <div class="logo-mark">AN.</div>
+  <div class="nav-links">
+    <a href="#">Work</a><a href="#">Skills</a><a href="#">About</a><a href="#">Contact</a>
+  </div>
+  <div class="nav-status">Available for work</div>
+</header>
+
+<section id="hero">
+  <div class="hero-index">001 / Introduction</div>
+  <h1>Creative<br>Developer<br>&amp; <span>Designer</span></h1>
+  <div class="hero-row">
+    <p class="hero-desc">I craft digital experiences where code meets creativity — immersive, purposeful, and pixel-perfect.</p>
+    <div class="hero-ctas">
+      <button class="btn-hire">Hire Me</button>
+      <button class="btn-work">See Work →</button>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>Three.js</span><span class="accent">★</span><span>WebGL</span><span class="accent">★</span><span>React</span><span class="accent">★</span><span>GSAP</span><span class="accent">★</span><span>TypeScript</span><span class="accent">★</span><span>UI Design</span><span class="accent">★</span><span>Motion</span><span class="accent">★</span><span>Figma</span><span class="accent">★</span>
+    <span>Three.js</span><span class="accent">★</span><span>WebGL</span><span class="accent">★</span><span>React</span><span class="accent">★</span><span>GSAP</span><span class="accent">★</span><span>TypeScript</span><span class="accent">★</span><span>UI Design</span><span class="accent">★</span><span>Motion</span><span class="accent">★</span><span>Figma</span><span class="accent">★</span>
+  </div>
+</div>
+
+<section id="work">
+  <div class="work-count">002 / Selected Work (2023–2025)</div>
+  <div class="project-list">
+    <div class="project-item">
+      <div class="proj-num">01</div>
+      <div class="proj-name">Orbital — Space Dashboard</div>
+      <div class="proj-tags"><span class="proj-tag">WebGL</span><span class="proj-tag">React</span></div>
+      <div class="proj-arrow">↗</div>
+    </div>
+    <div class="project-item">
+      <div class="proj-num">02</div>
+      <div class="proj-name">NEXUS — Brand Identity</div>
+      <div class="proj-tags"><span class="proj-tag">Branding</span><span class="proj-tag">3D</span></div>
+      <div class="proj-arrow">↗</div>
+    </div>
+    <div class="project-item">
+      <div class="proj-num">03</div>
+      <div class="proj-name">Flux — E-commerce Platform</div>
+      <div class="proj-tags"><span class="proj-tag">UI/UX</span><span class="proj-tag">Next.js</span></div>
+      <div class="proj-arrow">↗</div>
+    </div>
+    <div class="project-item">
+      <div class="proj-num">04</div>
+      <div class="proj-name">Aurora — Music Visualizer</div>
+      <div class="proj-tags"><span class="proj-tag">WebAudio</span><span class="proj-tag">Canvas</span></div>
+      <div class="proj-arrow">↗</div>
+    </div>
+    <div class="project-item">
+      <div class="proj-num">05</div>
+      <div class="proj-name">Phantom — AR App</div>
+      <div class="proj-tags"><span class="proj-tag">AR</span><span class="proj-tag">Swift</span></div>
+      <div class="proj-arrow">↗</div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="sk-title">My <span>Stack</span></div>
+  <div class="skills-grid">
+    <div class="skill-cell"><div class="skill-name">Three.js / WebGL</div><div class="skill-sub">3D & Graphics</div><div class="skill-bar"><div class="skill-fill" style="width:92%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">React / Next.js</div><div class="skill-sub">Frontend</div><div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">GSAP / Motion</div><div class="skill-sub">Animation</div><div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">UI/UX Design</div><div class="skill-sub">Figma · Principle</div><div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">TypeScript</div><div class="skill-sub">Language</div><div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">Node.js</div><div class="skill-sub">Backend</div><div class="skill-bar"><div class="skill-fill" style="width:78%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">WebAudio API</div><div class="skill-sub">Sound Design</div><div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div></div>
+    <div class="skill-cell"><div class="skill-name">Shader / GLSL</div><div class="skill-sub">GPU Programming</div><div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div></div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-label">003 / Let's Talk</div>
+  <a class="contact-email" href="mailto:alex@nova.dev">alex@nova.dev</a>
+  <div class="social-links">
+    <a class="social-link" href="#">Github</a>
+    <a class="social-link" href="#">Twitter</a>
+    <a class="social-link" href="#">Dribbble</a>
+    <a class="social-link" href="#">LinkedIn</a>
+  </div>
+</section>
+
+<footer>
+  <span>Alex Nova © 2025</span>
+  <span>Designed &amp; Built by Alex Nova</span>
+</footer>
+
+<script>
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function playHover(){const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='sine';o.frequency.value=800;g.gain.setValueAtTime(0.02,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.1);o.start();o.stop(AC.currentTime+0.1);}
+function playClick(){const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='triangle';o.frequency.setValueAtTime(400,AC.currentTime);o.frequency.exponentialRampToValueAtTime(600,AC.currentTime+0.06);g.gain.setValueAtTime(0.04,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+0.15);o.start();o.stop(AC.currentTime+0.15);}
+document.body.addEventListener('click',()=>{if(AC.state==='suspended')AC.resume();},{once:true});
+const cursor=document.getElementById('cursor'),dot=document.getElementById('cursor-dot');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function loop(){cx+=(mx-cx)*0.08;cy+=(my-cy)*0.08;cursor.style.left=cx+'px';cursor.style.top=cy+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button,.project-item,.skill-cell').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2)';playHover();});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';});
+  el.addEventListener('click',playClick);
+});
+
+// Three.js - minimal geometric field
+const canvas=document.getElementById('bg-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,1000);
+camera.position.z=25;
+
+// Subtle grid of dots
+const gCount=800,gPos=new Float32Array(gCount*3);
+for(let i=0;i<gCount;i++){gPos[i*3]=(Math.random()-0.5)*80;gPos[i*3+1]=(Math.random()-0.5)*60;gPos[i*3+2]=(Math.random()-0.5)*30;}
+const gGeo=new THREE.BufferGeometry();gGeo.setAttribute('position',new THREE.BufferAttribute(gPos,3));
+scene.add(new THREE.Points(gGeo,new THREE.PointsMaterial({size:0.15,color:0xf0ece4,transparent:true,opacity:0.25})));
+
+// Thin wireframe lines
+for(let i=0;i<5;i++){
+  const pts=[new THREE.Vector3((Math.random()-0.5)*60,(Math.random()-0.5)*40,(Math.random()-0.5)*10),new THREE.Vector3((Math.random()-0.5)*60,(Math.random()-0.5)*40,(Math.random()-0.5)*10)];
+  const g=new THREE.BufferGeometry().setFromPoints(pts);
+  scene.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xe8ff57,transparent:true,opacity:0.08})));
+}
+
+// Floating accent dots (yellow)
+const aCount=30,aPos=new Float32Array(aCount*3),aVel=new Float32Array(aCount*3);
+for(let i=0;i<aCount;i++){aPos[i*3]=(Math.random()-0.5)*50;aPos[i*3+1]=(Math.random()-0.5)*40;aPos[i*3+2]=(Math.random()-0.5)*10;aVel[i*3]=(Math.random()-0.5)*0.02;aVel[i*3+1]=(Math.random()-0.5)*0.02;}
+const aGeo=new THREE.BufferGeometry();aGeo.setAttribute('position',new THREE.BufferAttribute(aPos,3));
+scene.add(new THREE.Points(aGeo,new THREE.PointsMaterial({size:0.4,color:0xe8ff57,transparent:true,opacity:0.5})));
+
+let mX=0,mY=0;
+document.addEventListener('mousemove',e=>{mX=(e.clientX/innerWidth-0.5)*2;mY=(e.clientY/innerHeight-0.5)*2;});
+function animate(){
+  requestAnimationFrame(animate);
+  for(let i=0;i<aCount;i++){aPos[i*3]+=aVel[i*3];aPos[i*3+1]+=aVel[i*3+1];if(Math.abs(aPos[i*3])>30)aVel[i*3]*=-1;if(Math.abs(aPos[i*3+1])>25)aVel[i*3+1]*=-1;}
+  aGeo.attributes.position.needsUpdate=true;
+  camera.position.x+=(mX*2-camera.position.x)*0.02;camera.position.y+=(-mY*2-camera.position.y)*0.02;camera.lookAt(scene.position);
+  renderer.render(scene,camera);
+}
+animate();
+window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
+
+// GSAP
+gsap.from('h1',{duration:1.4,y:60,opacity:0,delay:0.5,ease:'power3.out'});
+gsap.from('.hero-row > *',{duration:1,y:30,opacity:0,stagger:0.15,delay:1,ease:'power2.out'});
+gsap.from('.project-item',{scrollTrigger:{trigger:'#work',start:'top 70%'},duration:0.7,x:-40,opacity:0,stagger:0.1});
+gsap.from('.skill-cell',{scrollTrigger:{trigger:'#skills',start:'top 70%'},duration:0.6,y:30,opacity:0,stagger:0.08});
+gsap.from('#contact > *',{scrollTrigger:{trigger:'#contact',start:'top 75%'},duration:1,y:30,opacity:0,stagger:0.2});
+</script>
+</body>
+</html>
