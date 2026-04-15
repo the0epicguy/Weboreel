@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMBER | Where Fire Meets Flavor</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;1,400&family=Karla:wght@300;400&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="cursor-plate"></div>
+
+    <nav class="ember-nav">
+        <div class="logo">EMBER</div>
+        <div class="links">
+            <a href="#menu">Menu</a>
+            <a href="#experience">Experience</a>
+            <a href="#cellar">Cellar</a>
+            <a href="#reservations">Reservations</a>
+        </div>
+    </nav>
+
+    <!-- Cinematic Hero -->
+    <header class="hero-cinematic">
+        <video autoplay muted loop playsinline class="hero-video">
+            <!-- Using a stock cooking video from a placeholder service -->
+            <source src="https://cdn.coverr.co/videos/coverr-chef-using-a-blowtorch-on-food-2815/1080p.mp4" type="video/mp4">
+        </video>
+        <div class="vignette"></div>
+        <div class="hero-content">
+            <h1>EMBER</h1>
+            <p>Open Tuesday–Sunday. Reservations recommended.</p>
+            <div class="ctas">
+                <button class="btn-primary">Reserve Your Table</button>
+                <button class="btn-secondary">View Menu</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- The Story (Split Screen Scroll) -->
+    <section class="story-section">
+        <div class="story-images">
+            <div class="img-wrapper pin-image">
+                <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=1000&q=80" alt="Chef Prep">
+            </div>
+        </div>
+        <div class="story-text">
+            <h2>The Process</h2>
+            <div class="text-block">
+                <p>Chef Marco Reyes grew up watching his grandmother cook over wood in rural Oaxaca. Every meal was an event, every flame a medium.</p>
+            </div>
+            <div class="text-block">
+                <p>He spent 12 years in Michelin-starred kitchens across Europe, mastering precision. But he always missed the smoke. The unpredictability.</p>
+            </div>
+            <div class="text-block">
+                <p>EMBER is his first word. A return to the fire, elevated by decades of discipline. This is not just cooking; this is alchemy.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Menu (Interactive Tabbed) -->
+    <section class="menu-section" id="menu">
+        <div class="menu-header">
+            <h2>The Menu</h2>
+        </div>
+        <div class="menu-tabs">
+            <button class="tab-btn active" data-target="amuse">Amuse-Bouche</button>
+            <button class="tab-btn" data-target="starters">Starters</button>
+            <button class="tab-btn" data-target="mains">Mains</button>
+            <button class="tab-btn" data-target="desserts">Desserts</button>
+        </div>
+        
+        <div class="menu-content active" id="amuse">
+            <div class="dish-card">
+                <div class="dish-title">Oyster & Smoke <span>$12</span></div>
+                <div class="dish-desc">Pacific oyster, smoked apple mignonette, charred kelp oil. <i>(GF)</i></div>
+            </div>
+            <div class="dish-card">
+                <div class="dish-title">Truffle Brioche <span>$14</span></div>
+                <div class="dish-desc">House-baked brioche, cultured smoked butter, black truffle shaving. <i>(V)</i></div>
+            </div>
+        </div>
+
+        <div class="menu-content" id="starters">
+            <div class="dish-card">
+                <div class="dish-title">Charred Octopus <span>$26</span></div>
+                <div class="dish-desc">Spanish octopus, confit potato, smoked paprika emulsion, burnt lemon. <i>(GF, DF)</i></div>
+            </div>
+            <div class="dish-card">
+                <div class="dish-title">Ash-Roasted Beets <span>$18</span></div>
+                <div class="dish-desc">Heirloom beets cooked in ember ash, whipped goat cheese, pistachio dukkah. <i>(V, GF)</i></div>
+            </div>
+        </div>
+        
+        <div class="menu-content" id="mains">
+            <!-- Simulated 3D parallax dish card for a main -->
+            <div class="parallax-dish">
+                <div class="parallax-layers">
+                    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80" alt="Base">
+                </div>
+                <div class="parallax-info">
+                    <h3>Dry-Aged Ribeye</h3>
+                    <p>45-day dry aged bone-in ribeye, smoked bone marrow butter, chimichurri, ember-roasted shallots.</p>
+                    <span class="price">$85</span>
+                </div>
+            </div>
+        </div>
+        <div class="menu-content" id="desserts">
+            <div class="dish-card">
+                <div class="dish-title">Burnt Honey Panna Cotta <span>$16</span></div>
+                <div class="dish-desc">Caramelized honey, smoked sea salt, almond tuile. <i>(V)</i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Cellar -->
+    <section class="cellar-section" id="cellar">
+        <div class="cellar-grid">
+            <div class="cellar-text">
+                <h2>The Cellar</h2>
+                <p>Our wine program is designed to stand up to the robust character of fire. Curated by Head Sommelier Elara Vance, focusing on biodynamic Old World estates.</p>
+                <button class="btn-secondary">Speak to Sommelier</button>
+            </div>
+            <div class="cellar-img">
+                <img src="https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=800&q=80" alt="Wine Pour">
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation system mockup -->
+    <section class="reservation-section" id="reservations">
+        <h2>Reserve A Table</h2>
+        <div class="res-widget">
+            <div class="res-row">
+                <div class="res-field">
+                    <label>Date</label>
+                    <input type="text" value="Oct 24, 2026" readonly>
+                </div>
+                <div class="res-field">
+                    <label>Party Size</label>
+                    <input type="text" value="2 Guests" readonly>
+                </div>
+            </div>
+            <div class="time-slots">
+                <button>6:00 PM</button>
+                <button>6:30 PM</button>
+                <button class="booked">7:00 PM</button>
+                <button>7:30 PM</button>
+                <button>8:00 PM</button>
+                <button>8:30 PM</button>
+            </div>
+            <button class="btn-primary full">Confirm Reservation</button>
+        </div>
+    </section>
+
+    <footer class="ember-footer">
+        <h2>EMBER</h2>
+        <p>124 Culinary Ave, New York, NY</p>
+        <p>info@ember-restaurant.example</p>
+        <div class="socials">
+            <a href="#">Instagram</a>
+            <a href="#">Press</a>
+            <a href="#">Careers</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

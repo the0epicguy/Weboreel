@@ -1,0 +1,86 @@
+:root {
+    --syn-bg: #050505;
+    --syn-matrix: #002200;
+    --syn-green: #00ff41;
+    --syn-green-dim: #008f11;
+    --syn-green-bright: #00fa9a;
+    
+    --font-term: 'Share Tech Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Global custom OS-level cursor override to crosshair */
+body { background-color: var(--syn-bg); color: var(--syn-green); font-family: var(--font-term); overflow: hidden; cursor: crosshair; }
+
+/* Canvas Background */
+#matrix { position: fixed; inset: 0; z-index: 1; opacity: 0.15; }
+
+/* The Terminal Window */
+.terminal {
+    position: relative; z-index: 2; width: 90%; max-width: 1000px; height: 85vh; margin: 40px auto;
+    border: 2px solid var(--syn-green-dim); background-color: rgba(5, 5, 5, 0.9); box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+    display: flex; flex-direction: column; backdrop-filter: blur(5px);
+}
+
+.t-header {
+    background-color: var(--syn-green-dim); color: var(--syn-bg); padding: 5px 15px;
+    display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--syn-green-dim);
+}
+.t-controls { display: flex; gap: 8px; }
+.t-controls span { width: 12px; height: 12px; border-radius: 50%; background: var(--syn-bg); opacity: 0.5; }
+
+.t-body { padding: 30px; overflow-y: auto; flex: 1; text-shadow: 0 0 5px rgba(0, 255, 65, 0.5); }
+.t-body::-webkit-scrollbar { width: 8px; }
+.t-body::-webkit-scrollbar-track { background: transparent; }
+.t-body::-webkit-scrollbar-thumb { background: var(--syn-green-dim); }
+
+.ascii-art { white-space: pre; font-size: 1.2rem; margin-bottom: 30px; font-weight: bold; line-height: 1.2; position: relative; display: inline-block; }
+
+.prompt { color: var(--syn-green-bright); margin-right: 10px; font-weight: bold; }
+.line { margin-bottom: 10px; font-size: 1.2rem; }
+.hidden { display: none; }
+.r-block { margin-bottom: 20px; color: #ccc; }
+.r-block p { margin-bottom: 5px; }
+.r-block h1 { color: var(--syn-green); font-size: 2rem; margin: 20px 0; border-bottom: 1px dashed var(--syn-green-dim); padding-bottom: 10px; }
+
+/* Services Grid */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.g-box { border: 1px solid var(--syn-green-dim); padding: 20px; transition: background 0.3s, box-shadow 0.3s; position: relative; }
+.g-box:hover { background: rgba(0, 255, 65, 0.1); box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); }
+.g-box h3 { color: var(--syn-green-bright); margin-bottom: 15px; font-size: 1.2rem; }
+.g-box p { font-size: 0.9rem; color: #aaa; line-height: 1.5; }
+
+.btn-terminal { display: inline-block; padding: 10px 20px; background: var(--syn-green); color: var(--syn-bg); text-decoration: none; font-weight: bold; margin-top: 20px; transition: all 0.3s; }
+.btn-terminal:hover { background: var(--syn-green-bright); box-shadow: 0 0 20px var(--syn-green); }
+
+.cursor-blink { display: inline-block; width: 10px; height: 1.2rem; background: var(--syn-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 5px; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Glitch Effect on Hover */
+.glitch-hover { position: relative; }
+.glitch-hover:hover { animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; color: var(--syn-green-bright); }
+.glitch-hover:hover::before { content: attr(data-text); position: absolute; left: 2px; text-shadow: -2px 0 red; top: 0; color: var(--syn-green); overflow: hidden; clip-path: inset(10% 0 50% 0); animation: glitch-anim 2s infinite linear alternate-reverse; }
+.glitch-hover:hover::after { content: attr(data-text); position: absolute; left: -2px; text-shadow: -2px 0 blue; top: 0; color: var(--syn-green); overflow: hidden; clip-path: inset(50% 0 30% 0); animation: glitch-anim 2s infinite linear alternate-reverse; }
+
+@keyframes glitch-anim {
+    0% { clip-path: inset(20% 0 80% 0); }
+    20% { clip-path: inset(60% 0 10% 0); }
+    40% { clip-path: inset(40% 0 50% 0); }
+    60% { clip-path: inset(80% 0 5% 0); }
+    80% { clip-path: inset(10% 0 70% 0); }
+    100% { clip-path: inset(30% 0 20% 0); }
+}
+@keyframes glitch-skew {
+    0% { transform: skew(0deg); }
+    20% { transform: skew(-5deg); }
+    40% { transform: skew(5deg); }
+    60% { transform: skew(-2deg); }
+    80% { transform: skew(2deg); }
+    100% { transform: skew(0deg); }
+}
+
+@media (max-width: 800px) {
+    .ascii-art { font-size: 0.6rem; }
+    .grid { grid-template-columns: 1fr; }
+    .terminal { height: 95vh; margin: 10px auto; }
+}

@@ -1,0 +1,120 @@
+:root {
+    /* Neutral / Warm Grey Palette */
+    --warm-grey: #D5D0C8;
+    --linen: #EBE7DF;
+    --soft-clay: #B6AD9F;
+    --charcoal: #2b2b2b;
+    --almost-black: #1a1a1a;
+    --white: #ffffff;
+    
+    --font-head: 'Cormorant', serif;
+    --font-body: 'Karla', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--linen); color: var(--charcoal); font-family: var(--font-body); overflow-x: hidden; }
+
+/* Custom Cursor */
+.cursor-plate {
+    position: fixed; width: 15px; height: 15px; border-radius: 50%; background: var(--charcoal);
+    pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); transition: transform 0.2s, background 0.2s; mix-blend-mode: multiply;
+}
+.cursor-plate.hover { transform: translate(-50%, -50%) scale(3); background: rgba(182, 173, 159, 0.5); border: 1px solid var(--charcoal); mix-blend-mode: normal; }
+
+/* Nav */
+.ember-nav {
+    position: fixed; top: 0; width: 100%; padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; mix-blend-mode: difference; color: var(--linen);
+}
+.logo { font-family: var(--font-head); font-size: 2rem; letter-spacing: 5px; text-transform: uppercase; }
+.links a { color: var(--linen); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; margin-left: 30px; transition: opacity 0.3s; }
+.links a:hover { opacity: 0.6; }
+
+/* Buttons */
+.btn-primary, .btn-secondary {
+    padding: 15px 35px; font-family: var(--font-body); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; border: none;
+}
+.btn-primary { background: var(--charcoal); color: var(--linen); }
+.btn-primary:hover { background: var(--soft-clay); }
+.btn-secondary { background: transparent; border: 1px solid var(--linen); color: var(--linen); }
+.btn-secondary:hover { background: var(--linen); color: var(--charcoal); }
+
+/* Hero */
+.hero-cinematic { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: var(--almost-black); }
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; filter: grayscale(50%) contrast(1.2); }
+.vignette { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, var(--almost-black) 100%); opacity: 0.8; }
+.hero-content { position: relative; z-index: 2; color: var(--linen); }
+.hero-content h1 { font-family: var(--font-head); font-size: 8rem; letter-spacing: 15px; margin-bottom: 20px; font-weight: 300; }
+.hero-content p { font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 40px; font-style: italic; }
+.ctas { display: flex; gap: 20px; justify-content: center; }
+
+/* The Story (Split Screen Concept) */
+.story-section { display: flex; background: var(--warm-grey); min-height: 100vh; position: relative; }
+.story-images { flex: 1; height: 100vh; position: sticky; top: 0; overflow: hidden; }
+.pin-image { width: 100%; height: 100%; }
+.pin-image img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+.story-text { flex: 1; padding: 150px 10%; display: flex; flex-direction: column; gap: 150px; }
+.story-text h2 { font-family: var(--font-head); font-size: 4rem; font-style: italic; margin-bottom: 50px; border-bottom: 1px solid var(--charcoal); padding-bottom: 20px; }
+.text-block p { font-size: 1.5rem; line-height: 1.8; color: var(--charcoal); font-family: var(--font-head); }
+
+/* Menu */
+.menu-section { padding: 150px 20%; background: var(--linen); min-height: 100vh; }
+.menu-header { text-align: center; margin-bottom: 60px; }
+.menu-header h2 { font-family: var(--font-head); font-size: 4rem; letter-spacing: 4px; }
+.menu-tabs { display: flex; justify-content: center; gap: 40px; margin-bottom: 80px; border-bottom: 1px solid var(--soft-clay); padding-bottom: 20px; }
+.tab-btn { background: transparent; border: none; font-family: var(--font-body); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; color: var(--soft-clay); transition: color 0.3s; }
+.tab-btn.active, .tab-btn:hover { color: var(--charcoal); }
+
+.menu-content { display: none; animation: fadeIn 0.5s; }
+.menu-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.dish-card { margin-bottom: 40px; }
+.dish-title { font-family: var(--font-head); font-size: 2rem; display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dotted var(--soft-clay); }
+.dish-desc { font-size: 1.1rem; color: #555; }
+
+/* Parallax Dish */
+.parallax-dish { position: relative; height: 500px; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: none; }
+.parallax-layers { position: absolute; inset: 0; }
+.parallax-layers img { width: 110%; height: 110%; object-fit: cover; filter: grayscale(30%) sepia(20%); position: absolute; top: -5%; left: -5%; }
+.parallax-info { position: relative; z-index: 2; background: rgba(235, 231, 223, 0.9); padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.parallax-info h3 { font-family: var(--font-head); font-size: 2.5rem; margin-bottom: 15px; }
+.parallax-info p { margin-bottom: 20px; color: #444; }
+.parallax-info .price { font-family: var(--font-head); font-size: 1.5rem; }
+
+/* Cellar */
+.cellar-section { background: var(--charcoal); color: var(--warm-grey); padding: 150px 10%; }
+.cellar-grid { display: flex; gap: 80px; align-items: center; max-width: 1200px; margin: 0 auto; }
+.cellar-text { flex: 1; }
+.cellar-text h2 { font-family: var(--font-head); font-size: 4rem; margin-bottom: 30px; font-style: italic; color: var(--linen); }
+.cellar-text p { font-size: 1.2rem; line-height: 1.8; margin-bottom: 40px; font-family: var(--font-head); }
+.cellar-img { flex: 1; }
+.cellar-img img { width: 100%; height: 500px; object-fit: cover; filter: grayscale(100%); }
+
+/* Reservation */
+.reservation-section { padding: 150px 5%; background: var(--linen); display: flex; flex-direction: column; align-items: center; }
+.reservation-section h2 { font-family: var(--font-head); font-size: 3.5rem; margin-bottom: 60px; }
+.res-widget { background: var(--white); padding: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 600px; width: 100%; border: 1px solid var(--warm-grey); }
+.res-row { display: flex; gap: 20px; margin-bottom: 30px; }
+.res-field { flex: 1; display: flex; flex-direction: column; }
+.res-field label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; color: var(--soft-clay); }
+.res-field input { border: 1px solid var(--warm-grey); padding: 15px; font-family: var(--font-body); font-size: 1rem; color: var(--charcoal); outline: none; background: transparent; }
+.time-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+.time-slots button { border: 1px solid var(--warm-grey); background: transparent; padding: 15px; font-family: var(--font-body); font-size: 0.9rem; transition: all 0.2s; }
+.time-slots button:hover { border-color: var(--charcoal); }
+.time-slots button.booked { opacity: 0.3; text-decoration: line-through; pointer-events: none; }
+.btn-primary.full { width: 100%; }
+
+/* Footer */
+.ember-footer { background: var(--almost-black); color: var(--warm-grey); text-align: center; padding: 100px 5%; }
+.ember-footer h2 { font-family: var(--font-head); font-size: 3rem; letter-spacing: 5px; margin-bottom: 20px; color: var(--linen); }
+.ember-footer p { margin-bottom: 10px; font-family: var(--font-head); font-size: 1.2rem; font-style: italic; }
+.socials { margin-top: 40px; }
+.socials a { color: var(--linen); text-decoration: none; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin: 0 15px; }
+
+@media (max-width: 900px) {
+    .story-section { flex-direction: column; }
+    .story-images { height: 50vh; position: relative; }
+    .cellar-grid { flex-direction: column; }
+    .menu-section { padding: 100px 5%; }
+}

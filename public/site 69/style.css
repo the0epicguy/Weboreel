@@ -1,0 +1,98 @@
+:root {
+    --fb-bg: #EAEBF3; /* Soft sky blue/white */
+    --fb-alt: #FDF1D5; /* Warm sunlight yellow */
+    --fb-text: #4A4A68; /* Soft dark blue/purple */
+    --fb-magic: #FF7B89; /* Playful coral pink */
+    
+    --font-head: 'Fredoka One', cursive;
+    --font-body: 'Quicksand', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--fb-bg); color: var(--fb-text); font-family: var(--font-body); overflow-x: hidden; }
+
+/* Star Trail Canvas */
+#trail-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 10000; }
+
+/* Navbar */
+.fb-nav { position: fixed; top: 0; width: 100%; padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.logo { font-family: var(--font-head); font-size: 2.5rem; color: var(--fb-magic); text-shadow: 2px 2px 0px #fff; }
+.nav-links { display: flex; gap: 30px; background: rgba(255,255,255,0.7); padding: 10px 30px; border-radius: 50px; backdrop-filter: blur(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.nav-links a { color: var(--fb-text); text-decoration: none; font-weight: 700; font-size: 1rem; transition: color 0.2s; }
+.nav-links a:hover { color: var(--fb-magic); }
+.btn-magic { background: var(--fb-magic); color: #fff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; font-size: 1rem; box-shadow: 0 8px 0px #da5967; transition: transform 0.1s, box-shadow 0.1s; display: inline-block; }
+.btn-magic:active { transform: translateY(8px); box-shadow: 0 0px 0px #da5967; }
+
+/* Clouds Background */
+.clouds { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.cloud { position: absolute; background: #fff; border-radius: 100px; opacity: 0.8; }
+.cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+.c1 { width: 200px; height: 60px; top: 15%; animation: floatCloud 40s linear infinite; }
+.c1::before { width: 80px; height: 80px; top: -40px; left: 30px; }
+.c1::after { width: 100px; height: 100px; top: -50px; right: 30px; }
+.c2 { width: 300px; height: 80px; top: 50%; animation: floatCloud 60s linear infinite reverse; }
+.c2::before { width: 120px; height: 120px; top: -60px; left: 40px; }
+.c2::after { width: 150px; height: 150px; top: -80px; right: 40px; }
+.c3 { width: 150px; height: 40px; top: 75%; animation: floatCloud 30s linear infinite; }
+.c3::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+.c3::after { width: 70px; height: 70px; top: -35px; right: 20px; }
+
+@keyframes floatCloud {
+    0% { left: -300px; }
+    100% { left: 110vw; }
+}
+
+/* Storybook Pages Layout */
+.storybook { position: relative; }
+.story-page { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0 5%; }
+.bg-alt { background-color: var(--fb-alt); border-radius: 50px; box-shadow: 0 -20px 50px rgba(0,0,0,0.05); }
+
+.page-content { display: flex; align-items: center; justify-content: space-between; max-width: 1000px; width: 100%; gap: 60px; }
+.page-content.reverse { flex-direction: row-reverse; }
+.page-content.center { flex-direction: column; text-align: center; justify-content: center; }
+
+/* Text Bubbles */
+.text-bubble { flex: 1; background: #fff; padding: 50px; border-radius: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); position: relative; border: 4px solid #fff; }
+.text-bubble::after { content: ''; position: absolute; bottom: -20px; left: 40px; border-width: 20px 20px 0; border-style: solid; border-color: #fff transparent transparent transparent; }
+.page-content.reverse .text-bubble::after { left: auto; right: 40px; }
+.text-bubble.wide::after { display: none; }
+
+.text-bubble h1, .text-bubble h2 { font-family: var(--font-head); font-size: 3.5rem; color: var(--fb-magic); margin-bottom: 20px; line-height: 1.1; text-shadow: 1px 1px 0px #da5967; }
+.text-bubble p { font-size: 1.3rem; line-height: 1.6; font-weight: 600; }
+.wide { max-width: 700px; }
+.btn-magic.huge { margin-top: 30px; font-size: 1.5rem; padding: 20px 50px; }
+
+/* Illustrations */
+.illustration { flex: 1; display: flex; justify-content: center; }
+.rounded-img { width: 100%; max-width: 400px; border-radius: 30px; border: 15px solid #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: rotate(-3deg); transition: transform 0.5s; }
+.rounded-img:hover { transform: rotate(3deg) scale(1.05); }
+
+/* Custom CSS Art - Hot Air Balloon */
+.hot-air-balloon { position: relative; width: 200px; height: 300px; }
+.balloon-envelope { background: linear-gradient(135deg, #FFD166, #EF476F); width: 200px; height: 230px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; box-shadow: inset -20px -20px 40px rgba(0,0,0,0.1); }
+.balloon-basket { position: absolute; bottom: 0; left: 75px; width: 50px; height: 40px; background: #8B5A2B; border-radius: 5px 5px 10px 10px; }
+.balloon-basket::before, .balloon-basket::after { content: ''; position: absolute; top: -30px; width: 2px; height: 30px; background: #555; }
+.balloon-basket::before { left: 5px; }
+.balloon-basket::after { right: 5px; }
+
+/* Animations */
+.float-anim { animation: floatImg 4s ease-in-out infinite; }
+.alt-delay { animation-delay: 2s; }
+@keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+/* Footer */
+.fb-footer { position: relative; background: var(--fb-magic); color: #fff; margin-top: -100px; padding-top: 150px; text-align: center; }
+.f-waves { position: absolute; top: 0; left: 0; width: 100%; overflow: hidden; line-height: 0; }
+.f-waves svg { display: block; width: calc(100% + 1.3px); height: 120px; }
+.f-waves .shape-fill { fill: var(--fb-bg); }
+
+.f-content { padding: 40px; }
+.f-content p { font-weight: 700; margin-top: 10px; }
+
+@media (max-width: 900px) {
+    .page-content, .page-content.reverse { flex-direction: column; text-align: center; margin-top: 80px; }
+    .text-bubble::after { left: 50%; transform: translateX(-50%); }
+    .text-bubble h1, .text-bubble h2 { font-size: 2.5rem; }
+    .nav-links { display: none; }
+}

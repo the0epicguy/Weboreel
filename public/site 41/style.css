@@ -1,0 +1,102 @@
+:root {
+    --bg-color: #f7f7f9;
+    --text-main: #222222;
+    --text-muted: #888888;
+    --slate: #9ca3af;
+    --mist: #e5e7eb;
+    --white: #ffffff;
+    --border: #d1d5db;
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-body); overflow-x: hidden; }
+
+/* Custom Cursor */
+.audio-cursor {
+    position: fixed; width: 40px; height: 40px; border: 1px solid var(--text-main); border-radius: 50%;
+    pointer-events: none; z-index: 10000; transform: translate(-50%, -50%);
+    transition: width 0.1s, height 0.1s, background 0.2s; mix-blend-mode: difference;
+}
+.audio-cursor.hover { width: 60px; height: 60px; background: rgba(255,255,255,0.2); }
+.audio-cursor.playing { animation: pulse 1s infinite alternate; }
+
+@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.2); } }
+
+/* Nav */
+.solstice-nav {
+    position: fixed; top: 0; width: 100%; padding: 30px 50px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 100;
+}
+.nav-brand { font-family: var(--font-heading); font-size: 2rem; letter-spacing: 5px; }
+.nav-links a { color: var(--text-main); text-decoration: none; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin: 0 15px; }
+.audio-toggle { background: transparent; border: 1px solid var(--text-main); padding: 8px 15px; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 2px; border-radius: 20px; transition: all 0.3s; }
+.audio-toggle:hover { background: var(--text-main); color: var(--white); }
+
+/* Hero */
+.audio-hero { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#waveform-canvas { position: absolute; inset: 0; z-index: 1; filter: invert(1); opacity: 0.8; } /* Invert to make it dark lines on light bg since three.js clearcolor is black for audio visualizers usually, or we set clearColor in JS */
+.hero-content { position: relative; z-index: 2; text-align: center; }
+.artist-name { font-family: var(--font-heading); font-size: 8rem; letter-spacing: 15px; font-weight: 300; margin-bottom: 10px; }
+.subtitle { font-size: 1rem; color: var(--text-muted); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 40px; }
+.listen-btn { background: var(--text-main); color: var(--white); border: none; padding: 15px 40px; border-radius: 30px; font-family: var(--font-body); font-size: 0.8rem; letter-spacing: 3px; display: inline-flex; align-items: center; gap: 10px; transition: transform 0.3s; }
+.listen-btn:hover { transform: scale(1.05); }
+
+/* Release Section */
+.latest-release { padding: 120px 5%; max-width: 1200px; margin: 0 auto; }
+.album-container { display: flex; gap: 80px; align-items: center; }
+.album-art { flex: 1; position: relative; perspective: 1000px; }
+.album-art img { width: 100%; box-shadow: 0 30px 60px rgba(0,0,0,0.1); border-radius: 2px; transition: transform 0.1s; transform-style: preserve-3d; }
+.glare { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%); pointer-events: none; mix-blend-mode: overlay; transition: transform 0.1s; }
+
+.album-info { flex: 1; }
+.tag { font-size: 0.7rem; letter-spacing: 3px; color: var(--slate); margin-bottom: 15px; text-transform: uppercase; }
+.album-info h2 { font-family: var(--font-heading); font-size: 4rem; margin-bottom: 20px; font-weight: 400; line-height: 1; }
+.description { color: var(--text-muted); line-height: 1.8; margin-bottom: 40px; max-width: 90%; }
+
+.tracklist { border-top: 1px solid var(--border); margin-bottom: 40px; }
+.track { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); transition: background 0.3s; padding: 15px 10px;}
+.track:hover { background: var(--mist); }
+.track .num { font-size: 0.7rem; color: var(--slate); width: 30px; }
+.track .name { flex: 1; font-size: 0.9rem; font-weight: 500; }
+.track .time { font-size: 0.8rem; color: var(--text-muted); }
+
+.mini-wave { display: flex; gap: 2px; height: 15px; align-items: flex-end; margin-left: 15px; opacity: 0; transition: opacity 0.3s;}
+.track.playing .mini-wave { opacity: 1; }
+.mini-wave .bar { width: 3px; background: var(--text-main); animation: wave 1s infinite ease-in-out alternate; }
+.mini-wave .bar:nth-child(2) { animation-delay: 0.2s; }
+.mini-wave .bar:nth-child(3) { animation-delay: 0.4s; }
+@keyframes wave { 0% { height: 3px; } 100% { height: 15px; } }
+
+.streaming-links button { background: transparent; border: 1px solid var(--text-main); padding: 10px 20px; font-family: var(--font-body); font-size: 0.8rem; margin-right: 15px; border-radius: 4px; transition: all 0.3s; }
+.streaming-links button:hover { background: var(--text-main); color: var(--white); }
+
+/* Discography */
+.discography { padding: 100px 0; background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section-heading { text-align: center; font-family: var(--font-heading); font-size: 3rem; margin-bottom: 60px; font-weight: 400; letter-spacing: 5px; }
+.timeline-scroll { overflow-x: auto; padding: 40px 5%; cursor: grab; }
+.timeline-scroll:active { cursor: grabbing; }
+.timeline-track { display: inline-flex; gap: 100px; padding: 0 50px; position: relative; }
+.timeline-track::before { content: ''; position: absolute; top: 20px; left: 0; width: 100%; height: 1px; background: var(--border); z-index: 1; }
+.node { width: 300px; position: relative; z-index: 2; padding-top: 40px; }
+.node::before { content: ''; position: absolute; top: 16px; left: 0; width: 9px; height: 9px; background: var(--bg-color); border: 2px solid var(--text-main); border-radius: 50%; }
+.year { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 20px; color: var(--slate); }
+.node-card { width: 100%; }
+.node-card img { width: 100%; height: 300px; object-fit: cover; filter: grayscale(100%); transition: filter 0.4s; }
+.node:hover .node-card img { filter: grayscale(0%); }
+.node-card h3 { margin-top: 15px; font-size: 1rem; letter-spacing: 1px; }
+
+/* Footer */
+.footer-minimal { padding: 100px 5%; text-align: center; }
+.inner-circle h3 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 400; margin-bottom: 15px; }
+.inner-circle p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem; }
+.inner-circle input { background: transparent; border: none; border-bottom: 1px solid var(--text-main); padding: 10px 0; width: 300px; text-align: center; font-family: var(--font-body); font-size: 0.9rem; outline: none; }
+.socials { margin-top: 80px; }
+.socials a { color: var(--text-main); text-decoration: none; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin: 0 15px; }
+
+@media (max-width: 768px) {
+    .album-container { flex-direction: column; }
+    .artist-name { font-size: 4rem; letter-spacing: 5px; }
+}

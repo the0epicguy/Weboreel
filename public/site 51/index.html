@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECHO | Future of Audio</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Three.js (for audio visualizer) & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="echo-cursor"></div>
+
+    <nav class="echo-nav">
+        <div class="logo">ECHO_</div>
+        <div class="nav-links">
+            <a href="#discover">Discover</a>
+            <a href="#originals">Originals</a>
+            <a href="#creators">Creators</a>
+        </div>
+        <button class="nav-btn">Start Listening</button>
+    </nav>
+
+    <!-- Interactive Audio Hero -->
+    <header class="echo-hero">
+        <div class="visualizer-container" id="visualizer-container">
+            <!-- Three.js visualizer will be injected here -->
+        </div>
+        <div class="hero-ui">
+            <div class="now-playing-badge">
+                <span class="pulse"></span> LIVE: NEURO-TECH DAILY
+            </div>
+            <h1>HEAR THE <br>UNSEEN.</h1>
+            <p>Immersive, high-fidelity audio documentaries and conversational networks. Press play to interact.</p>
+            
+            <div class="audio-controls">
+                <button id="play-toggle" class="play-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <div class="track-info">
+                    <span class="title">Episode 41: Artificial Synapses</span>
+                    <span class="author">By Dr. Elena Rostova</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Trending Episodes Grid -->
+    <section class="trending-section" id="discover">
+        <div class="section-head">
+            <h2>Trending Frequencies</h2>
+            <a href="#" class="view-all">View All -></a>
+        </div>
+        <div class="ep-grid">
+            <!-- Episode 1 -->
+            <div class="ep-card">
+                <div class="ep-img">
+                    <img src="https://images.unsplash.com/photo-1558486012-817176f84c6d?w=800&q=80" alt="Tech">
+                    <div class="play-overlay"><svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--neon-green)" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
+                </div>
+                <div class="ep-meta">
+                    <span class="duration">45 MIN</span>
+                    <h3>The Silicon Desert</h3>
+                    <p>Exploring the new tech hubs.</p>
+                </div>
+            </div>
+            <!-- Episode 2 -->
+            <div class="ep-card">
+                <div class="ep-img">
+                    <img src="https://images.unsplash.com/photo-1614113489855-66422ad300a4?w=800&q=80" alt="Architecture">
+                    <div class="play-overlay"><svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--neon-green)" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
+                </div>
+                <div class="ep-meta">
+                    <span class="duration">1 HR 12 MIN</span>
+                    <h3>Brutalism Reborn</h3>
+                    <p>A sonic tour of concrete giants.</p>
+                </div>
+            </div>
+            <!-- Episode 3 -->
+            <div class="ep-card">
+                <div class="ep-img">
+                    <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&q=80" alt="Space">
+                    <div class="play-overlay"><svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--neon-green)" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
+                </div>
+                <div class="ep-meta">
+                    <span class="duration">30 MIN</span>
+                    <h3>Void Sounds</h3>
+                    <p>Data sonification of black holes.</p>
+                </div>
+            </div>
+            <!-- Episode 4 -->
+            <div class="ep-card">
+                <div class="ep-img">
+                    <img src="https://images.unsplash.com/photo-1571210862729-78a52c3dbf9b?w=800&q=80" alt="Abstract">
+                    <div class="play-overlay"><svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--neon-green)" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
+                </div>
+                <div class="ep-meta">
+                    <span class="duration">55 MIN</span>
+                    <h3>Machine Dreams</h3>
+                    <p>AI generating its own lullabies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Creator -->
+    <section class="creator-section" id="creators">
+        <div class="c-split">
+            <div class="c-info">
+                <div class="badge">ECHO ORIGINAL</div>
+                <h2>SOUNDSCAPES <br>OF THE MIND</h2>
+                <p>Join host Julian Vance as he explores the psychological impact of ambient sound. Recorded entirely in binaural 3D audio.</p>
+                <div class="listen-now">
+                    <button class="nav-btn">Play Series</button>
+                    <span class="ep-count">12 Episodes</span>
+                </div>
+            </div>
+            <div class="c-image">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1516280440503-6fb396d11cd1?w=800&q=80" alt="Creator">
+                    <!-- Audio rings CSS animation -->
+                    <div class="ring r1"></div>
+                    <div class="ring r2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="echo-footer">
+        <div class="f-top">
+            <div class="copy">
+                <h2>ECHO_</h2>
+            </div>
+            <div class="links">
+                <div class="col">
+                    <h4>Platform</h4>
+                    <a href="#">Download App</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">For Creators</a>
+                </div>
+                <div class="col">
+                    <h4>Company</h4>
+                    <a href="#">About</a>
+                    <a href="#">Press</a>
+                    <a href="#">Careers</a>
+                </div>
+            </div>
+        </div>
+        <div class="f-bottom">
+            <span>&copy; 2026 Echo Audio Networks.</span>
+            <span>All systems nominal.</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

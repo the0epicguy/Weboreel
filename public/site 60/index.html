@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YONDER | Wilderness Retreat</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- GSAP for interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="y-cursor"></div>
+
+    <nav class="y-nav">
+        <div class="nav-left">
+            <a href="#">The Experience</a>
+            <a href="#">Accommodations</a>
+        </div>
+        <div class="logo">Yonder.</div>
+        <div class="nav-right">
+            <a href="#">Journal</a>
+            <a href="#" class="btn-reserve">Reserve</a>
+        </div>
+    </nav>
+
+    <!-- Preloader Text -->
+    <div class="loading-overlay">
+        <h2>Unplug.</h2>
+    </div>
+
+    <!-- Main Hero -->
+    <header class="y-hero">
+        <div class="h-image">
+            <img src="https://images.unsplash.com/photo-1544084944-15269ec7b5a0?w=1600&q=80" alt="Glamping Tent">
+        </div>
+        <div class="h-text">
+            <h1>Leave the <br>grid behind.</h1>
+            <p>Immersive wilderness retreats that blend raw nature with absolute comfort. Discover the undiscovered.</p>
+        </div>
+    </header>
+
+    <!-- Horizontal Panning Overlapping Cards -->
+    <section class="horizontal-pan" id="h-pan">
+        <div class="pan-container">
+            <div class="pan-title">
+                <h2>Our <br>Sanctuaries</h2>
+            </div>
+            
+            <div class="card-stack">
+                <!-- Card 1 -->
+                <div class="y-card c1">
+                    <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800&q=80" alt="Cabin">
+                    <div class="card-info">
+                        <h3>A Frame <br>Oasis</h3>
+                        <span>Sleeps 2 &bull; From $450/nt</span>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="y-card c2">
+                    <img src="https://images.unsplash.com/photo-1510312305653-8ed496efae77?w=800&q=80" alt="Tent">
+                    <div class="card-info">
+                        <h3>Canvas <br>Pavilion</h3>
+                        <span>Sleeps 4 &bull; From $600/nt</span>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="y-card c3">
+                    <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80" alt="Treehouse">
+                    <div class="card-info">
+                        <h3>Canopy <br>Suite</h3>
+                        <span>Sleeps 2 &bull; From $850/nt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Details -->
+    <section class="y-details">
+        <div class="d-grid">
+            <div class="d-text">
+                <span class="eyebrow">The Philosophy</span>
+                <h2>Grounded in nature, <br>elevated by design.</h2>
+                <p>Every structure at Yonder is fundamentally off-grid, utilizing discrete solar arrays and rainwater catchment systems, yet offering amenities rivaling the world's best boutique hotels.</p>
+                <button class="btn-outline">Explore Sustainability</button>
+            </div>
+            <div class="d-img interact-img">
+                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1000&q=80" alt="Interior">
+                <div class="drag-hint">DRAG</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="y-footer">
+        <h2>Find your nowhere.</h2>
+        <div class="f-content">
+            <div class="f-col">
+                <h4>Yonder Retreats</h4>
+                <p>104 Wilderness Drive<br>Sedona, AZ 86336</p>
+            </div>
+            <div class="f-col">
+                <h4>Connect</h4>
+                <a href="#">Instagram</a>
+                <a href="#">Pinterest</a>
+                <a href="#">Spotify</a>
+            </div>
+            <div class="f-col">
+                <h4>Newsletter</h4>
+                <input type="email" placeholder="Email Address">
+            </div>
+        </div>
+        <p class="copyright">&copy; 2026 Yonder Inc.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

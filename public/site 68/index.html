@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER | Audio Fidelity</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="a-cursor"></div>
+
+    <nav class="ae-nav">
+        <div class="logo">A E T H E R <span>//</span></div>
+        <div class="nav-links">
+            <a href="#">Mastering</a>
+            <a href="#">Presses</a>
+            <a href="#">Archive</a>
+        </div>
+        <a href="#" class="btn-book">Book Session</a>
+    </nav>
+
+    <!-- Guide Lines for Industrial Look -->
+    <div class="guide-v"></div>
+    <div class="guide-v right"></div>
+
+    <header class="ae-hero">
+        <div class="hero-content">
+            <h1>ANALOG <br><span>PERFECTION.</span></h1>
+            <p>Boutique vinyl pressing and high-fidelity analog mastering. Preserving the warmth, depth, and soul of every waveform.</p>
+        </div>
+        
+        <!-- Interactive Record that spins on scroll -->
+        <div class="record-container">
+            <div class="record" id="spin-record">
+                <div class="record-grooves"></div>
+                <div class="record-grooves inner"></div>
+                <div class="label">
+                    <div class="label-text rot1">AETHER SOUND LABS</div>
+                    <div class="label-text rot2">33⅓ RPM</div>
+                    <div class="hole"></div>
+                </div>
+            </div>
+            
+            <!-- Tone Arm -->
+            <div class="tone-arm" id="tone-arm"></div>
+        </div>
+    </header>
+
+    <main class="ae-process">
+        <div class="process-wrapper">
+            <h2 class="section-title">THE SIGNAL PATH</h2>
+            
+            <!-- Radial layout elements -->
+            <div class="radial-grid">
+                
+                <div class="r-item i1 point-hover">
+                    <div class="r-dot">01</div>
+                    <div class="r-text">
+                        <h3>Tape Transfer</h3>
+                        <p>Studer A820 direct transfer. Zero digital conversion.</p>
+                    </div>
+                </div>
+                
+                <div class="r-item i2 point-hover">
+                    <div class="r-dot">02</div>
+                    <div class="r-text">
+                        <h3>EQ Matrice</h3>
+                        <p>Custom-built passive EQ networking. Pure sonic color.</p>
+                    </div>
+                </div>
+                
+                <div class="r-item i3 point-hover">
+                    <div class="r-dot">03</div>
+                    <div class="r-text">
+                        <h3>Lathe Cut</h3>
+                        <p>Neumann VMS80 mastering lathe for perfect groove geometry.</p>
+                    </div>
+                </div>
+                
+                <div class="r-item i4 point-hover">
+                    <div class="r-dot">04</div>
+                    <div class="r-text">
+                        <h3>Galvanic Bath</h3>
+                        <p>Heavyweight 180g silver nitrate stamping process.</p>
+                    </div>
+                </div>
+
+                <!-- Center visual focal point -->
+                <div class="center-focal">
+                    <div class="pulse-ring"></div>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <footer class="ae-footer">
+        <div class="f-logo">A E T H E R</div>
+        <div class="f-info">
+            <span>TOKYO, JP</span>
+            <span>LOS ANGELES, CA</span>
+            <span>LONDON, UK</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

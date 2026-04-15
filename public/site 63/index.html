@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNTAX // Advanced Threat Protection</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Matrix Rain Canvas -->
+    <canvas id="matrix"></canvas>
+
+    <div class="terminal">
+        <header class="t-header">
+            <div class="t-controls">
+                <span class="red"></span>
+                <span class="yellow"></span>
+                <span class="green"></span>
+            </div>
+            <div class="t-title">root@syntax-sec:~</div>
+        </header>
+        
+        <main class="t-body" id="t-body">
+            <div class="ascii-art glitch-hover" data-text="SYNTAX">
+  ____  _   _ _   _ _____  _  __
+ / ___|| | | | \ | |_   _|/ \| \/ |
+ \___ \| |_| |  \| | | | / _ \ \/ |
+  ___) |  _  | |\  | | |/ ___ \  /|
+ |____/|_| |_|_| \_| |_/_/   \_\/ |
+            </div>
+            
+            <div class="line">
+                <span class="prompt">root@syntax-sec:~#</span> <span class="typing" id="t1">./initialize_payload.sh</span>
+            </div>
+            
+            <div class="hidden" id="r1">
+                <p>Initializing sequence...</p>
+                <p>[OK] Bypassing perimeter defense</p>
+                <p>[OK] Injecting zero-day heuristic monitor</p>
+                <br>
+            </div>
+            
+            <div class="line hidden" id="l2">
+                <span class="prompt">root@syntax-sec:~#</span> <span class="typing" id="t2">cat summary.txt</span>
+            </div>
+            
+            <div class="hidden" id="r2">
+                <h1>WE SECURE WHAT MATTERS.</h1>
+                <p>Syntax is a premier offensive security firm. We break your infrastructure before adversaries do. Penetration testing, red teaming, and advanced threat intelligence.</p>
+                <br>
+                <div class="grid">
+                    <div class="g-box glitch-hover">
+                        <h3>> SECURE_AUDIT</h3>
+                        <p>Comprehensive white-box cryptography review and smart contract auditing.</p>
+                    </div>
+                    <div class="g-box glitch-hover">
+                        <h3>> RED_TEAM</h3>
+                        <p>Full-scope adversarial simulation mimicking APT actors.</p>
+                    </div>
+                    <div class="g-box glitch-hover">
+                        <h3>> INCIDENT_RES</h3>
+                        <p>24/7 digital forensics and emergency breach recovery.</p>
+                    </div>
+                </div>
+                <br>
+            </div>
+
+            <div class="line hidden" id="l3">
+                <span class="prompt">root@syntax-sec:~#</span> <span class="typing" id="t3">ping api.hired.syntax.dev</span>
+            </div>
+            
+            <div class="hidden" id="r3">
+                <p>64 bytes from 104.22.x.x: icmp_seq=1 ttl=55 time=12.2 ms</p>
+                <br>
+                <p>CONNECTION ESTABLISHED.</p>
+                <a href="#" class="btn-terminal">> INITIATE SECURE COMMS</a>
+                <span class="cursor-blink">_</span>
+            </div>
+            
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

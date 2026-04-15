@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="FRAGMENT - A modular block/grid system with non-linear navigation through 3D interactive cards">
+<title>FRAGMENT — Modular Grid</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@200;400;700;900&family=Work+Sans:wght@300;400;500;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#111118;
+  color:#e8e4dd;
+  font-family:'Work Sans',sans-serif;
+  overflow:auto;
+  cursor:none;
+}
+
+/* Target lock cursor system */
+#lock-cursor{
+  position:fixed;
+  width:30px;height:30px;
+  border:2px solid rgba(255,100,100,0.5);
+  pointer-events:none;
+  z-index:10000;
+  transform:translate(-50%,-50%);
+  transition:width 0.3s, height 0.3s, border-color 0.3s, border-radius 0.3s;
+}
+
+#lock-cursor.locked{
+  width:10px;height:10px;
+  border-color:#ff4444;
+  border-radius:0;
+  transform:translate(-50%,-50%) rotate(45deg);
+  box-shadow:0 0 20px rgba(255,68,68,0.5);
+}
+
+#lock-cursor .corner{
+  position:absolute;
+  width:8px;height:8px;
+  border-color:rgba(255,100,100,0.5);
+  border-style:solid;
+}
+#lock-cursor .corner.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}
+#lock-cursor .corner.tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+#lock-cursor .corner.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px}
+#lock-cursor .corner.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+
+#lock-cursor.locked .corner{opacity:0}
+
+/* Header */
+#header{
+  padding:30px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:500;
+  background:rgba(17,17,24,0.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+
+#logo{
+  font-family:'Unbounded',sans-serif;
+  font-size:1.2rem;
+  font-weight:900;
+  letter-spacing:3px;
+  background:linear-gradient(90deg,#ff4444,#ff8844,#ffcc44);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+#filter-bar{
+  display:flex;gap:8px;
+}
+
+.filter-btn{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.4);
+  padding:8px 18px;
+  font-family:'Work Sans',sans-serif;
+  font-size:0.7rem;
+  letter-spacing:2px;
+  cursor:pointer;
+  border-radius:20px;
+  transition:all 0.3s;
+  text-transform:uppercase;
+}
+
+.filter-btn:hover,.filter-btn.active{
+  border-color:rgba(255,100,100,0.4);
+  color:#ff8844;
+  background:rgba(255,100,100,0.05);
+}
+
+#sound-toggle{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.3);
+  width:36px;height:36px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:0.8rem;
+  transition:all 0.3s;
+}
+
+/* Modular Grid */
+#grid{
+  padding:30px 40px 80px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  gap:20px;
+  grid-auto-flow:dense;
+}
+
+.block{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:16px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:all 0.5s cubic-bezier(0.23,1,0.32,1);
+  position:relative;
+}
+
+.block:hover{
+  border-color:rgba(255,100,100,0.2);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 40px rgba(255,100,100,0.05);
+}
+
+.block.wide{grid-column:span 2}
+.block.tall{grid-row:span 2}
+.block.featured{grid-column:span 2;grid-row:span 2}
+
+.block-canvas{
+  width:100%;
+  height:200px;
+  display:block;
+}
+
+.block.tall .block-canvas{height:300px}
+.block.featured .block-canvas{height:400px}
+
+.block-content{padding:24px}
+
+.block-tag{
+  font-size:0.6rem;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:rgba(255,100,100,0.5);
+  margin-bottom:10px;
+  font-weight:600;
+}
+
+.block-title{
+  font-family:'Unbounded',sans-serif;
+  font-size:1.1rem;
+  font-weight:700;
+  margin-bottom:10px;
+  color:rgba(255,240,230,0.9);
+  line-height:1.3;
+}
+
+.block.featured .block-title{font-size:1.5rem}
+
+.block-desc{
+  font-size:0.85rem;
+  line-height:1.6;
+  color:rgba(255,255,255,0.35);
+}
+
+.block-footer{
+  padding:15px 24px;
+  border-top:1px solid rgba(255,255,255,0.03);
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+.block-meta{
+  font-size:0.6rem;
+  color:rgba(255,255,255,0.2);
+  letter-spacing:2px;
+}
+
+.block-action{
+  font-size:0.65rem;
+  color:rgba(255,100,100,0.5);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:color 0.3s;
+}
+
+.block:hover .block-action{color:#ff8844}
+
+/* Expanded overlay */
+#expanded-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.9);
+  backdrop-filter:blur(30px);
+  z-index:1000;
+  display:none;
+  align-items:center;justify-content:center;
+  padding:40px;
+}
+
+#expanded-overlay.visible{display:flex}
+
+#expanded-content{
+  max-width:800px;
+  width:100%;
+  animation:expandIn 0.5s ease;
+}
+
+@keyframes expandIn{
+  from{transform:scale(0.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+#expanded-canvas{
+  width:100%;
+  height:300px;
+  border-radius:16px;
+  margin-bottom:30px;
+}
+
+#exp-close{
+  position:absolute;top:30px;right:30px;
+  background:transparent;border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.5);width:40px;height:40px;
+  border-radius:50%;cursor:pointer;font-size:1.2rem;
+  transition:all 0.3s;
+}
+
+#exp-close:hover{border-color:rgba(255,100,100,0.5);color:#ff8844}
+
+#exp-tag{font-size:0.65rem;letter-spacing:4px;color:rgba(255,100,100,0.5);margin-bottom:10px;text-transform:uppercase}
+#exp-title{font-family:'Unbounded',sans-serif;font-size:2rem;font-weight:900;margin-bottom:20px;color:rgba(255,240,230,0.95)}
+#exp-text{font-size:1.05rem;line-height:1.9;color:rgba(255,255,255,0.5);margin-bottom:20px}
+#exp-detail{font-size:0.85rem;line-height:1.7;color:rgba(255,255,255,0.35);padding:20px;background:rgba(255,255,255,0.02);border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+
+@media(max-width:768px){
+  body{cursor:auto}
+  #lock-cursor{display:none}
+  #grid{padding:15px;gap:12px;grid-template-columns:1fr}
+  .block.wide,.block.tall,.block.featured{grid-column:span 1;grid-row:span 1}
+  .block.featured .block-canvas{height:200px}
+  .block.featured .block-title{font-size:1.1rem}
+  #header{padding:20px;flex-wrap:wrap;gap:10px}
+  #filter-bar{flex-wrap:wrap}
+  .filter-btn{padding:6px 12px;font-size:0.6rem}
+  #expanded-overlay{padding:20px}
+  #exp-title{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<div id="lock-cursor">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+</div>
+
+<div id="header">
+  <div id="logo">FRAGMENT</div>
+  <div id="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="tech">Tech</button>
+    <button class="filter-btn" data-filter="art">Art</button>
+    <button class="filter-btn" data-filter="science">Science</button>
+    <button class="filter-btn" data-filter="culture">Culture</button>
+  </div>
+  <button id="sound-toggle" onclick="toggleAudio()">♪</button>
+</div>
+
+<div id="grid"></div>
+
+<div id="expanded-overlay">
+  <button id="exp-close" onclick="closeExpanded()">✕</button>
+  <div id="expanded-content">
+    <canvas id="expanded-canvas"></canvas>
+    <div id="exp-tag"></div>
+    <div id="exp-title"></div>
+    <div id="exp-text"></div>
+    <div id="exp-detail"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // --- Block data ---
+  const blocks = [
+    { tag:'tech', title:'Quantum Computing at Scale', desc:'How q-processors are reshaping computation beyond classical limits.', detail:'Quantum computers leverage superposition and entanglement to solve problems exponentially faster. The latest 1024-qubit processors have achieved quantum advantage in molecular simulation, drug discovery, and cryptographic analysis. Error correction rates have dropped below 0.1%, making fault-tolerant quantum computing a reality.', style:'featured', colorA:'#ff4444', colorB:'#ff8844' },
+    { tag:'art', title:'Generative Architecture', desc:'Buildings that design themselves through evolutionary algorithms.', detail:'Generative architecture uses AI-driven evolutionary algorithms to optimize building designs for structural integrity, energy efficiency, and aesthetic beauty simultaneously. The latest structures in Dubai and Singapore feature organic forms that look alive — because in a sense, they are.', style:'wide', colorA:'#44aaff', colorB:'#8844ff' },
+    { tag:'science', title:'The Neutrino Maps', desc:'First complete 3D maps of neutrino pathways through Earth.', detail:'Using massive underground detectors, scientists have created the first comprehensive maps of neutrino pathways. These "ghost particles" pass through Earth 65 billion times per second per square centimeter. The maps reveal unexpected concentrations near the core, hinting at unknown nuclear processes.', style:'tall', colorA:'#44ff88', colorB:'#44ffcc' },
+    { tag:'culture', title:'Memory Museums', desc:'Institutions where visitors experience historical moments firsthand.', detail:'Memory Museums use neural interface technology to project reconstructed historical memories directly into visitors\' consciousness. You don\'t just see history — you feel the wind at Kitty Hawk, smell the gunpowder at Gettysburg, hear the crowd at the first Moon landing.', style:'normal', colorA:'#ffaa44', colorB:'#ff4488' },
+    { tag:'tech', title:'Silent Interfaces', desc:'The end of screens: computing through ambient awareness.', detail:'Post-screen computing eliminates visual displays entirely. Information is conveyed through subtle haptic feedback, spatial audio, and ambient light changes in the environment. Users describe the experience as "thinking with the room" — ideas and data feel like natural extensions of thought.', style:'normal', colorA:'#ff6644', colorB:'#ffcc44' },
+    { tag:'art', title:'Symbiotic Sculpture', desc:'Art that grows, breathes, and responds to emotion.', detail:'Bio-synthetic sculptures contain living tissue integrated with responsive polymers. They pulse with bioluminescence, change shape based on the emotional states of nearby viewers (detected through micro-expressions), and evolve over months into forms their creators never anticipated.', style:'wide', colorA:'#aa44ff', colorB:'#ff44aa' },
+    { tag:'science', title:'Dark Matter Lens', desc:'Gravitational lensing reveals dark matter structures.', detail:'The Dark Matter Lens project uses a network of gravitational wave detectors to create the first direct images of dark matter structures. The results are stunning: cosmic web filaments spanning hundreds of millions of light-years, forming a scaffold upon which all visible matter is hung.', style:'normal', colorA:'#4488ff', colorB:'#44ccff' },
+    { tag:'culture', title:'The Language Garden', desc:'Where extinct languages are cultivated back to life.', detail:'Computational linguists have created AI systems that can reconstruct extinct languages from fragmentary evidence. The Language Garden grows these resurrected tongues, letting visitors hear Sumerian poetry, Etruscan songs, and Proto-Indo-European storytelling as they may have actually sounded.', style:'tall', colorA:'#88ff44', colorB:'#44ff88' },
+    { tag:'tech', title:'Photonic Processors', desc:'Light-speed computing through advanced photonic circuits.', detail:'Photonic processors replace electrons with photons, achieving computation at the speed of light with near-zero heat generation. The latest chips process 10 petaflops while consuming less power than an LED bulb, enabling AI systems of unprecedented capability in palm-sized devices.', style:'normal', colorA:'#ff8844', colorB:'#ff4444' },
+  ];
+
+  // --- Render blocks ---
+  const grid = document.getElementById('grid');
+
+  blocks.forEach((b, i) => {
+    const block = document.createElement('div');
+    block.className = `block ${b.style === 'featured' ? 'featured' : b.style === 'wide' ? 'wide' : b.style === 'tall' ? 'tall' : ''}`;
+    block.dataset.tag = b.tag;
+    block.dataset.index = i;
+
+    const canv = document.createElement('canvas');
+    canv.className = 'block-canvas';
+    canv.width = 600;
+    canv.height = b.style === 'featured' ? 400 : b.style === 'tall' ? 300 : 200;
+    block.appendChild(canv);
+
+    block.innerHTML += `
+      <div class="block-content">
+        <div class="block-tag">${b.tag}</div>
+        <div class="block-title">${b.title}</div>
+        <div class="block-desc">${b.desc}</div>
+      </div>
+      <div class="block-footer">
+        <span class="block-meta">FRAGMENT #${String(i+1).padStart(3,'0')}</span>
+        <span class="block-action">Explore →</span>
+      </div>
+    `;
+
+    block.addEventListener('click', () => openExpanded(i));
+    grid.appendChild(block);
+
+    // Generate procedural art on canvas
+    drawBlockArt(canv, b);
+  });
+
+  function drawBlockArt(canvas, block){
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+
+    // Gradient background
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, block.colorA + '15');
+    grad.addColorStop(1, block.colorB + '15');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Abstract shapes
+    ctx.globalCompositeOperation = 'lighter';
+    for(let i = 0; i < 15; i++){
+      ctx.strokeStyle = (Math.random() > 0.5 ? block.colorA : block.colorB) + '20';
+      ctx.lineWidth = Math.random() * 2;
+      ctx.beginPath();
+      if(Math.random() > 0.5){
+        ctx.arc(Math.random()*w, Math.random()*h, Math.random()*100+20, 0, Math.PI*2);
+      } else {
+        ctx.moveTo(Math.random()*w, Math.random()*h);
+        ctx.lineTo(Math.random()*w, Math.random()*h);
+        ctx.lineTo(Math.random()*w, Math.random()*h);
+      }
+      ctx.stroke();
+    }
+
+    // Grid lines
+    ctx.strokeStyle = block.colorA + '08';
+    ctx.lineWidth = 0.5;
+    for(let x = 0; x < w; x += 30){
+      ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();
+    }
+    for(let y = 0; y < h; y += 30){
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    }
+
+    // Animate glow
+    let t = 0;
+    function animateBlock(){
+      requestAnimationFrame(animateBlock);
+      t += 0.02;
+      ctx.fillStyle = grad;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.globalCompositeOperation = 'lighter';
+      for(let i = 0; i < 5; i++){
+        const x = w/2 + Math.sin(t + i * 1.2) * w * 0.3;
+        const y = h/2 + Math.cos(t * 0.7 + i * 0.8) * h * 0.3;
+        const r = 20 + Math.sin(t + i) * 10;
+        const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+        grd.addColorStop(0, (Math.random() > 0.5 ? block.colorA : block.colorB) + '15');
+        grd.addColorStop(1, 'transparent');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // Grid
+      ctx.strokeStyle = block.colorA + '06';
+      ctx.lineWidth = 0.5;
+      ctx.globalCompositeOperation = 'source-over';
+      for(let x2 = 0; x2 < w; x2 += 30){
+        ctx.beginPath();ctx.moveTo(x2,0);ctx.lineTo(x2,h);ctx.stroke();
+      }
+    }
+    animateBlock();
+  }
+
+  // --- Expanded view ---
+  function openExpanded(idx){
+    const b = blocks[idx];
+    document.getElementById('exp-tag').textContent = b.tag.toUpperCase();
+    document.getElementById('exp-title').textContent = b.title;
+    document.getElementById('exp-text').textContent = b.desc;
+    document.getElementById('exp-detail').textContent = b.detail;
+    document.getElementById('expanded-overlay').classList.add('visible');
+
+    // Draw expanded canvas
+    const ec = document.getElementById('expanded-canvas');
+    ec.width = 800;ec.height = 300;
+    drawBlockArt(ec, b);
+    playClickSound();
+  }
+
+  function closeExpanded(){
+    document.getElementById('expanded-overlay').classList.remove('visible');
+    playClickSound();
+  }
+  window.closeExpanded = closeExpanded;
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closeExpanded();
+  });
+
+  // --- Filters ---
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.block').forEach(b => {
+        b.style.display = (filter === 'all' || b.dataset.tag === filter) ? '' : 'none';
+      });
+      playClickSound();
+    });
+  });
+
+  // --- TARGET LOCK CURSOR ---
+  const lockCursor = document.getElementById('lock-cursor');
+  let lmx = 0, lmy = 0;
+
+  document.addEventListener('mousemove', e => {
+    lmx = e.clientX; lmy = e.clientY;
+    lockCursor.style.left = lmx + 'px';
+    lockCursor.style.top = lmy + 'px';
+  });
+
+  // Lock on interactive elements
+  document.querySelectorAll('.block,.filter-btn,#exp-close,#sound-toggle').forEach(el => {
+    el.addEventListener('mouseenter', () => lockCursor.classList.add('locked'));
+    el.addEventListener('mouseleave', () => lockCursor.classList.remove('locked'));
+  });
+
+  // --- AUDIO: Mechanical UI sounds ---
+  let audioCtx, soundOn = false;
+
+  function toggleAudio(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    soundOn = !soundOn;
+    document.getElementById('sound-toggle').textContent = soundOn ? '🔊' : '♪';
+  }
+  window.toggleAudio = toggleAudio;
+
+  function playClickSound(){
+    if(!soundOn || !audioCtx) return;
+    // Mechanical click
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 1200;
+    gain.gain.value = 0.03;
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+
+    // Low thud
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.value = 80;
+    gain2.gain.value = 0.05;
+    gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start();
+    osc2.stop(audioCtx.currentTime + 0.1);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Nuclear Energy - 2026 Updates</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00e5ff;
+            /* Cyan / Reactor Blue */
+            --secondary: #ffba08;
+            /* Amber / Energy */
+            --danger: #ff0055;
+            /* Hot Pink / Reaction */
+            --bg-color: #040814;
+            /* Very dark navy */
+            --glass-bg: rgba(4, 8, 20, 0.6);
+            --glass-border: rgba(0, 229, 255, 0.2);
+            --text-main: #e0f2fe;
+            --text-muted: #8ba2b5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: transparent;
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 3D Canvas Background */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            z-index: -1;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3,
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text-main);
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(4, 8, 20, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        nav .logo::before {
+            content: '';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle, var(--primary) 20%, transparent 80%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Utility Components */
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
+            transition: all 0.4s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: rgba(0, 229, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            padding: 8rem 5% 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Hero Section */
+        .hero {
+            align-items: flex-start;
+            max-width: 900px;
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            max-width: 700px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Info Grid Section */
+        .info {
+            align-items: center;
+            background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.03), transparent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1300px;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, var(--secondary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+        }
+
+        .card .icon {
+            font-size: 2rem;
+            color: var(--secondary);
+            text-shadow: 0 0 10px var(--secondary);
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .timeline-container {
+            max-width: 1000px;
+            width: 100%;
+            border-left: 2px solid rgba(0, 229, 255, 0.3);
+            padding-left: 3rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .timeline-item {
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -3.4rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
+        }
+
+        .timeline-content {
+            background: linear-gradient(135deg, rgba(4, 8, 20, 0.9), rgba(0, 229, 255, 0.05));
+            padding: 2.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .timeline-content h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .timeline-date {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            align-items: center;
+            min-height: auto;
+            padding-bottom: 8rem;
+            padding-top: 8rem;
+        }
+
+        .quiz-container {
+            background: rgba(4, 8, 20, 0.8);
+            border: 1px solid var(--primary);
+            padding: 4rem;
+            border-radius: 12px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.05);
+            position: relative;
+        }
+
+        .quiz-container::before {
+            content: '[ REACTOR DIAGNOSTICS ]';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            padding: 0 15px;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        .question {
+            font-size: 1.6rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .option-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 1.2rem 1.5rem;
+            border-radius: 6px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option-btn::before {
+            content: '✓';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--text-muted);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 0.8rem;
+            color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 229, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .option-btn.correct {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .option-btn.correct::before {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .option-btn.wrong {
+            background: rgba(255, 0, 85, 0.1);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .option-btn.wrong::before {
+            content: '✕';
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 1.5rem;
+        }
+
+        .progress {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+        }
+
+        #score-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .final-score-display {
+            font-size: 4rem;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+            margin: 2rem 0;
+        }
+
+        /* Scroll Animations */
+        .hidden {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 {
+            transition-delay: 0.15s;
+        }
+
+        .delay-2 {
+            transition-delay: 0.3s;
+        }
+
+        .delay-3 {
+            transition-delay: 0.45s;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.8);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .quiz-container {
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 2.8rem;
+            }
+
+            .timeline-container {
+                padding-left: 1.5rem;
+            }
+
+            .timeline-item::before {
+                left: -1.9rem;
+            }
+
+            section {
+                padding-top: 6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 3D Canvas Background -->
+    <div id="webgl-container"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">REAC_TOR</a>
+        <div class="nav-links">
+            <a href="#milestones">News & Updates</a>
+            <a href="#timeline">Timeline</a>
+            <a href="#quiz">Diagnostics</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero hidden">
+        <h1>India's Nuclear<br>Renaissance</h1>
+        <p>A transformative era in energy security. India accelerates towards its monumental vision of 100 GW of nuclear
+            capacity by 2047, achieving historic milestones in fast breeder technology and sweeping legislative reforms
+            to fuel a net-zero future.</p>
+        <div style="margin-top: 2rem; display: flex; gap: 1.5rem; flex-wrap: wrap;">
+            <a href="#milestones" class="btn">Initialize Briefing</a>
+            <a href="#quiz" class="btn" style="border-color: var(--secondary); color: var(--secondary);">Run
+                Diagnostics</a>
+        </div>
+    </section>
+
+    <!-- Info Section (News) -->
+    <section id="milestones" class="info">
+        <h2 class="hidden">Current Intelligence: April 2026</h2>
+        <p class="hidden delay-1" style="text-align: center; max-width: 800px; margin: 0 auto 3.5rem auto;">Latest
+            developments projecting India into the next stage of autonomous, clean energy production, highlighted by
+            indigenously developed advanced reactor technologies.</p>
+
+        <div class="grid">
+            <div class="card hidden delay-1">
+                <h3><span class="icon">⚛️</span> PFBR Criticality</h3>
+                <p>On April 6, 2026, the <span class="highlight">500 MWe Prototype Fast Breeder Reactor (PFBR)</span> at
+                    Kalpakkam achieved its historic first criticality. This self-sustaining chain reaction officially
+                    marks India's entry into the crucial second stage of its 3-stage nuclear programme.</p>
+                <p>India is now the second nation globally (after Russia) to operate a commercial fast breeder reactor,
+                    producing more fissile material than it consumes.</p>
+            </div>
+            <div class="card hidden delay-2">
+                <h3><span class="icon">📜</span> The SHANTI Act</h3>
+                <p>The <span class="highlight">SHANTI Bill</span> (Sustainable Harnessing and Advancement of Nuclear
+                    Energy for Transforming India), passed in late 2025, completely overhauls the nation's nuclear legal
+                    framework.</p>
+                <p>Replacing decades-old laws, it opens the sector for the first time to private sector investment,
+                    joint ventures, and direct foreign investment in plant construction and operation.</p>
+            </div>
+            <div class="card hidden delay-3">
+                <h3><span class="icon">🔋</span> BSRs & 100 GW Target</h3>
+                <p>To meet the monumental Net-Zero 2070 target, the government aims for <span class="highlight">100 GW
+                        of installed nuclear capacity by 2047</span>. Current capacity stands at roughly 8.78 GW.</p>
+                <p>A massive pipeline of <span class="highlight">Bharat Small Reactors (BSRs)</span> has been approved,
+                    with plans to make at least five 220 MWe modular units fully operational by 2033 via NTPC and
+                    international partnerships.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section" id="timeline">
+        <h2 class="hidden">Strategic Progression</h2>
+
+        <div class="timeline-container">
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <div class="timeline-date">April 6, 2026</div>
+                    <h3>PFBR Achieves First Criticality</h3>
+                    <p>The 500 MWe Prototype Fast Breeder Reactor at Kalpakkam initiated a self-sustaining nuclear chain
+                        reaction, unlocking Stage 2 of India's nuclear blueprint and paving the way to utilize vast
+                        thorium reserves.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-2">
+                <div class="timeline-content">
+                    <div class="timeline-date">April 2026</div>
+                    <h3>NTPC & EDF Strategic Pact</h3>
+                    <p>State-run giant NTPC signed a major agreement with France's EDF to joint-develop expanding
+                        nuclear capacities, signalling massive corporate mobilization post-legislative reforms.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-3">
+                <div class="timeline-content">
+                    <div class="timeline-date">December 2025</div>
+                    <h3>Enactment of SHANTI Act</h3>
+                    <p>Parliament passed the SHANTI Bill, dismantling the 1962 Atomic Energy Act restrictions, actively
+                        inviting private capital and restructuring civil liability to accelerate reactor deployments.
+                    </p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <div class="timeline-date">Projected 2033</div>
+                    <h3>First BSR Fleet Operational</h3>
+                    <p>The targeted deadline for the first five indigenously designed Bharat Small Reactors (220 MWe
+                        each) to come online, acting as flexible baseload power to replace aging coal grids.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="quiz-section">
+        <h2 class="hidden">Protocol Diagnostics</h2>
+        <p class="hidden delay-1" style="text-align: center; max-width: 600px; margin: 0 auto 3rem auto;">Test your
+            clearance level regarding India's current nuclear energy initiatives.</p>
+
+        <div class="quiz-container hidden delay-2">
+
+            <div id="quiz-ui">
+                <div class="question" id="question-text">Loading diagnostic parameters...</div>
+                <div class="options" id="options-container">
+                    <!-- Options injected here -->
+                </div>
+                <div class="quiz-footer">
+                    <div class="progress">SEQ: <span id="current-q">1</span>/<span id="total-q">4</span></div>
+                    <button class="btn" id="next-btn"
+                        style="display:none; padding: 0.8rem 1.5rem; font-size: 0.9rem;">Next Sequence</button>
+                </div>
+            </div>
+
+            <!-- Score UI -->
+            <div id="score-screen">
+                <h3 style="font-size: 2rem; color: #fff;">Diagnostics Complete</h3>
+                <div class="final-score-display"><span id="final-score">0</span> / <span id="total-score">4</span></div>
+                <p style="margin-bottom: 2rem;" id="score-feedback">Processing proficiency metrics...</p>
+                <button class="btn" onclick="location.reload()"
+                    style="border-color: var(--secondary); color: var(--secondary);">Reboot Sequence</button>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 REAC_TOR SYSTEM. ENCRYPTED.</p>
+    </footer>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Application Logic -->
+    <script>
+        // --- SCROLL ANIMATIONS ---
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+
+        // --- QUIZ LOGIC ---
+        const questions = [
+            {
+                q: "What massive milestone did the PFBR at Kalpakkam achieve on April 6, 2026?",
+                opts: [
+                    "Grid synchronization",
+                    "First Criticality (self-sustaining chain reaction)",
+                    "Decommissioning",
+                    "Transition to Thorium fuel"
+                ],
+                ans: 1
+            },
+            {
+                q: "What is India's long-term nuclear capacity target by the year 2047?",
+                opts: ["50 GW", "75 GW", "100 GW", "150 GW"],
+                ans: 2
+            },
+            {
+                q: "The SHANTI Act (passed in Dec 2025) significantly impacts the sector by:",
+                opts: [
+                    "Banning all foreign imports of uranium",
+                    "Shutting down older generation reactors",
+                    "Opening the nuclear sector to private and foreign investment",
+                    "Mandating only Small Modular Reactors be built"
+                ],
+                ans: 2
+            },
+            {
+                q: "Which state-run entity recently signed an agreement with France's EDF to joint-develop nuclear power projects?",
+                opts: ["NTPC", "ONGC", "Coal India", "BHEL"],
+                ans: 0
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const qText = document.getElementById('question-text');
+        const optionsBox = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+        const currentQSpan = document.getElementById('current-q');
+        const totalQSpan = document.getElementById('total-q');
+
+        const quizUI = document.getElementById('quiz-ui');
+        const scoreUI = document.getElementById('score-screen');
+        const finalScoreSpan = document.getElementById('final-score');
+        const totalScoreSpan = document.getElementById('total-score');
+        const scoreFeedback = document.getElementById('score-feedback');
+
+        totalQSpan.textContent = questions.length;
+        totalScoreSpan.textContent = questions.length;
+
+        function loadQuestion() {
+            nextBtn.style.display = 'none';
+            const currentObj = questions[currentQuestionIndex];
+            currentQSpan.textContent = currentQuestionIndex + 1;
+            qText.textContent = currentObj.q;
+            optionsBox.innerHTML = '';
+
+            currentObj.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(btn, index, currentObj.ans);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectOption(btn, selectedIndex, correctIndex) {
+            const allBtns = optionsBox.querySelectorAll('.option-btn');
+            allBtns.forEach(b => {
+                b.style.pointerEvents = 'none';
+                if (b.textContent === questions[currentQuestionIndex].opts[correctIndex]) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (selectedIndex === correctIndex) {
+                score++;
+            } else {
+                btn.classList.add('wrong');
+            }
+
+            nextBtn.style.display = 'inline-block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                quizUI.style.display = 'none';
+                scoreUI.style.display = 'block';
+                finalScoreSpan.textContent = score;
+
+                if (score === questions.length) {
+                    scoreFeedback.textContent = "Clearance Granted: Expert Level Knowledge Achieved.";
+                    scoreFeedback.style.color = "#00ff88";
+                } else if (score >= questions.length / 2) {
+                    scoreFeedback.textContent = "Clearance Partial: Review data streams and retry.";
+                    scoreFeedback.style.color = "var(--secondary)";
+                } else {
+                    scoreFeedback.textContent = "Clearance Denied: Knowledge parameters insufficient.";
+                    scoreFeedback.style.color = "var(--danger)";
+                }
+            }
+        });
+
+        loadQuestion();
+
+        // --- Three.js Realistic Reactor Core Background ---
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x040814, 0.0015);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+        camera.position.set(0, 50, 400);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Core central sphere (Nucleus / Plasma)
+        const coreGeometry = new THREE.SphereGeometry(40, 64, 64);
+        const coreMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00e5ff,
+            transparent: true,
+            opacity: 0.9,
+            wireframe: true
+        });
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        scene.add(core);
+
+        // Inner glow
+        const glowGeometry = new THREE.SphereGeometry(45, 32, 32);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.15,
+            blending: THREE.AdditiveBlending
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        scene.add(glow);
+
+        // Fuel Rods / Rings
+        const ringGroup = new THREE.Group();
+        scene.add(ringGroup);
+
+        const ringColors = [0x00e5ff, 0xffba08, 0x00e5ff];
+        for (let i = 0; i < 3; i++) {
+            const ringGeo = new THREE.TorusGeometry(100 + (i * 40), 1.5, 16, 100);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: ringColors[i],
+                transparent: true,
+                opacity: 0.4,
+                blending: THREE.AdditiveBlending
+            });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.random() * Math.PI;
+            ring.rotation.y = Math.random() * Math.PI;
+
+            // Add particles on rings
+            const ringParticlesGeo = new THREE.BufferGeometry();
+            const ringParticlesPos = [];
+            for (let j = 0; j < 50; j++) {
+                const angle = (j / 50) * Math.PI * 2;
+                const radius = 100 + (i * 40);
+                ringParticlesPos.push(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+            }
+            ringParticlesGeo.setAttribute('position', new THREE.Float32BufferAttribute(ringParticlesPos, 3));
+            const ringParticlesMat = new THREE.PointsMaterial({
+                color: ringColors[i],
+                size: 3,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            const ringParticles = new THREE.Points(ringParticlesGeo, ringParticlesMat);
+            ring.add(ringParticles);
+
+            ringGroup.add(ring);
+        }
+
+        // Ambient Particles (Cherenkov Radiation effect)
+        const particleCount = 1500;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesPositions = new Float32Array(particleCount * 3);
+        const particlesVelocities = [];
+
+        for (let i = 0; i < particleCount; i++) {
+            // Distribute mostly upwards in a cylindrical volume
+            const r = 300 * Math.sqrt(Math.random());
+            const theta = Math.random() * 2 * Math.PI;
+
+            particlesPositions[i * 3] = r * Math.cos(theta); // x
+            particlesPositions[i * 3 + 1] = (Math.random() - 0.5) * 800; // y
+            particlesPositions[i * 3 + 2] = r * Math.sin(theta); // z
+
+            particlesVelocities.push({
+                y: 0.5 + Math.random() * 2,
+                x: (Math.random() - 0.5) * 0.5
+            });
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+
+        // Create canvas texture for round particles
+        const circleCanvas = document.createElement('canvas');
+        circleCanvas.width = 16;
+        circleCanvas.height = 16;
+        const context = circleCanvas.getContext('2d');
+        const gradient = context.createRadialGradient(8, 8, 0, 8, 8, 8);
+        gradient.addColorStop(0, 'rgba(0, 229, 255, 1)');
+        gradient.addColorStop(1, 'rgba(0, 229, 255, 0)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 16, 16);
+        const particleTexture = new THREE.CanvasTexture(circleCanvas);
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 4,
+            map: particleTexture,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
+
+        // Interaction
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+        });
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Smooth camera movement
+            targetX = mouseX * 0.5;
+            targetY = mouseY * 0.5;
+            camera.position.x += (targetX - camera.position.x) * 0.02;
+            camera.position.y += (-targetY + 50 - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
+            // Core animations
+            core.rotation.y += 0.005;
+            core.rotation.x += 0.002;
+
+            // Pulsing effect
+            const scale = 1 + Math.sin(time * 2) * 0.05;
+            core.scale.set(scale, scale, scale);
+            glow.scale.set(scale, scale, scale);
+            glow.material.opacity = 0.15 + Math.sin(time * 4) * 0.05;
+
+            // Rings animation
+            ringGroup.children.forEach((ring, index) => {
+                ring.rotation.x += 0.001 * (index + 1);
+                ring.rotation.y += 0.002 * (3 - index);
+                ring.rotation.z += 0.003;
+            });
+
+            // Particles animation (flowing up)
+            const positions = particleSystem.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                // Move Y
+                positions[i * 3 + 1] += particlesVelocities[i].y;
+                // Move X slightly
+                positions[i * 3] += particlesVelocities[i].x;
+
+                // Reset at bottom
+                if (positions[i * 3 + 1] > 400) {
+                    positions[i * 3 + 1] = -400;
+                    const r = 300 * Math.sqrt(Math.random());
+                    const theta = Math.random() * 2 * Math.PI;
+                    positions[i * 3] = r * Math.cos(theta);
+                    positions[i * 3 + 2] = r * Math.sin(theta);
+                }
+            }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHROMA | Visionary Creative</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <!-- Three.js (for WebGL distortion/fluid) & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="chroma-cursor"></div>
+
+    <!-- WebGL Fluid Background -->
+    <canvas id="fluid-canvas"></canvas>
+
+    <nav class="c-nav">
+        <div class="logo">CHROMA.</div>
+        <div class="menu-toggle">
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+    </nav>
+
+    <!-- Overlay Menu -->
+    <div class="fullscreen-menu">
+        <div class="menu-links">
+            <a href="#work" data-text="Work">Work</a>
+            <a href="#studio" data-text="Studio">Studio</a>
+            <a href="#vision" data-text="Vision">Vision</a>
+            <a href="#contact" data-text="Contact">Contact</a>
+        </div>
+    </div>
+
+    <!-- Main Content mapped over the canvas -->
+    <main class="scroll-container">
+        <!-- Hero -->
+        <header class="hero-section">
+            <h1 class="mix-text">WE SHAPE <br><span class="outline">CULTURE</span></h1>
+            <p class="tagline">An independent creative agency engineering the digital avant-garde.</p>
+        </header>
+
+        <!-- Selected Work -->
+        <section class="work-showcase" id="work">
+            <h2 class="section-title">Selected Works</h2>
+            <div class="work-list">
+                <div class="w-item" data-img="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&q=80">
+                    <h3 class="w-title">NEON DRIFT</h3>
+                    <span class="w-cat">Brand Identity / 2026</span>
+                </div>
+                <div class="w-item" data-img="https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=1000&q=80">
+                    <h3 class="w-title">PRISM APPAREL</h3>
+                    <span class="w-cat">E-Commerce WebGL / 2025</span>
+                </div>
+                <div class="w-item" data-img="https://images.unsplash.com/photo-1563089145-599997674d42?w=1000&q=80">
+                    <h3 class="w-title">LUCID MINDS</h3>
+                    <span class="w-cat">Immersive Campaign / 2025</span>
+                </div>
+                <div class="w-item" data-img="https://images.unsplash.com/photo-1604871000636-074fa5117945?w=1000&q=80">
+                    <h3 class="w-title">VERTEX</h3>
+                    <span class="w-cat">Spatial Design UI / 2024</span>
+                </div>
+            </div>
+            <!-- Custom image reveal layer that follows mouse on hover -->
+            <div class="hover-reveal">
+                <img src="" alt="" class="hidden-img">
+            </div>
+        </section>
+
+        <!-- Vision Marquee -->
+        <section class="marquee-section" id="vision">
+            <div class="marquee-track">
+                <span>CREATE</span>
+                <span class="outline">DESTROY</span>
+                <span>REBUILD</span>
+                <span class="outline">INNOVATE</span>
+                <span>CREATE</span>
+                <span class="outline">DESTROY</span>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="c-footer" id="contact">
+            <h2>Let's break the rules.</h2>
+            <a href="mailto:hello@chroma.test" class="huge-email">HELLO@CHROMA</a>
+            <div class="f-bottom">
+                <p>&copy; 2026 Chroma Studio.</p>
+                <div class="f-socials">
+                    <a href="#">Instagram</a>
+                    <a href="#">X</a>
+                    <a href="#">Behance</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

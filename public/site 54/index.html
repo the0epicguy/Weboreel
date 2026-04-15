@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OASIS | Eco-Sanctuary</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="o-cursor"></div>
+
+    <!-- Organic shapes floating in background -->
+    <div class="bg-shape shape1"></div>
+    <div class="bg-shape shape2"></div>
+
+    <nav class="oasis-nav">
+        <div class="logo">OASIS.</div>
+        <div class="nav-links">
+            <a href="#">The Resort</a>
+            <a href="#">Villas</a>
+            <a href="#">Sustainability</a>
+        </div>
+        <button class="booking-btn">Book Stay</button>
+    </nav>
+
+    <!-- Hero with Organic mask -->
+    <header class="o-hero">
+        <div class="img-mask">
+            <img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=1200&q=80" alt="Resort View">
+        </div>
+        <div class="hero-text">
+            <h1>Nature,<br><span>Reimagined.</span></h1>
+            <p>An exclusive off-grid sanctuary nestled in the heart of the ancient forest. Disconnect to reconnect.</p>
+        </div>
+        <div class="scroll-down">
+            <span>Discover</span>
+            <div class="line"></div>
+        </div>
+    </header>
+
+    <!-- Features / Villas -->
+    <section class="villas-section">
+        <div class="v-wrapper">
+            <div class="v-text">
+                <h2>Treehouse Villas</h2>
+                <p>Suspended high within the canopy, our signature villas offer panoramic views while leaving a zero-carbon footprint on the forest floor below. Built with reclaimed timber and passively cooled.</p>
+                <a href="#" class="v-link">View Floorplans</a>
+            </div>
+            <div class="v-images">
+                <div class="img-wrap img1">
+                    <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80" alt="Villa Ext">
+                </div>
+                <div class="img-wrap img2">
+                    <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800&q=80" alt="Villa Int">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Horizontal Scrolling Values -->
+    <section class="values-section">
+        <div class="horizontal-scroll" id="horizontal-track">
+            
+            <div class="val-panel intro-panel">
+                <h2>Our Impact</h2>
+                <p>Luxury that gives back to the earth.</p>
+            </div>
+
+            <div class="val-panel content-panel">
+                <div class="cp-inner">
+                    <div class="cp-num">01</div>
+                    <h3>100% Solar Powered</h3>
+                    <p>Every watt of energy consumed is generated on-site through our integrated photovoltaic grid hidden within the canopy.</p>
+                </div>
+            </div>
+
+            <div class="val-panel content-panel">
+                <div class="cp-inner">
+                    <div class="cp-num">02</div>
+                    <h3>Regenerative Farming</h3>
+                    <p>Our restaurant sources 90% of its ingredients from our on-site organic permaculture gardens.</p>
+                </div>
+            </div>
+
+            <div class="val-panel content-panel">
+                <div class="cp-inner">
+                    <div class="cp-num">03</div>
+                    <h3>Water Stewardship</h3>
+                    <p>Advanced rainwater harvesting and greywater filtration systems ensure that not a single drop is wasted.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="o-footer">
+        <div class="f-content">
+            <h2>Ready to escape?</h2>
+            <button class="booking-btn large">Check Availability</button>
+        </div>
+        <div class="f-meta">
+            <div class="logo">OASIS.</div>
+            <div class="links">
+                <a href="#">Journal</a>
+                <a href="#">Contact</a>
+                <a href="#">Instagram</a>
+            </div>
+            <p>&copy; 2026 Oasis Eco Resort. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

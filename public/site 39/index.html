@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VORTEX | Enter The Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Custom Reticle Cursor -->
+    <div class="reticle">
+        <div class="reticle-dot"></div>
+        <div class="reticle-ring"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="game-nav">
+        <div class="brand">VORTEX</div>
+        <div class="links">
+            <a href="#roster">Roster</a>
+            <a href="#mechanics">Mechanics</a>
+            <a href="#map">World</a>
+            <a href="#season">Season Pass</a>
+        </div>
+        <button class="play-btn">PLAY FREE</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="cinematic-hero">
+        <canvas id="vortex-canvas"></canvas>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="glitch" data-text="VORTEX">VORTEX</h1>
+            <p class="season-text">SEASON 3 ENDS IN: <span id="countdown">14d 22h 11m</span></p>
+            <button class="charge-btn">
+                <span class="btn-text">JOIN THE BATTLE</span>
+                <div class="charge-fill"></div>
+            </button>
+        </div>
+    </header>
+
+    <!-- Lore Panorama -->
+    <section class="lore-section" id="lore">
+        <div class="panorama-layer layer-back"></div>
+        <div class="panorama-layer layer-mid"></div>
+        <div class="lore-text-wrap">
+            <p class="lore-text">In 2089, the megacorporations fell. What rose from the ashes was the VORTEX.</p>
+        </div>
+    </section>
+
+    <!-- Character Roster (CSS 3D Carousel) -->
+    <section class="roster-section" id="roster">
+        <div class="section-title">CHOOSE YOUR FIGHTER</div>
+        <div class="carousel-container">
+            <div class="carousel" id="roster-carousel">
+                <div class="character-card active">
+                    <div class="card-inner">
+                        <div class="card-front" style="background-image: url('https://images.unsplash.com/photo-1542382109-7f3747bf628a?w=800&q=80');">
+                            <div class="char-name">SPECTRE</div>
+                        </div>
+                        <div class="card-back">
+                            <h3>SPECTRE</h3>
+                            <p>Stealth / Assassin</p>
+                            <div class="stats">
+                                <div>Speed: 90</div>
+                                <div>Power: 60</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="character-card">
+                    <div class="card-inner">
+                        <div class="card-front" style="background-image: url('https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?w=800&q=80');">
+                            <div class="char-name">TITAN</div>
+                        </div>
+                        <div class="card-back">
+                            <h3>TITAN</h3>
+                            <p>Tank / Demolition</p>
+                            <div class="stats">
+                                <div>Speed: 30</div>
+                                <div>Power: 95</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="character-card">
+                    <div class="card-inner">
+                        <div class="card-front" style="background-image: url('https://images.unsplash.com/photo-1520696225962-4217117eec5e?w=800&q=80');">
+                            <div class="char-name">AURA</div>
+                        </div>
+                        <div class="card-back">
+                            <h3>AURA</h3>
+                            <p>Support / Tech</p>
+                            <div class="stats">
+                                <div>Speed: 70</div>
+                                <div>Power: 40</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-controls">
+                <button id="prev-btn">&lt; PREV</button>
+                <button id="next-btn">NEXT &gt;</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mechanics -->
+    <section class="mechanics-section" id="mechanics">
+        <div class="mechanics-grid">
+            <div class="mechanic-tile">
+                <h3>Gravity Shift</h3>
+                <div class="stat-bar"><div class="fill" style="width: 80%;"></div></div>
+            </div>
+            <div class="mechanic-tile">
+                <h3>Weapon Craft</h3>
+                <div class="stat-bar"><div class="fill" style="width: 60%;"></div></div>
+            </div>
+            <div class="mechanic-tile">
+                <h3>Zone Control</h3>
+                <div class="stat-bar"><div class="fill" style="width: 90%;"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download CTA -->
+    <section class="download-cta">
+        <h2>JOIN 12M+ PLAYERS</h2>
+        <div class="platforms">
+            <span>PC</span><span>PS5</span><span>XBOX</span>
+        </div>
+        <button class="play-btn large">DOWNLOAD NOW</button>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

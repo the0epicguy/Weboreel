@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTISAN | Small Batch Roasters</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,400;0,700;1,400&family=Karla:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Three.js (for 3D Beans) & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="a-cursor"></div>
+
+    <!-- Paper Texture overlay -->
+    <div class="paper-texture"></div>
+
+    <nav class="artisan-nav">
+        <div class="nav-links">
+            <a href="#shop">Shop</a>
+            <a href="#brew">Brew Guide</a>
+        </div>
+        <div class="logo">ARTISAN</div>
+        <div class="nav-links">
+            <a href="#">Our Story</a>
+            <a href="#">Cart</a>
+        </div>
+    </nav>
+
+    <!-- 3D Bean Hero -->
+    <header class="a-hero">
+        <canvas id="bean-canvas"></canvas>
+        <div class="hero-text">
+            <h1>Roasted for the <br><span>Purist.</span></h1>
+            <p>Direct trade, single-origin beans roasted to order in Brooklyn.</p>
+            <button class="btn-wood">Explore Roasts</button>
+        </div>
+    </header>
+
+    <!-- Product Reveal Section -->
+    <section class="shop-section" id="shop">
+        <div class="section-title text-center">
+            <h2>The Core Lineup</h2>
+            <p>Our foundational roasts. Always available.</p>
+        </div>
+        
+        <div class="coffee-grid">
+            <!-- Bag 1 -->
+            <div class="c-card">
+                <div class="bag-container">
+                    <img src="https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=600&q=80" alt="Ethiopia Yirgacheffe" class="bag-img">
+                    <!-- Hover reveal tasting notes overlay -->
+                    <div class="taste-overlay">
+                        <h4>Tasting Notes</h4>
+                        <ul>
+                            <li>Jasmine</li>
+                            <li>Bergamot</li>
+                            <li>Honey</li>
+                        </ul>
+                    </div>
+                </div>
+                <h3>Ethiopia Yirgacheffe</h3>
+                <span class="roast-level">Light Roast</span>
+                <span class="price">$22.00</span>
+            </div>
+
+            <!-- Bag 2 -->
+            <div class="c-card mt-down">
+                <div class="bag-container">
+                    <img src="https://images.unsplash.com/photo-1620864350792-bfccbe41d2fd?w=600&q=80" alt="Colombia Supremo" class="bag-img">
+                    <div class="taste-overlay">
+                        <h4>Tasting Notes</h4>
+                        <ul>
+                            <li>Milk Chocolate</li>
+                            <li>Caramel</li>
+                            <li>Almond</li>
+                        </ul>
+                    </div>
+                </div>
+                <h3>Colombia Supremo</h3>
+                <span class="roast-level">Medium Roast</span>
+                <span class="price">$19.00</span>
+            </div>
+
+            <!-- Bag 3 -->
+            <div class="c-card">
+                <div class="bag-container">
+                    <img src="https://images.unsplash.com/photo-1587049352847-8d4e8941552e?w=600&q=80" alt="Sumatra Mandheling" class="bag-img">
+                    <div class="taste-overlay">
+                        <h4>Tasting Notes</h4>
+                        <ul>
+                            <li>Dark Cocoa</li>
+                            <li>Tobacco</li>
+                            <li>Cedar</li>
+                        </ul>
+                    </div>
+                </div>
+                <h3>Sumatra Mandheling</h3>
+                <span class="roast-level">Dark Roast</span>
+                <span class="price">$20.00</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brew Guide Interactive -->
+    <section class="brew-section" id="brew">
+        <div class="brew-container">
+            <div class="b-left">
+                <h2>Perfect your <br>morning ritual.</h2>
+                <div class="brew-selector">
+                    <div class="b-option active" data-target="chemex">Chemex</div>
+                    <div class="b-option" data-target="french">French Press</div>
+                    <div class="b-option" data-target="espresso">Espresso</div>
+                </div>
+            </div>
+            <div class="b-right">
+                <div class="brew-content active" id="chemex">
+                    <h3>The Chemex Pour</h3>
+                    <div class="step"><span>1.</span> Grind 30g of coffee to a medium-coarse consistency.</div>
+                    <div class="step"><span>2.</span> Rinse filter and discard water.</div>
+                    <div class="step"><span>3.</span> 60g bloom for 45 seconds.</div>
+                    <div class="step"><span>4.</span> Pour to 500g in concentric circles.</div>
+                </div>
+                <div class="brew-content" id="french">
+                    <h3>The French Press</h3>
+                    <div class="step"><span>1.</span> Grind 25g of coffee coarsely.</div>
+                    <div class="step"><span>2.</span> Add water (400g) just off the boil.</div>
+                    <div class="step"><span>3.</span> Steep for 4 minutes.</div>
+                    <div class="step"><span>4.</span> Break the crust, skim, plunge, and pour.</div>
+                </div>
+                <div class="brew-content" id="espresso">
+                    <h3>The Espresso Pull</h3>
+                    <div class="step"><span>1.</span> Grind 18g very fine.</div>
+                    <div class="step"><span>2.</span> Distribute and tamp evenly.</div>
+                    <div class="step"><span>3.</span> Extract 36g of liquid.</div>
+                    <div class="step"><span>4.</span> Target time: 25-30 seconds.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="a-footer">
+        <div class="newsletter-wood">
+            <h3>Subscribe for fresh drops.</h3>
+            <div class="input-line">
+                <input type="email" placeholder="Your email address">
+                <button>Sign Up</button>
+            </div>
+        </div>
+        <div class="f-bottom">
+            <div class="logo">ARTISAN</div>
+            <p>&copy; 2026 Artisan Roasters. Built with care.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

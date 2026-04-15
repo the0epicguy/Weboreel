@@ -1,0 +1,173 @@
+:root {
+    --black: #050505;
+    --dark-grey: #1a1a1a;
+    --grey: #444444;
+    --silver: #b3b3b3;
+    --white: #ffffff;
+    --border: #333333;
+    --font-heading: 'Oswald', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none; /* Custom Reticle */
+}
+
+body {
+    background-color: var(--black);
+    color: var(--silver);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+}
+
+/* Custom Reticle */
+.reticle {
+    position: fixed;
+    width: 40px; height: 40px;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease-out;
+}
+.reticle-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 4px; height: 4px;
+    background: var(--white);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+.reticle-ring {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 1px solid var(--grey);
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+.reticle.target .reticle-ring {
+    border-color: var(--white);
+    transform: scale(0.6) rotate(45deg);
+    border-radius: 0;
+}
+
+/* Typography */
+h1, h2, h3, .brand {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    color: var(--white);
+}
+
+/* Navigation */
+.game-nav {
+    position: fixed;
+    top: 0; width: 100%;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    z-index: 100;
+}
+.brand { font-size: 2rem; font-weight: 700; letter-spacing: 4px; }
+.links a { color: var(--silver); text-decoration: none; margin: 0 20px; font-weight: 500; font-family: var(--font-heading); letter-spacing: 1px; transition: color 0.2s; }
+.links a:hover { color: var(--white); }
+
+.play-btn {
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    padding: 10px 30px;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+    transition: transform 0.2s;
+}
+.play-btn:hover { transform: scale(1.05); background: var(--silver); }
+.play-btn.large { padding: 20px 60px; font-size: 1.5rem; margin-top: 30px; }
+
+/* Hero */
+.cinematic-hero {
+    height: 100vh; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+#vortex-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, transparent 20%, var(--black) 100%); z-index: 2; }
+.hero-content { position: relative; z-index: 3; text-align: center; }
+
+h1.glitch {
+    font-size: 8rem; margin: 0; letter-spacing: 10px; position: relative;
+}
+h1.glitch::before, h1.glitch::after {
+    content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--black);
+}
+h1.glitch::before { left: 2px; text-shadow: -2px 0 var(--grey); animation: glitch-anim 2s infinite linear alternate-reverse; clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); }
+h1.glitch::after { left: -2px; text-shadow: -2px 0 var(--white); animation: glitch-anim 3s infinite linear alternate-reverse; clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); }
+
+@keyframes glitch-anim {
+    0% { clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%); }
+    20% { clip-path: polygon(0 80%, 100% 80%, 100% 90%, 0 90%); }
+    40% { clip-path: polygon(0 30%, 100% 30%, 100% 40%, 0 40%); }
+    60% { clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%); }
+    100% { clip-path: polygon(0 40%, 100% 40%, 100% 50%, 0 50%); }
+}
+
+.season-text { font-family: var(--font-heading); letter-spacing: 2px; margin-bottom: 30px; font-size: 1.2rem; }
+
+.charge-btn {
+    position: relative; background: transparent; border: 2px solid var(--grey);
+    padding: 15px 40px; color: var(--white); font-family: var(--font-heading);
+    font-size: 1.2rem; letter-spacing: 3px; overflow: hidden;
+}
+.charge-fill { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: var(--white); transition: left 0.3s; z-index: -1; }
+.charge-btn:hover .charge-fill { left: 0; }
+.charge-btn:hover { color: var(--black); }
+
+/* Lore Scroll */
+.lore-section { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); overflow: hidden; }
+.panorama-layer { position: absolute; top: 0; bottom: 0; width: 200%; background-size: cover; background-position: center; opacity: 0.3; }
+.layer-back { background-image: radial-gradient(circle, var(--grey) 10%, transparent 11%), radial-gradient(circle, var(--grey) 10%, transparent 11%); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
+.lore-text { font-size: 2.5rem; text-align: center; max-width: 800px; color: var(--white); font-family: var(--font-heading); position: relative; z-index: 10; text-transform: uppercase; line-height: 1.4; }
+
+/* Roster Carousel */
+.roster-section { padding: 100px 0; background: var(--black); overflow: hidden; }
+.section-title { text-align: center; font-size: 3rem; margin-bottom: 50px; letter-spacing: 5px; }
+
+.carousel-container { perspective: 1000px; width: 100%; height: 500px; position: relative; display: flex; justify-content: center; align-items: center; }
+.carousel { position: relative; width: 300px; height: 400px; transform-style: preserve-3d; transition: transform 0.5s; }
+
+.character-card { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.5s, opacity 0.5s; opacity: 0.5; }
+.character-card.active { opacity: 1; transform: translateZ(100px) scale(1.1); z-index: 10; }
+.character-card.prev { transform: translateX(-150px) translateZ(-100px) rotateY(20deg); z-index: 5; }
+.character-card.next { transform: translateX(150px) translateZ(-100px) rotateY(-20deg); z-index: 5; }
+
+.card-inner { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s; position: relative; }
+.character-card.active:hover .card-inner { transform: rotateY(180deg); }
+
+.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border: 1px solid var(--grey); background-size: cover; background-position: center; border-radius: 4px; }
+.card-front::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+.char-name { position: absolute; bottom: 20px; left: 20px; font-family: var(--font-heading); font-size: 2rem; color: var(--white); z-index: 2; }
+.card-back { background: var(--dark-grey); transform: rotateY(180deg); padding: 30px; display: flex; flex-direction: column; justify-content: center; }
+.stat-bar { height: 4px; background: var(--black); margin-top: 5px; width: 100%; }
+.stat-bar .fill { height: 100%; background: var(--white); }
+
+.carousel-controls { position: absolute; bottom: -50px; width: 100%; display: flex; justify-content: center; gap: 20px; }
+.carousel-controls button { background: transparent; border: none; color: var(--silver); font-family: var(--font-heading); font-size: 1.2rem; transition: color 0.2s; }
+.carousel-controls button:hover { color: var(--white); }
+
+/* Mechanics grid */
+.mechanics-section { padding: 100px 50px; }
+.mechanics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1200px; margin: 0 auto; }
+.mechanic-tile { background: var(--dark-grey); padding: 40px; border: 1px solid var(--border); transition: transform 0.3s; }
+.mechanic-tile h3 { font-size: 1.5rem; margin-bottom: 20px; }
+.mechanic-tile:hover { transform: translateY(-10px); border-color: var(--white); }
+
+/* Download */
+.download-cta { height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, var(--dark-grey) 0%, var(--black) 100%); border-top: 1px solid var(--border); text-align: center; }
+.platforms span { margin: 0 15px; font-family: var(--font-heading); color: var(--silver); letter-spacing: 2px; }

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Archery Pro - Realistic Arrow Physics</title>
+    <style>
+        :root {
+            --bg-top: #0a0e17;
+            --bg-bottom: #1a2f4c;
+            --panel-bg: rgba(20, 30, 50, 0.6);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --text-color: #e0f0ff;
+            --accent: #FF5722;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+            user-select: none;
+            touch-action: none;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlays */
+        .ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 15px 25px;
+            color: var(--text-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            color: #8fa3c0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .score-val {
+            color: #4CAF50;
+            font-size: 1.5rem;
+        }
+
+        /* Weapon Select Info */
+        .bow-info {
+            text-align: right;
+        }
+        
+        .bow-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #FFC107;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .bow-desc {
+            font-size: 0.85rem;
+            color: #8fa3c0;
+            max-width: 200px;
+        }
+
+        /* Wind Indicator */
+        .wind-panel {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .wind-label {
+            font-size: 0.85rem;
+            color: #8fa3c0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .wind-arrow-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wind-arrow {
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, #fff, transparent);
+            position: absolute;
+            transform-origin: center;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wind-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 8px solid #fff;
+        }
+
+        .wind-speed {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            color: #00E676;
+        }
+
+        /* Notifications */
+        #notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 20px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        #notification.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .notif-sub {
+            font-size: 1.2rem;
+            color: #FFC107;
+            margin-top: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="ui-container">
+        <div class="panel">
+            <div class="stat-row">
+                <span class="stat-label">Level</span>
+                <span class="stat-value" id="ui-level">1</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Score</span>
+                <span class="stat-value score-val" id="ui-score">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Arrows</span>
+                <span class="stat-value score-val" id="ui-arrows">3</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Round Score</span>
+                <span class="stat-value" id="ui-round-score">0 / 10</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Next Bow</span>
+                <span class="stat-value" id="ui-next-bow">100</span>
+            </div>
+        </div>
+
+        <div class="panel wind-panel">
+            <span class="wind-label">Wind</span>
+            <div class="wind-arrow-container">
+                <div class="wind-arrow" id="ui-wind-arrow"></div>
+            </div>
+            <span class="wind-speed" id="ui-wind-speed">0.0 m/s</span>
+        </div>
+
+        <div class="panel bow-info">
+            <div class="bow-name" id="ui-bow-name">Indian Bow</div>
+            <div class="bow-desc" id="ui-bow-desc">Basic bow. High wind drift.</div>
+            <div id="unlockText" style="color: #4CAF50; font-size: 0.8rem; margin-top:5px; display:none;">New Bow Unlocked!</div>
+        </div>
+    </div>
+
+    <div id="notification">
+        <div id="notif-title">BULLSEYE!</div>
+        <div class="notif-sub" id="notif-sub">+10 Points</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // UI Elements
+        const uiLevel = document.getElementById('ui-level');
+        const uiScore = document.getElementById('ui-score');
+        const uiWindArrow = document.getElementById('ui-wind-arrow');
+        const uiWindSpeed = document.getElementById('ui-wind-speed');
+        const uiBowName = document.getElementById('ui-bow-name');
+        const uiBowDesc = document.getElementById('ui-bow-desc');
+        const uiNextBow = document.getElementById('ui-next-bow');
+        const uiArrows = document.getElementById('ui-arrows');
+        const uiRoundScore = document.getElementById('ui-round-score');
+        const unlockText = document.getElementById('unlockText');
+        const notification = document.getElementById('notification');
+        const notifTitle = document.getElementById('notif-title');
+        const notifSub = document.getElementById('notif-sub');
+
+        let width, height;
+        let dpr = window.devicePixelRatio || 1;
+
+        // Entities
+        let archer = {
+            x: 150,
+            y: 0
+        };
+
+        let target = {
+            x: 0,
+            y: 0,
+            radius: 80,
+            moving: false,
+            speedY: 0,
+            dirY: 1
+        };
+
+        let MAX_DRAW_DIST = 150;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+
+            archer.x = Math.max(60, width * 0.15);
+            archer.y = height - 120;
+            target.x = Math.max(width - 150, width * 0.85);
+            target.radius = Math.min(80, Math.max(30, width * 0.08));
+            if(target.y === 0) target.y = height / 2;
+            
+            MAX_DRAW_DIST = Math.min(150, width * 0.25);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Game Configuration & State
+        const BOWS = {
+            INDIAN: { 
+                id: 'INDIAN',
+                name: 'Indian Bow', 
+                desc: 'Traditional. Low power, high wind drift.',
+                powerMult: 1.0, 
+                windResist: 0.1,  // 10% resist (90% affected)
+                unlockPts: 0, 
+                color: '#8B4513' 
+            },
+            RECURVE: { 
+                id: 'RECURVE',
+                name: 'Recurve Bow', 
+                desc: 'Curved tips. Higher precision, medium wind drift.',
+                powerMult: 1.4, 
+                windResist: 0.4,  // 40% resist (60% affected)
+                unlockPts: 100, 
+                color: '#E0E0E0' 
+            },
+            COMPOUND: { 
+                id: 'COMPOUND',
+                name: 'Compound Bow', 
+                desc: 'Mechanically assisted. High power, low wind drift.',
+                powerMult: 2.0, 
+                windResist: 0.8, // 80% resist (20% affected)
+                unlockPts: 300, 
+                color: '#1E90FF' 
+            }
+        };
+
+        const STATE = {
+            score: 0,
+            level: 1,
+            levelScore: 0,
+            targetScore: 10,
+            arrowsLeft: 3,
+            activeBow: BOWS.INDIAN,
+            dragStart: null,
+            currentDrag: null,
+            isDrawing: false,
+            wind: { speed: 0, angle: 0 }, // speed in logical units
+            gravity: 0.15, // downward acceleration
+            arrows: [],
+            floatingTexts: []
+        };
+
+        // Visual parameters
+        const ARROW_LENGTH = 60;
+
+        function updateUI() {
+            uiLevel.textContent = STATE.level;
+            uiScore.textContent = STATE.score;
+            if(uiArrows) uiArrows.textContent = STATE.arrowsLeft > 0 ? STATE.arrowsLeft : 0;
+            if(uiRoundScore) uiRoundScore.textContent = STATE.levelScore + ' / ' + STATE.targetScore;
+            
+            // Wind rotation and speed display
+            // Convert angle to degrees for CSS rotation
+            let deg = STATE.wind.angle * (180/Math.PI);
+            uiWindArrow.style.transform = `rotate(${deg}deg)`;
+            uiWindSpeed.textContent = STATE.wind.speed.toFixed(1) + ' mph';
+
+            if (STATE.score >= BOWS.COMPOUND.unlockPts) {
+                uiNextBow.textContent = "MAX";
+            } else if (STATE.score >= BOWS.RECURVE.unlockPts) {
+                uiNextBow.textContent = BOWS.COMPOUND.unlockPts;
+            } else {
+                uiNextBow.textContent = BOWS.RECURVE.unlockPts;
+            }
+
+            uiBowName.textContent = STATE.activeBow.name;
+            uiBowDesc.textContent = STATE.activeBow.desc;
+            uiBowName.style.color = STATE.activeBow.color;
+        }
+
+        function generateWind() {
+            // Stronger winds at higher levels
+            let maxSpeed = Math.min(2 + STATE.level * 1.5, 25);
+            STATE.wind.speed = Math.random() * maxSpeed;
+            
+            // Bias towards blowing right or left mostly, not straight up/down
+            let angleBase = Math.random() > 0.5 ? 0 : Math.PI; // Right or Left
+            let variance = (Math.random() - 0.5) * Math.PI/2; // +/- 45 deg
+            STATE.wind.angle = angleBase + variance;
+            
+            updateUI();
+        }
+
+        function checkRoundEnd() {
+            STATE.arrowsLeft = -1; // prevent multiple triggers
+            
+            setTimeout(() => {
+                if (STATE.levelScore >= STATE.targetScore) {
+                    STATE.level++;
+                    showNotification('LEVEL CLEARED!', 'Nice shooting!', 2000);
+                } else {
+                    showNotification('LEVEL FAILED', 'Not enough points. Try again.', 2000);
+                }
+
+                STATE.arrowsLeft = 3;
+                STATE.levelScore = 0;
+                STATE.arrows = []; // Clear arrows from target
+                
+                generateWind();
+                
+                target.y = Math.random() * (height - 300) + 150;
+                if (STATE.level > 3) {
+                    target.moving = true;
+                    target.speedY = 1 + (STATE.level * 0.2);
+                } else {
+                    target.moving = false;
+                }
+                updateUI();
+            }, 1500);
+        }
+
+        function checkBowUnlock() {
+            if (STATE.activeBow.id === 'INDIAN' && STATE.score >= BOWS.RECURVE.unlockPts) {
+                STATE.activeBow = BOWS.RECURVE;
+                playUnlockAnim();
+            }
+            if (STATE.activeBow.id === 'RECURVE' && STATE.score >= BOWS.COMPOUND.unlockPts) {
+                STATE.activeBow = BOWS.COMPOUND;
+                playUnlockAnim();
+            }
+            updateUI();
+        }
+
+        function playUnlockAnim() {
+            unlockText.style.display = 'block';
+            setTimeout(() => { unlockText.style.display = 'none'; }, 3000);
+            showNotification('NEW BOW!', STATE.activeBow.name + ' unlocked!', 3000);
+        }
+
+        function showNotification(title, sub, duration) {
+            notifTitle.textContent = title;
+            notifSub.textContent = sub;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        function addFloatingText(text, x, y, color = '#FFF') {
+            STATE.floatingTexts.push({
+                text: text,
+                x: x,
+                y: y,
+                alpha: 1.0,
+                color: color
+            });
+        }
+
+        // Input Handling
+        function getPointerPos(e) {
+            if(e.touches) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startHandler(e) {
+            STATE.isDrawing = true;
+            let pos = getPointerPos(e);
+            STATE.dragStart = pos;
+            STATE.currentDrag = pos;
+        }
+
+        function moveHandler(e) {
+            if (!STATE.isDrawing) return;
+            STATE.currentDrag = getPointerPos(e);
+        }
+
+        function endHandler(e) {
+            if (!STATE.isDrawing) return;
+            STATE.isDrawing = false;
+            
+            // Calculate release velocity
+            let dx = STATE.dragStart.x - STATE.currentDrag.x;
+            let dy = STATE.dragStart.y - STATE.currentDrag.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist > 10 && STATE.arrowsLeft > 0) { // minimum draw
+                dist = Math.min(dist, MAX_DRAW_DIST);
+                let angle = Math.atan2(dy, dx);
+                
+                // Power scaling based on bow
+                let baseSpeed = (dist / MAX_DRAW_DIST) * 35; // Increased power
+                let launchSpeed = baseSpeed * STATE.activeBow.powerMult;
+
+                STATE.arrows.push({
+                    x: archer.x,
+                    y: archer.y,
+                    vx: Math.cos(angle) * launchSpeed,
+                    vy: Math.sin(angle) * launchSpeed,
+                    angle: angle,
+                    active: true,
+                    stuckAt: null // Coordinates on target if hit
+                });
+
+                STATE.arrowsLeft--;
+                updateUI();
+            }
+        }
+
+        // Event listeners
+        window.addEventListener('mousedown', startHandler);
+        window.addEventListener('mousemove', moveHandler);
+        window.addEventListener('mouseup', endHandler);
+        window.addEventListener('touchstart', startHandler);
+        window.addEventListener('touchmove', moveHandler);
+        window.addEventListener('touchend', endHandler);
+
+        // Rendering Functions
+        function drawArcher() {
+            // Draw a basic platform or indicator where archer stands
+            ctx.fillStyle = 'rgba(255,255,255, 0.1)';
+            ctx.beginPath();
+            ctx.ellipse(archer.x, archer.y + 40, 60, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bow
+            let bowDist = 0;
+            let angle = 0;
+
+            if (STATE.isDrawing && STATE.currentDrag) {
+                let dx = STATE.dragStart.x - STATE.currentDrag.x;
+                let dy = STATE.dragStart.y - STATE.currentDrag.y;
+                bowDist = Math.min(Math.sqrt(dx*dx + dy*dy), MAX_DRAW_DIST);
+                // Angle of the bow (pointing where arrow goes)
+                angle = Math.atan2(dy, dx);
+            }
+
+            ctx.save();
+            ctx.translate(archer.x, archer.y);
+            
+            if (bowDist > 0) {
+                ctx.rotate(angle);
+            }
+
+            // Draw Bow Body based on active type
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = STATE.activeBow.color;
+
+            if (STATE.activeBow.id === 'INDIAN') {
+                ctx.beginPath();
+                ctx.arc(0, 0, 50, -Math.PI/2, Math.PI/2);
+                ctx.stroke();
+            } else if (STATE.activeBow.id === 'RECURVE') {
+                ctx.beginPath();
+                ctx.moveTo(0, -60);
+                ctx.quadraticCurveTo(20, -30, 10, 0);
+                ctx.quadraticCurveTo(20, 30, 0, 60);
+                ctx.stroke();
+            } else if (STATE.activeBow.id === 'COMPOUND') {
+                // Main rigid body
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(-10, -50);
+                ctx.lineTo(15, -20);
+                ctx.lineTo(15, 20);
+                ctx.lineTo(-10, 50);
+                ctx.stroke();
+                // Cams (pulleys)
+                ctx.fillStyle = '#444';
+                ctx.beginPath(); ctx.arc(-10, -50, 8, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(-10, 50, 8, 0, Math.PI*2); ctx.fill();
+            }
+
+            // Draw string
+            let stringPullX = -bowDist * 0.4;
+            let topY = STATE.activeBow.id === 'COMPOUND' ? -50 : (STATE.activeBow.id === 'RECURVE' ? -60 : -50);
+            let botY = STATE.activeBow.id === 'COMPOUND' ? 50 : (STATE.activeBow.id === 'RECURVE' ? 60 : 50);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(0, topY);
+            ctx.lineTo(stringPullX, 0);
+            ctx.lineTo(0, botY);
+            ctx.stroke();
+
+            // Draw loaded arrow if drawing
+            if (STATE.isDrawing && bowDist > 0) {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(stringPullX, 0);
+                ctx.lineTo(stringPullX + ARROW_LENGTH, 0);
+                ctx.stroke();
+
+                // Arrow head
+                ctx.fillStyle = '#ccc';
+                ctx.beginPath();
+                ctx.moveTo(stringPullX + ARROW_LENGTH, 0);
+                ctx.lineTo(stringPullX + ARROW_LENGTH - 6, -4);
+                ctx.lineTo(stringPullX + ARROW_LENGTH - 6, 4);
+                ctx.fill();
+
+                // Fletchings (Feathers)
+                ctx.strokeStyle = '#FF5722';
+                ctx.beginPath();
+                ctx.moveTo(stringPullX + 5, 0);
+                ctx.lineTo(stringPullX, -4);
+                ctx.moveTo(stringPullX + 5, 0);
+                ctx.lineTo(stringPullX, 4);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+
+            // Draw trajectory path
+            if (STATE.isDrawing && bowDist > 10) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                
+                let baseSpeed = (bowDist / MAX_DRAW_DIST) * 35; 
+                let launchSpeed = baseSpeed * STATE.activeBow.powerMult;
+                let vx = Math.cos(angle) * launchSpeed;
+                let vy = Math.sin(angle) * launchSpeed;
+                let px = archer.x;
+                let py = archer.y;
+
+                // Predict out a few frames to show curve
+                // Compound shows longer trajectory, Indian shorter
+                let predictFrames = STATE.activeBow.id === 'COMPOUND' ? 45 : (STATE.activeBow.id === 'RECURVE' ? 30 : 20);
+
+                ctx.moveTo(px, py);
+                for(let i=0; i<predictFrames; i++) {
+                    vy += STATE.gravity;
+                    
+                    // Wind prediction (approximate)
+                    let windAffect = (1 - STATE.activeBow.windResist);
+                    let windVx = Math.cos(STATE.wind.angle) * (STATE.wind.speed * 0.05);
+                    let windVy = Math.sin(STATE.wind.angle) * (STATE.wind.speed * 0.05);
+                    
+                    vx += windVx * windAffect;
+                    vy += windVy * windAffect;
+
+                    px += vx;
+                    py += vy;
+                    ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function drawTarget() {
+            // Stand
+            ctx.fillStyle = '#3a2a1a';
+            ctx.fillRect(target.x - 5, target.y + target.radius, 10, height);
+            
+            const rings = [
+                { r: 1.0, color: '#fff', pts: 1 },
+                { r: 0.8, color: '#000', pts: 3 },
+                { r: 0.6, color: '#00aaff', pts: 5 },
+                { r: 0.4, color: '#ff0000', pts: 7 },
+                { r: 0.2, color: '#ffcc00', pts: 10 }
+            ];
+
+            // Outer thick ring
+            ctx.fillStyle = '#e0e0e0';
+            ctx.beginPath();
+            ctx.arc(target.x, target.y, target.radius + 5, 0, Math.PI*2);
+            ctx.fill();
+
+            // Scoring rings
+            for(let ring of rings) {
+                ctx.fillStyle = ring.color;
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.radius * ring.r, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Highlight bullseye
+            ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(target.x, target.y, target.radius * 0.2, 0, Math.PI*2);
+            ctx.stroke();
+        }
+
+        function drawArrows() {
+            for (let i = STATE.arrows.length - 1; i >= 0; i--) {
+                let a = STATE.arrows[i];
+
+                ctx.save();
+                ctx.translate(a.x, a.y);
+                ctx.rotate(a.angle);
+                
+                // Shaft
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(-ARROW_LENGTH/2, 0);
+                ctx.lineTo(ARROW_LENGTH/2, 0);
+                ctx.stroke();
+
+                // Head
+                ctx.fillStyle = '#ccc';
+                ctx.beginPath();
+                ctx.moveTo(ARROW_LENGTH/2, 0);
+                ctx.lineTo(ARROW_LENGTH/2 - 6, -4);
+                ctx.lineTo(ARROW_LENGTH/2 - 6, 4);
+                ctx.fill();
+
+                // Fletching
+                ctx.strokeStyle = '#FF5722';
+                ctx.beginPath();
+                ctx.moveTo(-ARROW_LENGTH/2 + 5, 0);
+                ctx.lineTo(-ARROW_LENGTH/2, -4);
+                ctx.moveTo(-ARROW_LENGTH/2 + 5, 0);
+                ctx.lineTo(-ARROW_LENGTH/2, 4);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        function drawFloatingTexts() {
+            ctx.font = 'bold 24px Inter';
+            ctx.textAlign = 'center';
+            for (let i = STATE.floatingTexts.length - 1; i >= 0; i--) {
+                let ft = STATE.floatingTexts[i];
+                ctx.fillStyle = ft.color;
+                ctx.globalAlpha = ft.alpha;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                
+                ft.y -= 1;
+                ft.alpha -= 0.02;
+                if (ft.alpha <= 0) {
+                    STATE.floatingTexts.splice(i, 1);
+                }
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        function detectCollision(arrow) {
+            // Front tip of the arrow
+            let tipX = arrow.x + Math.cos(arrow.angle) * (ARROW_LENGTH/2);
+            let tipY = arrow.y + Math.sin(arrow.angle) * (ARROW_LENGTH/2);
+
+            // Distance to target center
+            let dx = tipX - target.x;
+            let dy = tipY - target.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist <= target.radius && tipX > target.x - 20) { // Rough front-hit check
+                arrow.active = false;
+                arrow.stuckAt = { x: dx, y: dy }; // store relative hit loc
+                
+                // Calculate score
+                let score = 0;
+                let color = '#fff';
+                let msg = '';
+                let ratio = dist / target.radius;
+
+                if (ratio <= 0.2) { score = 10; color = '#ffcc00'; msg = 'BULLSEYE!'; }
+                else if (ratio <= 0.4) { score = 7; color = '#ff0000'; msg = 'Great!'; }
+                else if (ratio <= 0.6) { score = 5; color = '#00aaff'; msg = 'Nice!'; }
+                else if (ratio <= 0.8) { score = 3; color = '#cccccc'; msg = 'Ok!'; }
+                else if (ratio <= 1.0) { score = 1; color = '#ffffff'; msg = 'Close!'; }
+
+                STATE.score += score;
+                STATE.levelScore += score;
+                addFloatingText('+' + score, tipX, tipY - 20, color);
+                
+                if(score === 10) {
+                    showNotification('BULLSEYE!', '+10 Points', 1500);
+                }
+
+                checkBowUnlock();
+                updateUI();
+                return true;
+            }
+            return false;
+        }
+
+        // Main Loop
+        function update() {
+            // Update target movement if applicable
+            if (target.moving) {
+                target.y += target.speedY * target.dirY;
+                if (target.y < 150 || target.y > height - 150) {
+                    target.dirY *= -1; // Bounce
+                }
+            }
+
+            // Update arrows
+            for (let i = STATE.arrows.length - 1; i >= 0; i--) {
+                let a = STATE.arrows[i];
+                if (a.active) {
+                    // Apply gravity
+                    a.vy += STATE.gravity;
+
+                    // Apply wind based on bow's wind resistance
+                    let windAffect = (1 - STATE.activeBow.windResist); // 1 = fully affected, 0 = no effect
+                    let windForceX = Math.cos(STATE.wind.angle) * (STATE.wind.speed * 0.05);
+                    let windForceY = Math.sin(STATE.wind.angle) * (STATE.wind.speed * 0.05);
+
+                    a.vx += windForceX * windAffect;
+                    a.vy += windForceY * windAffect;
+
+                    // Update position
+                    a.x += a.vx;
+                    a.y += a.vy;
+
+                    // Update angle based on velocity vector
+                    a.angle = Math.atan2(a.vy, a.vx);
+
+                    // Check boundaries (ground or off-screen)
+                    if (a.y > height - 50 || a.x > width + 100 || a.x < -100) {
+                        a.active = false;
+                    } else {
+                        // Check collision
+                        detectCollision(a);
+                    }
+                } else if (a.stuckAt) {
+                    // Update position based on target if moving
+                    a.x = target.x + a.stuckAt.x;
+                    a.y = target.y + a.stuckAt.y;
+                }
+
+                // Cleanup old arrows
+                if (!a.active && !a.stuckAt && STATE.arrows.length > 20) {
+                    STATE.arrows.splice(i, 1);
+                }
+            }
+
+            // Check if round ended
+            if (STATE.arrowsLeft === 0) {
+                let anyActive = STATE.arrows.some(a => a.active);
+                if (!anyActive) {
+                    checkRoundEnd();
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(0, height - 100, width, 100);
+
+            drawArcher();
+            drawTarget();
+            drawArrows();
+            drawFloatingTexts();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        // Initialize state
+        archer.y = height - 120; // Anchor to new ground level
+        generateWind();
+        updateUI();
+        loop();
+
+    </script>
+</body>
+</html>

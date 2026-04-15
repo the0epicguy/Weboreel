@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="TERRAFORM - A physics simulation environment where you shape planetary evolution">
+<title>TERRAFORM — Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;600;800&family=Fira+Code:wght@300;400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0a0c12;
+  color:#c0c8d8;
+  font-family:'Exo 2',sans-serif;
+  overflow:hidden;
+  cursor:none;
+}
+
+#sim-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+
+/* Shape morphing cursor */
+#morph-cursor{
+  position:fixed;
+  width:20px;height:20px;
+  border:2px solid rgba(100,200,255,0.6);
+  pointer-events:none;
+  z-index:10000;
+  transform:translate(-50%,-50%);
+  transition:width 0.3s,height 0.3s,border-radius 0.3s,border-color 0.3s,transform 0.3s;
+  border-radius:50%;
+}
+
+#morph-cursor.slider-mode{
+  width:6px;height:30px;
+  border-radius:3px;
+  border-color:rgba(100,255,200,0.6);
+}
+
+#morph-cursor.button-mode{
+  width:40px;height:40px;
+  border-radius:8px;
+  border-color:rgba(255,200,100,0.6);
+}
+
+/* Control panels */
+#left-panel{
+  position:fixed;
+  left:0;top:0;
+  width:300px;height:100%;
+  z-index:100;
+  background:linear-gradient(to right,rgba(10,12,18,0.95),rgba(10,12,18,0.7),transparent);
+  padding:30px;
+  display:flex;flex-direction:column;
+  gap:15px;
+  overflow-y:auto;
+  pointer-events:auto;
+  scrollbar-width:none;
+}
+
+#left-panel::-webkit-scrollbar{display:none}
+
+.panel-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:800;
+  font-size:1.3rem;
+  letter-spacing:3px;
+  background:linear-gradient(90deg,#64c8ff,#64ffaa);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.panel-sub{
+  font-size:0.6rem;
+  letter-spacing:4px;
+  color:rgba(100,200,255,0.3);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+/* Control groups */
+.ctrl-group{
+  background:rgba(100,200,255,0.03);
+  border:1px solid rgba(100,200,255,0.06);
+  border-radius:12px;
+  padding:15px;
+}
+
+.ctrl-label{
+  font-family:'Fira Code',monospace;
+  font-size:0.6rem;
+  letter-spacing:2px;
+  color:rgba(100,200,255,0.5);
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex;justify-content:space-between;
+}
+
+.ctrl-value{
+  font-family:'Fira Code',monospace;
+  color:rgba(100,255,200,0.6);
+}
+
+.ctrl-slider{
+  width:100%;
+  -webkit-appearance:none;
+  height:4px;
+  background:rgba(100,200,255,0.1);
+  border-radius:2px;
+  outline:none;
+  margin:5px 0;
+}
+
+.ctrl-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;
+  background:#64c8ff;
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 0 10px rgba(100,200,255,0.4);
+}
+
+.ctrl-toggle{
+  display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;
+}
+
+.toggle-switch{
+  width:36px;height:18px;
+  background:rgba(100,200,255,0.15);
+  border-radius:9px;
+  position:relative;
+  transition:background 0.3s;
+}
+
+.toggle-switch.on{background:rgba(100,255,200,0.4)}
+
+.toggle-switch::after{
+  content:'';position:absolute;
+  top:2px;left:2px;
+  width:14px;height:14px;
+  background:#fff;border-radius:50%;
+  transition:transform 0.3s;
+}
+
+.toggle-switch.on::after{transform:translateX(18px)}
+
+.toggle-label{
+  font-size:0.75rem;
+  color:rgba(200,210,220,0.5);
+}
+
+/* Right info panel */
+#right-panel{
+  position:fixed;
+  right:0;top:0;
+  width:250px;height:100%;
+  z-index:100;
+  background:linear-gradient(to left,rgba(10,12,18,0.95),rgba(10,12,18,0.7),transparent);
+  padding:30px 25px;
+  display:flex;flex-direction:column;
+  gap:15px;
+  pointer-events:auto;
+}
+
+.readout{
+  background:rgba(100,200,255,0.03);
+  border:1px solid rgba(100,200,255,0.06);
+  border-radius:10px;
+  padding:12px;
+}
+
+.readout-label{
+  font-family:'Fira Code',monospace;
+  font-size:0.55rem;
+  letter-spacing:2px;
+  color:rgba(100,200,255,0.3);
+  text-transform:uppercase;
+}
+
+.readout-value{
+  font-family:'Fira Code',monospace;
+  font-size:1.4rem;
+  color:#64c8ff;
+  margin-top:5px;
+}
+
+.readout-unit{
+  font-size:0.6rem;
+  color:rgba(100,200,255,0.3);
+}
+
+.readout-bar{
+  width:100%;height:4px;
+  background:rgba(100,200,255,0.08);
+  border-radius:2px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+.readout-fill{
+  height:100%;
+  background:linear-gradient(90deg,#64c8ff,#64ffaa);
+  border-radius:2px;
+  transition:width 1s;
+}
+
+/* Bottom status */
+#status-bar{
+  position:fixed;
+  bottom:0;left:300px;right:250px;
+  z-index:100;
+  padding:15px 30px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to top,rgba(10,12,18,0.9),transparent);
+  pointer-events:auto;
+}
+
+.status-item{
+  font-family:'Fira Code',monospace;
+  font-size:0.6rem;
+  color:rgba(100,200,255,0.3);
+  letter-spacing:2px;
+}
+
+.status-item span{color:#64c8ff}
+
+#sim-speed{
+  display:flex;align-items:center;gap:8px;
+}
+
+.speed-btn{
+  background:transparent;
+  border:1px solid rgba(100,200,255,0.15);
+  color:rgba(100,200,255,0.5);
+  width:30px;height:24px;
+  font-family:'Fira Code',monospace;
+  font-size:0.65rem;
+  cursor:pointer;
+  border-radius:4px;
+  transition:all 0.3s;
+}
+
+.speed-btn:hover,.speed-btn.active{
+  border-color:#64c8ff;
+  color:#64c8ff;
+  background:rgba(100,200,255,0.05);
+}
+
+#sound-btn{
+  background:transparent;
+  border:1px solid rgba(100,200,255,0.15);
+  color:rgba(100,200,255,0.3);
+  padding:6px 14px;
+  font-family:'Fira Code',monospace;
+  font-size:0.55rem;
+  letter-spacing:2px;
+  cursor:pointer;
+  border-radius:4px;
+  transition:all 0.3s;
+}
+
+@media(max-width:1024px){
+  #left-panel{width:220px;padding:15px}
+  #right-panel{width:180px;padding:15px}
+  #status-bar{left:220px;right:180px}
+}
+
+@media(max-width:768px){
+  body{cursor:auto;overflow:auto}
+  #morph-cursor{display:none}
+  #left-panel{position:relative;width:100%;height:auto;background:rgba(10,12,18,0.98)}
+  #right-panel{position:relative;width:100%;height:auto;background:rgba(10,12,18,0.98);flex-direction:row;flex-wrap:wrap}
+  .readout{flex:1;min-width:140px}
+  #sim-canvas{position:relative;height:50vh}
+  #status-bar{position:relative;left:0;right:0;flex-wrap:wrap;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="morph-cursor"></div>
+<canvas id="sim-canvas"></canvas>
+
+<div id="left-panel">
+  <div>
+    <div class="panel-title">TERRAFORM</div>
+    <div class="panel-sub">Planetary Simulation Engine</div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Gravity <span class="ctrl-value" id="gravity-val">9.8</span></div>
+    <input type="range" class="ctrl-slider" id="gravity" min="0" max="30" value="9.8" step="0.1">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Atmosphere Density <span class="ctrl-value" id="atmo-val">1.0</span></div>
+    <input type="range" class="ctrl-slider" id="atmosphere" min="0" max="5" value="1" step="0.1">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Temperature <span class="ctrl-value" id="temp-val">288</span></div>
+    <input type="range" class="ctrl-slider" id="temperature" min="50" max="800" value="288">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Water Level <span class="ctrl-value" id="water-val">70</span></div>
+    <input type="range" class="ctrl-slider" id="water" min="0" max="100" value="70">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Rotation Speed <span class="ctrl-value" id="rotation-val">1.0</span></div>
+    <input type="range" class="ctrl-slider" id="rotation" min="0.1" max="10" value="1" step="0.1">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-label">Magnetic Field <span class="ctrl-value" id="mag-val">1.0</span></div>
+    <input type="range" class="ctrl-slider" id="magnetic" min="0" max="5" value="1" step="0.1">
+  </div>
+
+  <div class="ctrl-group">
+    <div class="ctrl-toggle" onclick="toggleLife()">
+      <div class="toggle-switch" id="life-toggle"></div>
+      <span class="toggle-label">Enable Life Simulation</span>
+    </div>
+    <div class="ctrl-toggle" onclick="toggleRings()">
+      <div class="toggle-switch" id="rings-toggle"></div>
+      <span class="toggle-label">Planetary Rings</span>
+    </div>
+    <div class="ctrl-toggle" onclick="toggleMoons()">
+      <div class="toggle-switch" id="moons-toggle"></div>
+      <span class="toggle-label">Moons</span>
+    </div>
+  </div>
+</div>
+
+<div id="right-panel">
+  <div style="font-size:0.65rem;letter-spacing:3px;color:rgba(100,200,255,0.4);text-transform:uppercase;width:100%">System Readouts</div>
+
+  <div class="readout">
+    <div class="readout-label">Habitability Index</div>
+    <div class="readout-value" id="hab-val">0.87</div>
+    <div class="readout-bar"><div class="readout-fill" id="hab-fill" style="width:87%"></div></div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label">Surface Pressure</div>
+    <div class="readout-value" id="press-val">101.3 <span class="readout-unit">kPa</span></div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label">Orbital Period</div>
+    <div class="readout-value" id="orbit-val">365.25 <span class="readout-unit">days</span></div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label">Mass</div>
+    <div class="readout-value" id="mass-val">5.97 <span class="readout-unit">×10²⁴ kg</span></div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label">Biodiversity</div>
+    <div class="readout-value" id="bio-val">0 <span class="readout-unit">species</span></div>
+    <div class="readout-bar"><div class="readout-fill" id="bio-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-label">Stability</div>
+    <div class="readout-value" id="stab-val">STABLE</div>
+  </div>
+</div>
+
+<div id="status-bar">
+  <div class="status-item">EPOCH: <span id="epoch-val">0</span></div>
+  <div id="sim-speed">
+    <span class="status-item">SPEED:</span>
+    <button class="speed-btn" data-speed="0.5">½×</button>
+    <button class="speed-btn active" data-speed="1">1×</button>
+    <button class="speed-btn" data-speed="2">2×</button>
+    <button class="speed-btn" data-speed="5">5×</button>
+  </div>
+  <button id="sound-btn" onclick="toggleSound()">◊ SND OFF</button>
+  <div class="status-item">FPS: <span id="fps-val">60</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  // --- Simulation state ---
+  const sim = {
+    gravity: 9.8,
+    atmosphere: 1.0,
+    temperature: 288,
+    water: 70,
+    rotation: 1.0,
+    magnetic: 1.0,
+    life: false,
+    rings: false,
+    moons: false,
+    speed: 1,
+    epoch: 0
+  };
+
+  // --- Shape morphing cursor ---
+  const morphCursor = document.getElementById('morph-cursor');
+  document.addEventListener('mousemove', e => {
+    morphCursor.style.left = e.clientX + 'px';
+    morphCursor.style.top = e.clientY + 'px';
+  });
+
+  document.querySelectorAll('.ctrl-slider').forEach(s => {
+    s.addEventListener('mouseenter', () => morphCursor.classList.add('slider-mode'));
+    s.addEventListener('mouseleave', () => morphCursor.classList.remove('slider-mode'));
+  });
+
+  document.querySelectorAll('.speed-btn,.ctrl-toggle,#sound-btn').forEach(b => {
+    b.addEventListener('mouseenter', () => morphCursor.classList.add('button-mode'));
+    b.addEventListener('mouseleave', () => morphCursor.classList.remove('button-mode'));
+  });
+
+  // --- Sliders ---
+  const sliders = {
+    gravity: { el: 'gravity', val: 'gravity-val' },
+    atmosphere: { el: 'atmosphere', val: 'atmo-val' },
+    temperature: { el: 'temperature', val: 'temp-val' },
+    water: { el: 'water', val: 'water-val' },
+    rotation: { el: 'rotation', val: 'rotation-val' },
+    magnetic: { el: 'magnetic', val: 'mag-val' }
+  };
+
+  Object.entries(sliders).forEach(([key, cfg]) => {
+    document.getElementById(cfg.el).addEventListener('input', e => {
+      sim[key] = parseFloat(e.target.value);
+      document.getElementById(cfg.val).textContent = sim[key];
+      updatePlanet();
+      playAdjustSound();
+    });
+  });
+
+  // Toggles
+  function toggleLife(){
+    sim.life = !sim.life;
+    document.getElementById('life-toggle').classList.toggle('on', sim.life);
+    playAdjustSound();
+  }
+  window.toggleLife = toggleLife;
+
+  function toggleRings(){
+    sim.rings = !sim.rings;
+    document.getElementById('rings-toggle').classList.toggle('on', sim.rings);
+    if(ringsObj) ringsObj.visible = sim.rings;
+    playAdjustSound();
+  }
+  window.toggleRings = toggleRings;
+
+  function toggleMoons(){
+    sim.moons = !sim.moons;
+    document.getElementById('moons-toggle').classList.toggle('on', sim.moons);
+    moonGroup.visible = sim.moons;
+    playAdjustSound();
+  }
+  window.toggleMoons = toggleMoons;
+
+  // Speed buttons
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sim.speed = parseFloat(btn.dataset.speed);
+    });
+  });
+
+  // --- THREE.JS: Planet simulation ---
+  const canvas = document.getElementById('sim-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0c12);
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 500);
+  camera.position.set(0, 3, 18);
+  camera.lookAt(0, 0, 0);
+
+  // Stars
+  const starCount = 3000;
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(starCount * 3);
+  for(let i = 0; i < starCount; i++){
+    starPos[i*3] = (Math.random()-0.5) * 400;
+    starPos[i*3+1] = (Math.random()-0.5) * 400;
+    starPos[i*3+2] = (Math.random()-0.5) * 400;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({
+    color: 0x88aacc, size: 0.3, transparent: true, opacity: 0.6
+  })));
+
+  // Sun light
+  const sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+  sunLight.position.set(50, 20, 30);
+  scene.add(sunLight);
+  scene.add(new THREE.AmbientLight(0x223344, 0.4));
+
+  // Planet
+  const planetGeo = new THREE.SphereGeometry(5, 64, 64);
+  const planetMat = new THREE.MeshStandardMaterial({
+    color: 0x4488aa,
+    metalness: 0.1,
+    roughness: 0.8
+  });
+  const planet = new THREE.Mesh(planetGeo, planetMat);
+  scene.add(planet);
+
+  // Atmosphere glow
+  const atmoGeo = new THREE.SphereGeometry(5.3, 32, 32);
+  const atmoMat = new THREE.MeshBasicMaterial({
+    color: 0x64c8ff,
+    transparent: true,
+    opacity: 0.08,
+    side: THREE.BackSide
+  });
+  const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+  scene.add(atmosphere);
+
+  // Rings
+  const ringGeo = new THREE.RingGeometry(7, 10, 64);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0x998877,
+    transparent: true,
+    opacity: 0.2,
+    side: THREE.DoubleSide
+  });
+  const ringsObj = new THREE.Mesh(ringGeo, ringMat);
+  ringsObj.rotation.x = Math.PI / 2.5;
+  ringsObj.visible = false;
+  scene.add(ringsObj);
+
+  // Moons
+  const moonGroup = new THREE.Group();
+  moonGroup.visible = false;
+  for(let i = 0; i < 3; i++){
+    const moonGeo = new THREE.SphereGeometry(0.3 + Math.random()*0.3, 16, 16);
+    const moonMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.9 });
+    const moon = new THREE.Mesh(moonGeo, moonMat);
+    moon.userData = { orbit: 8 + i * 2, speed: 0.3 + i * 0.2, offset: Math.random() * Math.PI * 2 };
+    moonGroup.add(moon);
+  }
+  scene.add(moonGroup);
+
+  // Update planet visuals based on sim state
+  function updatePlanet(){
+    // Color based on temperature
+    const t = sim.temperature;
+    if(t < 200) planetMat.color.setHSL(0.6, 0.5, 0.3); // frozen
+    else if(t < 350) planetMat.color.setHSL(0.55 - sim.water/500, 0.6, 0.35 + sim.water/500); // habitable
+    else if(t < 500) planetMat.color.setHSL(0.08, 0.7, 0.3); // hot
+    else planetMat.color.setHSL(0.02, 0.9, 0.25); // volcanic
+
+    // Atmosphere
+    atmoMat.opacity = sim.atmosphere * 0.08;
+    atmosphere.scale.setScalar(1 + sim.atmosphere * 0.06);
+
+    // Size based on gravity
+    const scale = 0.7 + sim.gravity / 15;
+    planet.scale.setScalar(scale);
+
+    // Readouts
+    const hab = calcHabitability();
+    document.getElementById('hab-val').textContent = hab.toFixed(2);
+    document.getElementById('hab-fill').style.width = (hab * 100) + '%';
+
+    const pressure = (sim.atmosphere * sim.gravity * 10.3).toFixed(1);
+    document.getElementById('press-val').innerHTML = `${pressure} <span class="readout-unit">kPa</span>`;
+
+    const mass = (5.97 * Math.pow(sim.gravity/9.8, 1.5)).toFixed(2);
+    document.getElementById('mass-val').innerHTML = `${mass} <span class="readout-unit">×10²⁴ kg</span>`;
+
+    const orbPeriod = (365.25 / sim.rotation).toFixed(1);
+    document.getElementById('orbit-val').innerHTML = `${orbPeriod} <span class="readout-unit">days</span>`;
+
+    // Stability
+    const stable = sim.gravity > 3 && sim.gravity < 20 && sim.temperature > 150 && sim.temperature < 500;
+    document.getElementById('stab-val').textContent = stable ? 'STABLE' : 'UNSTABLE';
+    document.getElementById('stab-val').style.color = stable ? '#64ffaa' : '#ff6464';
+  }
+
+  function calcHabitability(){
+    let h = 1;
+    // Temperature factor
+    const tDist = Math.abs(sim.temperature - 288) / 300;
+    h *= Math.max(0, 1 - tDist);
+    // Water factor
+    h *= 0.3 + (sim.water / 100) * 0.7;
+    // Atmosphere factor
+    h *= Math.min(sim.atmosphere / 0.5, 1) * (sim.atmosphere < 3 ? 1 : Math.max(0, 1-(sim.atmosphere-3)/2));
+    // Magnetic field
+    h *= Math.min(sim.magnetic, 1);
+    return Math.max(0, Math.min(1, h));
+  }
+
+  // Animation
+  let time = 0;
+  let frames = 0, lastFps = performance.now();
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt = 0.016 * sim.speed;
+    time += dt;
+    sim.epoch += dt;
+
+    document.getElementById('epoch-val').textContent = Math.floor(sim.epoch);
+
+    // Rotate planet
+    planet.rotation.y += 0.005 * sim.rotation * sim.speed;
+    atmosphere.rotation.y += 0.003 * sim.rotation * sim.speed;
+    ringsObj.rotation.z += 0.001 * sim.speed;
+
+    // Moons
+    moonGroup.children.forEach(m => {
+      const a = time * m.userData.speed + m.userData.offset;
+      m.position.set(
+        Math.cos(a) * m.userData.orbit,
+        Math.sin(a * 0.3) * 0.5,
+        Math.sin(a) * m.userData.orbit
+      );
+    });
+
+    // Life simulation
+    if(sim.life){
+      const hab = calcHabitability();
+      const bio = Math.floor(hab * 8700000 * Math.min(sim.epoch / 500, 1));
+      document.getElementById('bio-val').innerHTML = `${bio.toLocaleString()} <span class="readout-unit">species</span>`;
+      document.getElementById('bio-fill').style.width = Math.min(100, hab * 100) + '%';
+    } else {
+      document.getElementById('bio-val').innerHTML = `0 <span class="readout-unit">species</span>`;
+      document.getElementById('bio-fill').style.width = '0%';
+    }
+
+    // Camera gentle sway
+    camera.position.x = Math.sin(time * 0.05) * 2;
+    camera.position.y = 3 + Math.cos(time * 0.03) * 0.5;
+    camera.lookAt(0, 0, 0);
+
+    // FPS
+    frames++;
+    const now = performance.now();
+    if(now - lastFps > 1000){
+      document.getElementById('fps-val').textContent = frames;
+      frames = 0; lastFps = now;
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+  updatePlanet();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // --- AUDIO: Ambient & reactive ---
+  let audioCtx, soundOn = false;
+
+  function toggleSound(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    soundOn = !soundOn;
+    document.getElementById('sound-btn').textContent = soundOn ? '◊ SND ON' : '◊ SND OFF';
+    if(soundOn) startSimAmbient();
+  }
+  window.toggleSound = toggleSound;
+
+  function startSimAmbient(){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 65;
+    gain.gain.value = 0.03;
+    const lfo = audioCtx.createOscillator();
+    const lfoG = audioCtx.createGain();
+    lfo.frequency.value = 0.1;
+    lfoG.gain.value = 8;
+    lfo.connect(lfoG);
+    lfoG.connect(osc.frequency);
+    lfo.start();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+  }
+
+  function playAdjustSound(){
+    if(!soundOn || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = 300 + Math.random() * 400;
+    gain.gain.value = 0.03;
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+  }
+})();
+</script>
+</body>
+</html>

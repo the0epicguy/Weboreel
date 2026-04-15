@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="RESONANCE - A minimalist abstract art interface that responds to presence">
+<title>RESONANCE — Abstract Art</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;700&family=Instrument+Sans:wght@400;500;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{
+  background:#faf8f5;
+  color:#1a1a1a;
+  font-family:'Instrument Sans',sans-serif;
+  cursor:none;
+}
+
+#art-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:1;
+}
+
+#gravity-cursor{
+  position:fixed;
+  width:60px;height:60px;
+  border:1px solid rgba(0,0,0,0.15);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:10000;
+  transform:translate(-50%,-50%);
+  transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1), height 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  mix-blend-mode:difference;
+}
+
+#gravity-dot{
+  position:fixed;
+  width:6px;height:6px;
+  background:#1a1a1a;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:10001;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+}
+
+#minimal-ui{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:100;
+  pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:40px;
+}
+
+#top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  pointer-events:auto;
+}
+
+.title-mark{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.1rem;
+  font-weight:300;
+  letter-spacing:4px;
+  color:rgba(0,0,0,0.4);
+  mix-blend-mode:difference;
+}
+
+#mode-label{
+  font-size:0.65rem;
+  letter-spacing:6px;
+  color:rgba(0,0,0,0.3);
+  text-transform:uppercase;
+  mix-blend-mode:difference;
+}
+
+#bottom-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  pointer-events:auto;
+}
+
+.mode-btn{
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.15);
+  color:rgba(0,0,0,0.5);
+  padding:10px 25px;
+  font-family:'Instrument Sans',sans-serif;
+  font-size:0.7rem;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.5s;
+  mix-blend-mode:difference;
+}
+
+.mode-btn:hover{
+  border-color:rgba(0,0,0,0.4);
+  color:rgba(0,0,0,0.8);
+}
+
+.mode-btn.active{
+  background:rgba(0,0,0,0.8);
+  color:#faf8f5;
+  border-color:rgba(0,0,0,0.8);
+}
+
+#sound-btn{
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.15);
+  width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:0.8rem;
+  color:rgba(0,0,0,0.4);
+  transition:all 0.3s;
+  mix-blend-mode:difference;
+}
+
+#poem-container{
+  position:fixed;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:50;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 3s;
+  max-width:500px;
+}
+
+#poem-container.visible{opacity:1}
+
+#poem-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.2rem,3vw,2rem);
+  font-weight:300;
+  line-height:2;
+  color:rgba(0,0,0,0.3);
+  mix-blend-mode:difference;
+}
+
+.mode-dots{
+  display:flex;gap:15px;
+  align-items:center;
+}
+
+.info-text{
+  font-size:0.6rem;
+  letter-spacing:3px;
+  color:rgba(0,0,0,0.25);
+  text-transform:uppercase;
+  mix-blend-mode:difference;
+}
+
+@media(max-width:768px){
+  body{cursor:auto}
+  #gravity-cursor,#gravity-dot{display:none}
+  #minimal-ui{padding:20px}
+  .mode-btn{padding:8px 15px;font-size:0.6rem;letter-spacing:2px}
+}
+</style>
+</head>
+<body>
+
+<div id="gravity-cursor"></div>
+<div id="gravity-dot"></div>
+
+<canvas id="art-canvas"></canvas>
+
+<div id="poem-container">
+  <div id="poem-text"></div>
+</div>
+
+<div id="minimal-ui">
+  <div id="top-bar">
+    <span class="title-mark">RESONANCE</span>
+    <span id="mode-label">FLOW MODE</span>
+  </div>
+  <div id="bottom-bar">
+    <div class="mode-dots">
+      <button class="mode-btn active" data-mode="flow">Flow</button>
+      <button class="mode-btn" data-mode="fracture">Fracture</button>
+      <button class="mode-btn" data-mode="void">Void</button>
+      <button class="mode-btn" data-mode="bloom">Bloom</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px">
+      <span class="info-text">Move to create</span>
+      <button id="sound-btn" onclick="toggleAudio()">○</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('art-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let W, H;
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // --- GRAVITY CURSOR ---
+  let mx = W/2, my = H/2;
+  let gx = W/2, gy = H/2; // gravity-affected pos
+  let dx = W/2, dy = H/2; // dot pos
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+  });
+
+  function updateCursor(){
+    // Gravity pull effect — cursor ring lags behind with elastic feel
+    const pullStrength = 0.05;
+    const dotPull = 0.15;
+    gx += (mx - gx) * pullStrength;
+    gy += (my - gy) * pullStrength;
+    dx += (mx - dx) * dotPull;
+    dy += (my - dy) * dotPull;
+
+    document.getElementById('gravity-cursor').style.left = gx + 'px';
+    document.getElementById('gravity-cursor').style.top = gy + 'px';
+    document.getElementById('gravity-dot').style.left = dx + 'px';
+    document.getElementById('gravity-dot').style.top = dy + 'px';
+  }
+
+  // --- ART MODES ---
+  let currentMode = 'flow';
+  let particles = [];
+  let time = 0;
+
+  const poems = {
+    flow: "Movement is the poetry\nof the unseen hand\ndrawing circles\non still water",
+    fracture: "In breaking\nwe find\nthe geometry\nof honesty",
+    void: "Silence\nis the canvas\nbefore\nthe first thought",
+    bloom: "Every point of light\nis a seed\nthat remembers\nhow to grow"
+  };
+
+  // Mode buttons
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      document.getElementById('mode-label').textContent = currentMode.toUpperCase() + ' MODE';
+      particles = [];
+
+      // Show poem
+      const poemEl = document.getElementById('poem-container');
+      const poemText = document.getElementById('poem-text');
+      poemText.textContent = poems[currentMode];
+      poemEl.classList.add('visible');
+      setTimeout(() => poemEl.classList.remove('visible'), 5000);
+
+      playModeSound();
+    });
+  });
+
+  // --- PARTICLE SYSTEMS ---
+  class Particle {
+    constructor(x, y, mode){
+      this.x = x; this.y = y;
+      this.mode = mode;
+      this.life = 1;
+      this.decay = 0.003 + Math.random() * 0.005;
+      this.vx = 0; this.vy = 0;
+      this.size = 1;
+      this.hue = 0;
+      this.angle = Math.random() * Math.PI * 2;
+
+      switch(mode){
+        case 'flow':
+          this.vx = Math.cos(this.angle) * (0.5 + Math.random());
+          this.vy = Math.sin(this.angle) * (0.5 + Math.random());
+          this.size = 1 + Math.random() * 2;
+          this.hue = 30 + Math.random() * 20;
+          break;
+        case 'fracture':
+          this.vx = (Math.random()-0.5) * 8;
+          this.vy = (Math.random()-0.5) * 8;
+          this.size = Math.random() * 4;
+          this.hue = 0;
+          this.decay = 0.01;
+          break;
+        case 'void':
+          const dist = 50 + Math.random() * 100;
+          this.targetX = x + Math.cos(this.angle) * dist;
+          this.targetY = y + Math.sin(this.angle) * dist;
+          this.x = this.targetX;
+          this.y = this.targetY;
+          this.size = 0.5;
+          this.hue = 240;
+          this.decay = 0.002;
+          break;
+        case 'bloom':
+          const a = Math.random() * Math.PI * 2;
+          const r = Math.random() * 3;
+          this.vx = Math.cos(a) * r;
+          this.vy = Math.sin(a) * r;
+          this.size = 2 + Math.random() * 5;
+          this.hue = 340 + Math.random() * 40;
+          this.decay = 0.004;
+          break;
+      }
+    }
+
+    update(){
+      this.life -= this.decay;
+      switch(this.mode){
+        case 'flow':
+          const noiseX = Math.sin(this.x * 0.01 + time) * 0.3;
+          const noiseY = Math.cos(this.y * 0.01 + time) * 0.3;
+          this.vx += noiseX * 0.1;
+          this.vy += noiseY * 0.1;
+          this.vx *= 0.99;
+          this.vy *= 0.99;
+          this.x += this.vx;
+          this.y += this.vy;
+          break;
+        case 'fracture':
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.95;
+          this.vy *= 0.95;
+          break;
+        case 'void':
+          this.x += (mx - this.x) * 0.01;
+          this.y += (my - this.y) * 0.01;
+          break;
+        case 'bloom':
+          this.vy += 0.02;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.98;
+          this.vy *= 0.98;
+          break;
+      }
+    }
+
+    draw(){
+      const alpha = this.life * 0.4;
+      if(this.mode === 'void'){
+        ctx.strokeStyle = `rgba(30,30,40,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + (Math.random()-0.5)*5, this.y + (Math.random()-0.5)*5);
+        ctx.stroke();
+      } else if(this.mode === 'fracture'){
+        ctx.fillStyle = `rgba(30,30,40,${alpha})`;
+        ctx.fillRect(this.x, this.y, this.size, this.size * 0.5);
+      } else {
+        ctx.fillStyle = `hsla(${this.hue},40%,40%,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  let lastMx = mx, lastMy = my;
+
+  function animate(){
+    requestAnimationFrame(animate);
+    time += 0.01;
+    updateCursor();
+
+    // Soft fade instead of clear
+    ctx.fillStyle = currentMode === 'void' ? 'rgba(250,248,245,0.03)' : 'rgba(250,248,245,0.02)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Spawn particles on mouse movement
+    const speed = Math.hypot(mx - lastMx, my - lastMy);
+    if(speed > 1){
+      const count = Math.min(Math.floor(speed * 0.5), 5);
+      for(let i = 0; i < count; i++){
+        particles.push(new Particle(mx, my, currentMode));
+      }
+    }
+    lastMx = mx; lastMy = my;
+
+    // Update & draw
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => { p.update(); p.draw(); });
+
+    // Limit particles
+    if(particles.length > 2000) particles.splice(0, particles.length - 2000);
+  }
+  animate();
+
+  // --- AUDIO: Organic/Nature-like tones ---
+  let audioCtx, audioEnabled = false;
+
+  function toggleAudio(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioEnabled = !audioEnabled;
+    document.getElementById('sound-btn').textContent = audioEnabled ? '●' : '○';
+    if(audioEnabled) startAmbient();
+  }
+
+  let ambientOscs = [];
+
+  function startAmbient(){
+    if(!audioCtx || !audioEnabled) return;
+    // Nature-like harmonics
+    const freqs = [174, 285, 396, 417];
+    freqs.forEach(f => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.value = 0.008;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      ambientOscs.push({ osc, gain });
+    });
+  }
+
+  function playModeSound(){
+    if(!audioCtx || !audioEnabled) return;
+    const modeTones = { flow: 396, fracture: 174, void: 285, bloom: 528 };
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = modeTones[currentMode] || 396;
+    gain.gain.value = 0.06;
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 2);
+  }
+
+  // Show initial poem
+  setTimeout(() => {
+    document.getElementById('poem-text').textContent = poems.flow;
+    document.getElementById('poem-container').classList.add('visible');
+    setTimeout(() => document.getElementById('poem-container').classList.remove('visible'), 6000);
+  }, 1500);
+})();
+</script>
+</body>
+</html>

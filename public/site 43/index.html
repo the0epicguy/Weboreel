@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERRA WANDR | The Earth Awaits</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="compass-cursor">
+        <div class="compass-rose"></div>
+    </div>
+
+    <nav class="terra-nav">
+        <div class="logo">TERRA WANDR</div>
+        <div class="nav-links">
+            <a href="#destinations">Destinations</a>
+            <a href="#journeys">Curated Journeys</a>
+            <a href="#stories">Traveler Stories</a>
+        </div>
+        <button class="book-btn">Start Planning</button>
+    </nav>
+
+    <!-- WebGL Earth Hero -->
+    <header class="globe-hero">
+        <canvas id="earth-canvas"></canvas>
+        <div class="hero-ui">
+            <h1>Every journey begins with a single coordinate.</h1>
+            <div class="search-box">
+                <input type="text" placeholder="Where to, adventurer? (e.g. Patagonia, Kyoto)">
+                <button>→</button>
+            </div>
+            <div class="scroll-prompt">
+                <span>Discover Experiences</span>
+                <div class="line"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Experience Categories -->
+    <section class="experiences" id="destinations">
+        <div class="category-grid">
+            <div class="cat-tile">
+                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80" alt="Mountains">
+                <div class="cat-content">
+                    <h3>Alpine Peaks</h3>
+                    <p>14 Destinations</p>
+                </div>
+            </div>
+            <div class="cat-tile">
+                <img src="https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80" alt="Desert">
+                <div class="cat-content">
+                    <h3>Desert Crossings</h3>
+                    <p>8 Destinations</p>
+                </div>
+            </div>
+            <div class="cat-tile">
+                <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&q=80" alt="Coast">
+                <div class="cat-content">
+                    <h3>Coastal Expeditions</h3>
+                    <p>22 Destinations</p>
+                </div>
+            </div>
+            <div class="cat-tile">
+                <img src="https://images.unsplash.com/photo-1522206016834-081e7dcf2a64?w=800&q=80" alt="Culture">
+                <div class="cat-content">
+                    <h3>Cultural Immersion</h3>
+                    <p>36 Destinations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curated Journeys -->
+    <section class="curated-journeys" id="journeys">
+        <div class="section-header">
+            <h2>Curated Journeys</h2>
+            <p>Hand-crafted itineraries for the discerning explorer.</p>
+        </div>
+        <div class="journey-grid">
+            <!-- Journey 1 -->
+            <div class="journey-card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1544735716-392fe2449fee?w=800&q=80" alt="Himalayas">
+                    <div class="difficulty">Advanced</div>
+                </div>
+                <div class="card-body">
+                    <h3>14 Days in the High Himalayas</h3>
+                    <div class="meta">
+                        <span>14 Days</span>
+                        <span>Max 6 Group</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">From $4,200</span>
+                        <a href="#">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Journey 2 -->
+            <div class="journey-card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800&q=80" alt="Kyoto">
+                    <div class="difficulty easy">Leisure</div>
+                </div>
+                <div class="card-body">
+                    <h3>Autumn Monasteries of Kyoto</h3>
+                    <div class="meta">
+                        <span>10 Days</span>
+                        <span>Max 12 Group</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">From $3,800</span>
+                        <a href="#">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Journey 3 -->
+            <div class="journey-card">
+                <div class="img-wrap">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80" alt="Desert">
+                    <div class="difficulty moderate">Moderate</div>
+                </div>
+                <div class="card-body">
+                    <h3>Sahara Silk Road Trek</h3>
+                    <div class="meta">
+                        <span>8 Days</span>
+                        <span>Max 8 Group</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="price">From $2,600</span>
+                        <a href="#">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trip Builder Widget -->
+    <section class="trip-builder">
+        <div class="builder-box">
+            <h2>Design Your Expedition</h2>
+            <div class="builder-steps">
+                <div class="step active">1. Region</div>
+                <div class="step">2. Style</div>
+                <div class="step">3. Duration</div>
+            </div>
+            <div class="builder-content">
+                <p>Select your primary landscape.</p>
+                <div class="options">
+                    <button class="opt-btn">Mountains</button>
+                    <button class="opt-btn">Oceans</button>
+                    <button class="opt-btn">Jungles</button>
+                    <button class="opt-btn">Deserts</button>
+                </div>
+            </div>
+            <div class="builder-nav">
+                <button disabled>Back</button>
+                <button class="btn-primary">Next Step</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="terra-footer">
+        <h2>TERRA WANDR</h2>
+        <div class="footer-grid">
+            <div class="col">
+                <p>The world is wider than your imagination. Step into the unknown with curated precision.</p>
+            </div>
+            <div class="col">
+                <h4>Company</h4>
+                <a href="#">About Us</a>
+                <a href="#">Sustainability</a>
+                <a href="#">Careers</a>
+            </div>
+            <div class="col">
+                <h4>Support</h4>
+                <a href="#">FAQ</a>
+                <a href="#">Travel Insurance</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        <div class="copyright">&copy; 2026 Terra Wandr. Neutral theme edition.</div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

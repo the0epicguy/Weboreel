@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPOCH | Antiquarian Horology</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Custom Clock Cursor -->
+    <div class="e-cursor" id="clock-cursor">
+        <div class="hand hour-hand" id="hour"></div>
+        <div class="hand min-hand" id="minute"></div>
+        <div class="hand sec-hand" id="second"></div>
+        <div class="center-dot"></div>
+    </div>
+
+    <!-- Paper Texture -->
+    <div class="paper-grain"></div>
+
+    <header class="e-header">
+        <div class="logo">E P O C H</div>
+        <div class="issue-info">Vol. IV &mdash; MMXXVI</div>
+    </header>
+
+    <main class="e-main border-container">
+        <!-- Hero Editorial -->
+        <section class="e-hero split-layout">
+            <div class="hero-text col-left">
+                <h1>The <br>Art of <br>Time.</h1>
+                <p>Curating the rarest horological artifacts from the 19th and 20th centuries. A celebration of mechanical genius and enduring craftsmanship.</p>
+                <div class="divider"></div>
+                <div class="meta-row">
+                    <span>GENÈVE</span>
+                    <span>LONDON</span>
+                    <span>NEW YORK</span>
+                </div>
+            </div>
+            <div class="hero-img col-right parallax-wrapper">
+                <img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=1000&q=80" alt="Vintage Pocket Watch" class="parallax-img">
+            </div>
+        </section>
+
+        <!-- Two Column Article -->
+        <section class="e-article">
+            <h2 class="sub-headline">THE COMPLICATION</h2>
+            <div class="two-col-text">
+                <p class="dropcap">B</p>
+                <p>efore the advent of the quartz crisis, timepieces were not merely instruments of utility; they were profound expressions of human ingenuity. Master watchmakers spent generations perfecting the perpetual calendar, the tourbillon, and the minute repeater—complications that required thousands of hours of painstaking manual labor to assemble.</p>
+                <p>The collection presented by Epoch focuses exclusively on pristine examples from the golden eras of Patek Philippe, Vacheron Constantin, and Audemars Piguet. We seek not just watches, but stories. The patina on a dial, the fading of gilt lettering, and the intricate engravings on a caseback—these are the signatures of time itself, marking the passage of history across the wrist of its custodian.</p>
+            </div>
+        </section>
+
+        <!-- Featured Collection Grid -->
+        <section class="e-collection">
+            <h2 class="section-heading">CURRENT ACQUISITIONS</h2>
+            <div class="grid-3">
+                <a href="#" class="item-card fade-up">
+                    <div class="img-mask">
+                        <img src="https://images.unsplash.com/photo-1614164185128-f4cc6173a1ba?w=800&q=80" alt="Chronograph">
+                    </div>
+                    <div class="item-detail">
+                        <h3>Ref. 1463 Chronograph</h3>
+                        <span class="year">Circa 1950</span>
+                    </div>
+                </a>
+                
+                <a href="#" class="item-card fade-up" style="transition-delay: 0.2s;">
+                    <div class="img-mask">
+                        <img src="https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800&q=80" alt="Pocket Watch">
+                    </div>
+                    <div class="item-detail">
+                        <h3>Grand Sonnerie</h3>
+                        <span class="year">Circa 1895</span>
+                    </div>
+                </a>
+                
+                <a href="#" class="item-card fade-up" style="transition-delay: 0.4s;">
+                    <div class="img-mask">
+                        <img src="https://images.unsplash.com/photo-1587836374361-f1665d1426ea?w=800&q=80" alt="Dress Watch">
+                    </div>
+                    <div class="item-detail">
+                        <h3>Calatrava Enamel</h3>
+                        <span class="year">Circa 1962</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="e-footer">
+        <div class="f-logo">E P O C H</div>
+        <p>Private viewings by appointment only.</p>
+        <a href="#" class="inquiry-btn">Submit Inquiry</a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

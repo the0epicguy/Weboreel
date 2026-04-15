@@ -1,0 +1,102 @@
+:root {
+    /* Earthy / Organic Palette */
+    --o-sand: #F5F2ED;
+    --o-green: #2C3C30;
+    --o-muted-green: #6C7A63;
+    --o-earth: #8C7C61;
+    --o-white: #ffffff;
+    
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-sans: 'Lato', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--o-sand); color: var(--o-green); font-family: var(--font-sans); overflow-x: hidden; }
+
+/* Custom Organic Cursor */
+.o-cursor {
+    position: fixed; width: 20px; height: 20px; border: 1px solid var(--o-green); border-radius: 50%;
+    pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background 0.3s;
+}
+.o-cursor.hover { width: 50px; height: 50px; background: rgba(44, 60, 48, 0.1); border-color: transparent; }
+
+/* Background Shapes */
+.bg-shape { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.4; }
+.shape1 { width: 400px; height: 400px; background: var(--o-muted-green); top: -100px; right: -100px; animation: float 15s ease-in-out infinite; }
+.shape2 { width: 500px; height: 500px; background: var(--o-earth); bottom: -200px; left: -100px; animation: float 20s ease-in-out infinite reverse; }
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-50px, 50px); }
+}
+
+/* Nav */
+.oasis-nav {
+    position: fixed; top: 0; width: 100%; padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100;
+}
+.logo { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 300; letter-spacing: 5px; }
+.nav-links a { color: var(--o-green); text-decoration: none; font-size: 0.9rem; margin: 0 20px; text-transform: uppercase; letter-spacing: 2px; transition: opacity 0.3s; }
+.nav-links a:hover { opacity: 0.5; }
+.booking-btn { background: var(--o-green); color: var(--o-white); border: none; padding: 12px 25px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 1px; border-radius: 30px; transition: transform 0.3s; }
+.booking-btn:hover { transform: translateY(-3px); }
+
+/* Hero */
+.o-hero { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; padding: 5%; }
+.img-mask { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%); transition: clip-path 1.5s ease; }
+.img-mask img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85); transform: scale(1.1); transition: transform 1.5s ease; }
+
+.hero-text { position: relative; z-index: 2; text-align: center; color: var(--o-sand); }
+.hero-text h1 { font-family: var(--font-serif); font-size: 7rem; line-height: 1; font-weight: 300; margin-bottom: 20px; }
+.hero-text h1 span { font-style: italic; font-weight: 400; margin-left: 100px; display: block; }
+.hero-text p { font-size: 1.2rem; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+.scroll-down { position: absolute; bottom: 40px; left: 5%; color: var(--o-sand); z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.scroll-down span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
+.scroll-down .line { width: 1px; height: 50px; background: var(--o-sand); transform-origin: top; animation: slideDown 2s infinite; }
+@keyframes slideDown { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* Villas Section */
+.villas-section { padding: 150px 5%; }
+.v-wrapper { display: flex; max-width: 1200px; margin: 0 auto; gap: 80px; align-items: center; }
+.v-text { flex: 1; }
+.v-text h2 { font-family: var(--font-serif); font-size: 4rem; font-weight: 300; line-height: 1.1; margin-bottom: 30px; }
+.v-text p { font-size: 1.1rem; line-height: 1.8; color: var(--o-muted-green); margin-bottom: 40px; }
+.v-link { color: var(--o-green); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px; text-decoration: none; border-bottom: 1px solid var(--o-green); padding-bottom: 5px; }
+
+.v-images { flex: 1; position: relative; height: 600px; }
+.img-wrap { position: absolute; border-radius: 200px 200px 0 0; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.img1 { width: 300px; height: 450px; top: 0; left: 0; z-index: 2; }
+.img2 { width: 250px; height: 350px; bottom: 0; right: 0; z-index: 1; }
+
+/* Values Horizontal Scroll */
+.values-section { height: 100vh; overflow: hidden; background: var(--o-green); color: var(--o-sand); position: relative; }
+.horizontal-scroll { display: flex; width: 400vw; height: 100%; /* Will be converted to horizontal scroll via GSAP */ }
+.val-panel { width: 100vw; height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 10%; }
+.intro-panel h2 { font-family: var(--font-serif); font-size: 5rem; font-weight: 300; margin-bottom: 20px; }
+.intro-panel p { font-size: 1.5rem; font-style: italic; color: var(--o-earth); }
+
+.content-panel { justify-content: flex-start; }
+.cp-inner { max-width: 600px; }
+.cp-num { font-family: var(--font-serif); font-size: 2rem; color: var(--o-earth); margin-bottom: 20px; font-style: italic; }
+.cp-inner h3 { font-family: var(--font-serif); font-size: 3rem; font-weight: 400; margin-bottom: 20px; }
+.cp-inner p { font-size: 1.2rem; line-height: 1.8; color: var(--o-muted-green); }
+
+/* Footer */
+.o-footer { padding: 150px 5% 50px; text-align: center; }
+.f-content h2 { font-family: var(--font-serif); font-size: 4rem; font-weight: 300; margin-bottom: 40px; }
+.booking-btn.large { padding: 20px 40px; font-size: 1.1rem; margin-bottom: 150px; }
+
+.f-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(44, 60, 48, 0.2); padding-top: 40px; font-size: 0.9rem; }
+.f-meta .links a { color: var(--o-green); text-decoration: none; margin: 0 15px; text-transform: uppercase; letter-spacing: 1px; }
+
+@media (max-width: 900px) {
+    .v-wrapper { flex-direction: column; text-align: center; }
+    .v-images { width: 100%; height: 500px; }
+    .img1 { left: 10%; width: 200px; height: 350px; }
+    .img2 { right: 10%; width: 180px; height: 280px; }
+    .hero-text h1 { font-size: 4rem; }
+    .hero-text h1 span { margin-left: 0; }
+    .f-meta { flex-direction: column; gap: 20px; }
+}

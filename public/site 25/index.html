@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ECHOES - A timeline-based memory storytelling experience through 3D frozen moments">
+<title>ECHOES — Timeline Memories</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#0f0e13;
+  color:#d4cfc6;
+  font-family:'Source Sans 3',sans-serif;
+  overflow:hidden;
+  cursor:none;
+}
+
+#scene-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+
+/* Trail particles cursor */
+#trail-cursor{
+  position:fixed;
+  width:6px;height:6px;
+  background:#d4a574;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:10000;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 15px rgba(212,165,116,0.5);
+}
+
+.trail-particle{
+  position:fixed;
+  width:3px;height:3px;
+  background:rgba(212,165,116,0.3);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* Timeline navigation */
+#timeline-nav{
+  position:fixed;
+  bottom:50px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:100;
+  display:flex;
+  align-items:center;
+  gap:0;
+  pointer-events:auto;
+}
+
+.timeline-line{
+  width:100px;height:1px;
+  background:rgba(212,165,116,0.2);
+  position:relative;
+}
+
+.timeline-dot{
+  width:16px;height:16px;
+  border:2px solid rgba(212,165,116,0.3);
+  border-radius:50%;
+  cursor:pointer;
+  transition:all 0.5s;
+  position:relative;
+  z-index:2;
+  background:transparent;
+}
+
+.timeline-dot:hover{
+  border-color:#d4a574;
+  box-shadow:0 0 15px rgba(212,165,116,0.3);
+}
+
+.timeline-dot.active{
+  border-color:#d4a574;
+  background:#d4a574;
+  box-shadow:0 0 20px rgba(212,165,116,0.5);
+}
+
+.timeline-dot .year{
+  position:absolute;
+  bottom:-25px;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Playfair Display',serif;
+  font-size:0.7rem;
+  color:rgba(212,165,116,0.4);
+  white-space:nowrap;
+  transition:color 0.3s;
+}
+
+.timeline-dot.active .year{color:#d4a574}
+
+/* Memory overlay */
+#memory-overlay{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:50;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+}
+
+#memory-content{
+  position:absolute;
+  right:60px;
+  top:50%;
+  transform:translateY(-50%);
+  max-width:420px;
+  opacity:0;
+  transition:opacity 1.5s,transform 1.5s;
+  transform:translateY(-50%) translateY(30px);
+  pointer-events:auto;
+}
+
+#memory-content.visible{
+  opacity:1;
+  transform:translateY(-50%) translateY(0);
+}
+
+#memory-era{
+  font-family:'Source Sans 3',sans-serif;
+  font-size:0.6rem;
+  letter-spacing:8px;
+  color:rgba(212,165,116,0.35);
+  text-transform:uppercase;
+  margin-bottom:15px;
+}
+
+#memory-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,4vw,3.5rem);
+  font-weight:900;
+  line-height:1.1;
+  margin-bottom:20px;
+  color:rgba(255,240,220,0.9);
+}
+
+#memory-text{
+  font-size:1.05rem;
+  line-height:1.9;
+  color:rgba(212,207,198,0.6);
+  margin-bottom:25px;
+}
+
+#memory-detail{
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:0.85rem;
+  color:rgba(212,165,116,0.4);
+  padding-left:20px;
+  border-left:2px solid rgba(212,165,116,0.15);
+}
+
+/* Navigation arrows */
+.nav-arrow{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:100;
+  background:transparent;
+  border:1px solid rgba(212,165,116,0.2);
+  color:rgba(212,165,116,0.5);
+  width:50px;height:50px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:1.2rem;
+  transition:all 0.3s;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:auto;
+}
+
+.nav-arrow:hover{
+  border-color:#d4a574;
+  color:#d4a574;
+  box-shadow:0 0 20px rgba(212,165,116,0.15);
+}
+
+#prev-arrow{left:30px}
+#next-arrow{right:30px}
+
+/* Title card */
+#title-card{
+  position:fixed;
+  top:40px;left:40px;
+  z-index:100;
+}
+
+#title-card h1{
+  font-family:'Playfair Display',serif;
+  font-size:1.3rem;
+  font-weight:400;
+  color:rgba(212,165,116,0.5);
+  letter-spacing:5px;
+}
+
+#title-card .sub{
+  font-size:0.6rem;
+  letter-spacing:6px;
+  color:rgba(212,165,116,0.25);
+  margin-top:5px;
+}
+
+#sound-btn{
+  position:fixed;
+  top:40px;right:40px;
+  z-index:100;
+  background:transparent;
+  border:1px solid rgba(212,165,116,0.15);
+  color:rgba(212,165,116,0.4);
+  padding:8px 18px;
+  font-family:'Source Sans 3',sans-serif;
+  font-size:0.65rem;
+  letter-spacing:3px;
+  cursor:pointer;
+  border-radius:20px;
+  pointer-events:auto;
+  transition:all 0.3s;
+}
+
+/* Fade vignette */
+#vignette{
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  z-index:40;
+  pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(15,14,19,0.8) 100%);
+}
+
+@media(max-width:768px){
+  body{cursor:auto}
+  #trail-cursor,.trail-particle{display:none}
+  #memory-content{right:20px;left:20px;max-width:none}
+  .nav-arrow{width:40px;height:40px;font-size:1rem}
+  #prev-arrow{left:10px}
+  #next-arrow{right:10px}
+  #timeline-nav{bottom:30px}
+  .timeline-line{width:40px}
+  #title-card{top:20px;left:20px}
+  #sound-btn{top:20px;right:20px;padding:6px 12px}
+}
+</style>
+</head>
+<body>
+
+<div id="trail-cursor"></div>
+<canvas id="scene-canvas"></canvas>
+<div id="vignette"></div>
+
+<div id="title-card">
+  <h1>ECHOES</h1>
+  <div class="sub">Memories Frozen in Time</div>
+</div>
+
+<button id="sound-btn" onclick="toggleSound()">♪ Sound Off</button>
+
+<div id="memory-overlay">
+  <div id="memory-content">
+    <div id="memory-era">ERA I — 2024</div>
+    <div id="memory-title">The First Light</div>
+    <div id="memory-text">Loading memory...</div>
+    <div id="memory-detail">"Every ending is just the quiet before a new beginning."</div>
+  </div>
+</div>
+
+<button class="nav-arrow" id="prev-arrow" onclick="navigate(-1)">←</button>
+<button class="nav-arrow" id="next-arrow" onclick="navigate(1)">→</button>
+
+<div id="timeline-nav"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  // --- Memory data ---
+  const memories = [
+    {
+      year: '2024', era: 'ERA I — THE AWAKENING',
+      title: 'The First Light',
+      text: 'Before the machines learned to dream, there was a moment of pure silence. A single photon, traveling 13 billion years, struck a silicon detector and whispered: "I remember the beginning."',
+      detail: '"Every ending is just the quiet before a new beginning."',
+      color: 0xd4a574, sceneType: 'spheres'
+    },
+    {
+      year: '2089', era: 'ERA II — THE CONVERGENCE',
+      title: 'When Rivers Learned to Sing',
+      text: 'The bioharmonic revolution changed everything. Rivers were no longer just water — they were living neural networks, carrying the memories of every raindrop that had ever fallen.',
+      detail: '"Water remembers. It always has. We just finally learned to listen."',
+      color: 0x7ab8d4, sceneType: 'waves'
+    },
+    {
+      year: '2156', era: 'ERA III — THE DISSOLUTION',
+      title: 'Borders of the Mind',
+      text: 'The last physical border dissolved on a Tuesday. Not with war or politics, but with the quiet realization that when you can share memories, nationality becomes as quaint as blood type.',
+      detail: '"We discovered that empathy, at sufficient scale, is indistinguishable from love."',
+      color: 0xa87bd4, sceneType: 'torus'
+    },
+    {
+      year: '2301', era: 'ERA IV — THE GARDEN',
+      title: 'Seeds of Carbon Stars',
+      text: 'They planted the first garden on a dead star. Carbon from the nova formed crystalline soil. The flowers that bloomed existed in seven dimensions, visible only to those who had learned to see sideways.',
+      detail: '"Beauty doesn\'t require an audience. But consciousness craves witnesses."',
+      color: 0x74d4a5, sceneType: 'particles'
+    },
+    {
+      year: '2847', era: 'ERA V — THE ECHO',
+      title: 'The Sound of Forever',
+      text: 'The last human memory was recorded on this day. Not because humanity ended, but because they evolved beyond the need for individual remembrance. They became the memory.',
+      detail: '"We are the echo of a universe that spoke once and never stopped."',
+      color: 0xd47a7a, sceneType: 'spiral'
+    }
+  ];
+
+  // --- Timeline navigation ---
+  const timelineNav = document.getElementById('timeline-nav');
+  let currentMemory = 0;
+
+  memories.forEach((m, i) => {
+    if(i > 0){
+      const line = document.createElement('div');
+      line.className = 'timeline-line';
+      timelineNav.appendChild(line);
+    }
+
+    const dot = document.createElement('button');
+    dot.className = 'timeline-dot' + (i === 0 ? ' active' : '');
+    dot.innerHTML = `<span class="year">${m.year}</span>`;
+    dot.addEventListener('click', () => goToMemory(i));
+    timelineNav.appendChild(dot);
+  });
+
+  function navigate(dir){
+    const next = currentMemory + dir;
+    if(next >= 0 && next < memories.length) goToMemory(next);
+  }
+  window.navigate = navigate;
+
+  function goToMemory(idx){
+    if(idx === currentMemory) return;
+    const content = document.getElementById('memory-content');
+    content.classList.remove('visible');
+
+    setTimeout(() => {
+      currentMemory = idx;
+      const m = memories[idx];
+      document.getElementById('memory-era').textContent = m.era;
+      document.getElementById('memory-title').textContent = m.title;
+      document.getElementById('memory-text').textContent = m.text;
+      document.getElementById('memory-detail').textContent = m.detail;
+
+      // Update timeline dots
+      document.querySelectorAll('.timeline-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+      });
+
+      // Transition 3D scene
+      transitionScene(m);
+
+      setTimeout(() => content.classList.add('visible'), 300);
+      playTransitionSound();
+    }, 800);
+  }
+
+  // Initial show
+  setTimeout(() => document.getElementById('memory-content').classList.add('visible'), 1000);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+
+  // --- TRAIL PARTICLES CURSOR ---
+  const trailCursor = document.getElementById('trail-cursor');
+  let tmx = 0, tmy = 0;
+  const trailParts = [];
+
+  for(let i = 0; i < 15; i++){
+    const p = document.createElement('div');
+    p.className = 'trail-particle';
+    document.body.appendChild(p);
+    trailParts.push({ el: p, x: 0, y: 0, life: 0 });
+  }
+
+  let trailIdx = 0;
+  document.addEventListener('mousemove', e => {
+    tmx = e.clientX; tmy = e.clientY;
+    trailCursor.style.left = tmx + 'px';
+    trailCursor.style.top = tmy + 'px';
+
+    // Spawn trail
+    if(trailIdx % 2 === 0){
+      const p = trailParts[trailIdx % trailParts.length];
+      p.x = tmx + (Math.random()-0.5) * 10;
+      p.y = tmy + (Math.random()-0.5) * 10;
+      p.life = 1;
+    }
+    trailIdx++;
+  });
+
+  function animateTrails(){
+    requestAnimationFrame(animateTrails);
+    trailParts.forEach(p => {
+      if(p.life > 0){
+        p.life -= 0.03;
+        p.y -= 0.3;
+        p.el.style.left = p.x + 'px';
+        p.el.style.top = p.y + 'px';
+        p.el.style.opacity = p.life * 0.5;
+        p.el.style.transform = `scale(${p.life})`;
+      }
+    });
+  }
+  animateTrails();
+
+  // --- THREE.JS: Memory scenes ---
+  const canvas = document.getElementById('scene-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
+  camera.position.set(-20, 5, 30);
+  camera.lookAt(-5, 0, 0);
+
+  let currentObject = null;
+  let time = 0;
+
+  function createScene(memory){
+    if(currentObject) scene.remove(currentObject);
+
+    const group = new THREE.Group();
+    const color = memory.color;
+
+    switch(memory.sceneType){
+      case 'spheres':
+        for(let i = 0; i < 20; i++){
+          const r = 0.5 + Math.random() * 2;
+          const geo = new THREE.SphereGeometry(r, 16, 16);
+          const mat = new THREE.MeshBasicMaterial({
+            color, wireframe: true, transparent: true,
+            opacity: 0.1 + Math.random() * 0.15
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set((Math.random()-0.5)*30,(Math.random()-0.5)*20,(Math.random()-0.5)*20);
+          group.add(mesh);
+        }
+        break;
+      case 'waves':
+        const waveGeo = new THREE.PlaneGeometry(40, 40, 60, 60);
+        const waveMat = new THREE.MeshBasicMaterial({
+          color, wireframe: true, transparent: true, opacity: 0.12
+        });
+        const wave = new THREE.Mesh(waveGeo, waveMat);
+        wave.rotation.x = -Math.PI / 3;
+        group.add(wave);
+        break;
+      case 'torus':
+        for(let i = 0; i < 5; i++){
+          const geo = new THREE.TorusGeometry(5 + i * 3, 0.3, 8, 40);
+          const mat = new THREE.MeshBasicMaterial({
+            color, wireframe: true, transparent: true,
+            opacity: 0.08 + i * 0.02
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.rotation.x = Math.PI/2 + i * 0.2;
+          group.add(mesh);
+        }
+        break;
+      case 'particles':
+        const pCount = 500;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(pCount * 3);
+        for(let i = 0; i < pCount; i++){
+          const phi = Math.random() * Math.PI * 2;
+          const theta = Math.acos(Math.random()*2-1);
+          const r2 = 10 + Math.random() * 10;
+          pPos[i*3] = r2 * Math.sin(theta) * Math.cos(phi);
+          pPos[i*3+1] = r2 * Math.sin(theta) * Math.sin(phi);
+          pPos[i*3+2] = r2 * Math.cos(theta);
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({
+          color, size: 0.3, transparent: true, opacity: 0.4,
+          blending: THREE.AdditiveBlending
+        });
+        group.add(new THREE.Points(pGeo, pMat));
+        break;
+      case 'spiral':
+        const spiralGeo = new THREE.BufferGeometry();
+        const spiralPos = [];
+        for(let i = 0; i < 2000; i++){
+          const t2 = i * 0.05;
+          const r3 = t2 * 0.3;
+          spiralPos.push(
+            Math.cos(t2) * r3,
+            (i - 1000) * 0.01,
+            Math.sin(t2) * r3
+          );
+        }
+        spiralGeo.setAttribute('position', new THREE.Float32BufferAttribute(spiralPos, 3));
+        const spiralMat = new THREE.PointsMaterial({
+          color, size: 0.15, transparent: true, opacity: 0.5,
+          blending: THREE.AdditiveBlending
+        });
+        group.add(new THREE.Points(spiralGeo, spiralMat));
+        break;
+    }
+
+    group.position.set(-10, 0, 0);
+    scene.add(group);
+    currentObject = group;
+  }
+
+  createScene(memories[0]);
+
+  function transitionScene(memory){
+    if(currentObject){
+      // Fade out
+      currentObject.children.forEach(c => {
+        if(c.material) c.material.opacity *= 0.5;
+      });
+    }
+    setTimeout(() => createScene(memory), 500);
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    time += 0.005;
+
+    if(currentObject){
+      currentObject.rotation.y = time * 0.2;
+
+      // Wave animation
+      currentObject.children.forEach(c => {
+        if(c.geometry && c.geometry.type === 'PlaneGeometry'){
+          const pos = c.geometry.attributes.position;
+          for(let i = 0; i < pos.count; i++){
+            const x = pos.getX(i);
+            const y = pos.getY(i);
+            pos.setZ(i, Math.sin(x * 0.3 + time * 3) * Math.cos(y * 0.3 + time * 2) * 2);
+          }
+          pos.needsUpdate = true;
+        }
+      });
+    }
+
+    // Camera breathing
+    camera.position.y = 5 + Math.sin(time) * 2;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // --- AUDIO: Organic atmospheric ---
+  let audioCtx, soundOn = false;
+
+  function toggleSound(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    soundOn = !soundOn;
+    document.getElementById('sound-btn').textContent = soundOn ? '♪ Sound On' : '♪ Sound Off';
+    if(soundOn) startAmbient();
+  }
+  window.toggleSound = toggleSound;
+
+  function startAmbient(){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 136.1; // Om frequency
+    gain.gain.value = 0.03;
+
+    const reverb = audioCtx.createConvolver();
+    const len = audioCtx.sampleRate * 5;
+    const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+    for(let ch = 0; ch < 2; ch++){
+      const d = impulse.getChannelData(ch);
+      for(let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 1.5);
+    }
+    reverb.buffer = impulse;
+    osc.connect(gain);
+    gain.connect(reverb);
+    reverb.connect(audioCtx.destination);
+    osc.start();
+
+    // Second harmonic
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.value = 272.2;
+    gain2.gain.value = 0.01;
+    osc2.connect(gain2);
+    gain2.connect(reverb);
+    osc2.start();
+  }
+
+  function playTransitionSound(){
+    if(!soundOn || !audioCtx) return;
+    const tones = [261.63, 329.63, 392.00];
+    tones.forEach((f, i) => {
+      setTimeout(() => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = f;
+        gain.gain.value = 0.04;
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.5);
+      }, i * 200);
+    });
+  }
+})();
+</script>
+</body>
+</html>

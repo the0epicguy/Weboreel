@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLSTICE | The Inner Echo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="audio-cursor"></div>
+
+    <nav class="solstice-nav">
+        <div class="nav-brand">SOLSTICE</div>
+        <div class="nav-links">
+            <a href="#music">Music</a>
+            <a href="#tour">Tour</a>
+            <a href="#store">Store</a>
+        </div>
+        <button class="audio-toggle" id="mute-btn">SOUND: OFF</button>
+    </nav>
+
+    <!-- Interactive Audio Hero -->
+    <header class="audio-hero">
+        <canvas id="waveform-canvas"></canvas>
+        <div class="hero-content">
+            <h1 class="artist-name">SOLSTICE</h1>
+            <p class="subtitle">Silence is just the canvas.</p>
+            <button class="listen-btn">LISTEN NOW <span class="play-icon">▶</span></button>
+        </div>
+    </header>
+
+    <!-- Latest Release -->
+    <section class="latest-release" id="music">
+        <div class="album-container">
+            <div class="album-art" id="album-art">
+                <img src="https://images.unsplash.com/photo-1518331580228-5a210c4d2847?w=800&q=80" alt="Resonance Album">
+                <div class="glare"></div>
+            </div>
+            <div class="album-info">
+                <div class="tag">NEW RELEASE</div>
+                <h2>RESONANCE</h2>
+                <p class="description">A glacial exploration of spatial analog synthesis and mist-covered landscapes. Recorded entirely on cassette tape in an abandoned silo.</p>
+                
+                <div class="tracklist">
+                    <div class="track playing">
+                        <span class="num">01</span>
+                        <span class="name">Fog Horizon</span>
+                        <span class="time">4:12</span>
+                        <div class="mini-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                    </div>
+                    <div class="track">
+                        <span class="num">02</span>
+                        <span class="name">Silver Thread</span>
+                        <span class="time">3:45</span>
+                    </div>
+                    <div class="track">
+                        <span class="num">03</span>
+                        <span class="name">Concrete Echoes</span>
+                        <span class="time">5:30</span>
+                    </div>
+                    <div class="track">
+                        <span class="num">04</span>
+                        <span class="name">White Void</span>
+                        <span class="time">2:18</span>
+                    </div>
+                </div>
+                
+                <div class="streaming-links">
+                    <button>Spotify</button>
+                    <button>Apple Music</button>
+                    <button>Vinyl</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Discography horizontal scroll -->
+    <section class="discography">
+        <h2 class="section-heading">CATALOG</h2>
+        <div class="timeline-scroll">
+            <div class="timeline-track">
+                <div class="node">
+                    <div class="year">2019</div>
+                    <div class="node-card">
+                        <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&q=80" alt="EP1">
+                        <h3>FRAGMENTS EP</h3>
+                    </div>
+                </div>
+                <div class="node">
+                    <div class="year">2021</div>
+                    <div class="node-card">
+                        <img src="https://images.unsplash.com/photo-1493225457124-a1a2a5f5f0d3?w=400&q=80" alt="LP1">
+                        <h3>THE WEIGHT OF AIR</h3>
+                    </div>
+                </div>
+                <div class="node">
+                    <div class="year">2023</div>
+                    <div class="node-card">
+                        <img src="https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=400&q=80" alt="LP2">
+                        <h3>MONOLITH</h3>
+                    </div>
+                </div>
+                <div class="node">
+                    <div class="year">2026</div>
+                    <div class="node-card">
+                        <img src="https://images.unsplash.com/photo-1518331580228-5a210c4d2847?w=400&q=80" alt="LP3">
+                        <h3>RESONANCE</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-minimal">
+        <div class="inner-circle">
+            <h3>Join the Inner Circle</h3>
+            <p>Early access to tickets, exclusive vinyl pressings.</p>
+            <input type="email" placeholder="Email address">
+        </div>
+        <div class="socials">
+            <a href="#">Instagram</a>
+            <a href="#">X</a>
+            <a href="#">YouTube</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

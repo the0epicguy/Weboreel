@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OURA | Cognitive Rest</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400&display=swap" rel="stylesheet">
+    <!-- GSAP & Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="oura-cursor"></div>
+
+    <!-- WebGL Ambient Background -->
+    <canvas id="ambient-canvas"></canvas>
+
+    <nav class="o-nav">
+        <div class="logo">OURA</div>
+        <div class="links">
+            <a href="#">Science</a>
+            <a href="#">Method</a>
+            <a href="#">Pricing</a>
+            <a href="#" class="btn-start">Begin</a>
+        </div>
+    </nav>
+
+    <main class="focus-container">
+        <!-- Concentric rings -->
+        <div class="rings">
+            <div class="ring r1"></div>
+            <div class="ring r2"></div>
+            <div class="ring r3"></div>
+        </div>
+
+        <div class="focus-text">
+            <h1>Breathe.</h1>
+            <p>Sync your biology. Achieve deep cognitive rest in 15 minutes.</p>
+        </div>
+    </main>
+
+    <section class="features">
+        <div class="f-item">
+            <div class="f-number">01</div>
+            <h2>Neural Entrainment</h2>
+            <p>Binaural audio frequencies matched to theta brainwave patterns.</p>
+        </div>
+        <div class="f-item">
+            <div class="f-number">02</div>
+            <h2>Paced Respiration</h2>
+            <p>Visual anchors guide your breath down to 4 breaths per minute.</p>
+        </div>
+        <div class="f-item">
+            <div class="f-number">03</div>
+            <h2>Deep Autonomic Shift</h2>
+            <p>Deactivate the sympathetic nervous system on command.</p>
+        </div>
+    </section>
+
+    <footer class="o-footer">
+        <a href="#">privacy</a>
+        <a href="#">terms</a>
+        <a href="#">contact</a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SYNTH OS - A 3D operating system interface in the browser">
+<title>SYNTH OS — Desktop Interface</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#1a1a2e;
+  overflow:hidden;
+  font-family:'Inter',sans-serif;
+  color:#e0e0e0;
+  cursor:none;
+  height:100vh;
+}
+
+#custom-cursor{
+  position:fixed;
+  width:20px;height:20px;
+  border:2px solid rgba(230,100,255,0.8);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:100000;
+  transition:width 0.2s,height 0.2s,border-radius 0.2s,border-color 0.2s;
+  transform:translate(-50%,-50%);
+}
+
+#custom-cursor.hovering{
+  width:40px;height:40px;
+  border-color:#e664ff;
+  background:rgba(230,100,255,0.05);
+}
+
+#custom-cursor::after{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:4px;height:4px;
+  background:rgba(230,100,255,0.9);
+  border-radius:50%;
+}
+
+#bg-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:0;
+}
+
+#desktop{
+  position:relative;
+  width:100%;height:100%;
+  z-index:1;
+}
+
+/* Taskbar */
+#taskbar{
+  position:fixed;
+  bottom:0;left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+  display:flex;
+  gap:4px;
+  padding:8px 16px;
+  background:rgba(20,20,40,0.8);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(230,100,255,0.1);
+  border-bottom:none;
+  border-radius:16px 16px 0 0;
+}
+
+.taskbar-icon{
+  width:48px;height:48px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:12px;
+  font-size:1.4rem;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  background:rgba(230,100,255,0.05);
+  border:1px solid rgba(230,100,255,0.1);
+}
+
+.taskbar-icon:hover{
+  background:rgba(230,100,255,0.15);
+  transform:translateY(-4px);
+  border-color:rgba(230,100,255,0.3);
+}
+
+.taskbar-icon.active::after{
+  content:'';
+  position:absolute;
+  bottom:-4px;
+  width:16px;height:3px;
+  background:#e664ff;
+  border-radius:2px;
+}
+
+/* Desktop Icons */
+.desktop-icon{
+  position:absolute;
+  width:80px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:6px;
+  cursor:pointer;
+  padding:10px;
+  border-radius:10px;
+  transition:background 0.2s;
+}
+
+.desktop-icon:hover{
+  background:rgba(230,100,255,0.1);
+}
+
+.desktop-icon .icon{
+  width:48px;height:48px;
+  background:rgba(230,100,255,0.1);
+  border:1px solid rgba(230,100,255,0.2);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;
+}
+
+.desktop-icon .label{
+  font-size:0.65rem;
+  text-align:center;
+  color:rgba(255,255,255,0.7);
+  text-shadow:0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* Windows */
+.os-window{
+  position:absolute;
+  min-width:300px;
+  min-height:200px;
+  background:rgba(20,20,40,0.9);
+  backdrop-filter:blur(30px);
+  border:1px solid rgba(230,100,255,0.15);
+  border-radius:12px;
+  overflow:hidden;
+  display:none;
+  z-index:100;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(230,100,255,0.05);
+}
+
+.os-window.open{display:block}
+
+.window-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(230,100,255,0.05);
+  border-bottom:1px solid rgba(230,100,255,0.1);
+  cursor:grab;
+  user-select:none;
+}
+
+.window-header:active{cursor:grabbing}
+
+.window-title{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;
+  letter-spacing:1px;
+  color:rgba(230,100,255,0.8);
+}
+
+.window-controls{display:flex;gap:8px}
+
+.window-controls span{
+  width:12px;height:12px;
+  border-radius:50%;
+  cursor:pointer;
+  transition:transform 0.2s;
+}
+
+.window-controls span:hover{transform:scale(1.3)}
+
+.win-close{background:#ff5555}
+.win-min{background:#ffaa33}
+.win-max{background:#55ff88}
+
+.window-body{
+  padding:20px;
+  max-height:400px;
+  overflow-y:auto;
+}
+
+.window-body::-webkit-scrollbar{width:6px}
+.window-body::-webkit-scrollbar-track{background:rgba(230,100,255,0.05)}
+.window-body::-webkit-scrollbar-thumb{background:rgba(230,100,255,0.2);border-radius:3px}
+
+/* Terminal window */
+#terminal-window{width:550px;height:380px;top:80px;left:60px}
+.terminal-content{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.8rem;
+  line-height:1.6;
+  color:#00ff88;
+}
+
+.terminal-line{margin-bottom:4px}
+.terminal-prompt{color:#e664ff}
+.terminal-input{
+  display:flex;align-items:center;gap:5px;
+  margin-top:10px;
+}
+
+.terminal-input input{
+  background:transparent;
+  border:none;
+  color:#00ff88;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.8rem;
+  outline:none;
+  flex:1;
+  caret-color:#e664ff;
+}
+
+/* About window */
+#about-window{width:450px;height:350px;top:120px;left:350px}
+#about-window h2{
+  font-size:1.5rem;
+  background:linear-gradient(135deg,#e664ff,#64b5f6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin-bottom:15px;
+}
+
+#about-window p{
+  color:rgba(255,255,255,0.6);
+  font-size:0.85rem;
+  line-height:1.7;
+  margin-bottom:12px;
+}
+
+/* Gallery window */
+#gallery-window{width:500px;height:400px;top:60px;left:500px}
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.gallery-item{
+  aspect-ratio:1;
+  border-radius:8px;
+  overflow:hidden;
+  position:relative;
+  cursor:pointer;
+}
+
+.gallery-item canvas{width:100%;height:100%}
+
+.gallery-item:hover .gallery-overlay{opacity:1}
+
+.gallery-overlay{
+  position:absolute;inset:0;
+  background:rgba(230,100,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;
+  transition:opacity 0.3s;
+  font-size:0.7rem;
+  letter-spacing:2px;
+  color:#fff;
+}
+
+/* Settings window */
+#settings-window{width:420px;height:350px;top:200px;left:200px}
+
+.settings-group{margin-bottom:20px}
+
+.settings-group label{
+  display:block;
+  font-size:0.75rem;
+  color:rgba(230,100,255,0.6);
+  letter-spacing:1px;
+  margin-bottom:8px;
+  text-transform:uppercase;
+}
+
+.settings-slider{
+  width:100%;
+  -webkit-appearance:none;
+  height:4px;
+  background:rgba(230,100,255,0.15);
+  border-radius:2px;
+  outline:none;
+}
+
+.settings-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;height:16px;
+  background:#e664ff;
+  border-radius:50%;
+  cursor:pointer;
+}
+
+.settings-toggle{
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;
+}
+
+.toggle-track{
+  width:40px;height:20px;
+  background:rgba(230,100,255,0.2);
+  border-radius:10px;
+  position:relative;
+  transition:background 0.3s;
+}
+
+.toggle-track.on{background:rgba(230,100,255,0.6)}
+
+.toggle-track::after{
+  content:'';
+  position:absolute;
+  top:2px;left:2px;
+  width:16px;height:16px;
+  background:#fff;
+  border-radius:50%;
+  transition:transform 0.3s;
+}
+
+.toggle-track.on::after{transform:translateX(20px)}
+
+/* Music window */
+#music-window{width:350px;height:280px;top:150px;left:600px}
+
+.music-viz{
+  width:100%;height:80px;
+  display:flex;align-items:flex-end;gap:2px;
+  margin-bottom:20px;
+}
+
+.viz-bar{
+  flex:1;
+  background:linear-gradient(to top,#e664ff,#64b5f6);
+  border-radius:2px 2px 0 0;
+  transition:height 0.1s;
+  min-height:3px;
+}
+
+.music-controls{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+}
+
+.music-btn{
+  background:transparent;
+  border:1px solid rgba(230,100,255,0.3);
+  color:#e664ff;
+  width:40px;height:40px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:1.2rem;
+  transition:all 0.3s;
+}
+
+.music-btn:hover{background:rgba(230,100,255,0.1)}
+.music-btn.play{width:50px;height:50px;font-size:1.5rem}
+
+/* Clock widget */
+#clock-widget{
+  position:fixed;
+  top:20px;right:20px;
+  z-index:500;
+  text-align:right;
+}
+
+#clock-time{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:2.5rem;
+  font-weight:300;
+  color:rgba(255,255,255,0.9);
+  text-shadow:0 0 20px rgba(230,100,255,0.3);
+}
+
+#clock-date{
+  font-size:0.75rem;
+  color:rgba(255,255,255,0.4);
+  letter-spacing:2px;
+}
+
+/* Notification */
+.notification{
+  position:fixed;
+  top:-80px;right:20px;
+  z-index:2000;
+  background:rgba(20,20,40,0.95);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(230,100,255,0.2);
+  border-radius:12px;
+  padding:15px 20px;
+  max-width:300px;
+  transition:top 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+
+.notification.show{top:20px}
+
+.notification .notif-title{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;
+  color:#e664ff;
+  margin-bottom:5px;
+}
+
+.notification .notif-text{
+  font-size:0.8rem;
+  color:rgba(255,255,255,0.6);
+}
+
+/* Sound toggle */
+#sound-toggle{
+  position:fixed;top:20px;left:20px;z-index:500;
+  background:rgba(20,20,40,0.6);
+  border:1px solid rgba(230,100,255,0.2);
+  color:#e664ff;
+  padding:8px 16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  letter-spacing:2px;
+  cursor:pointer;
+  border-radius:8px;
+  transition:all 0.3s;
+}
+
+#sound-toggle:hover{background:rgba(230,100,255,0.1)}
+
+@media(max-width:768px){
+  body{cursor:auto}
+  #custom-cursor{display:none}
+  .os-window{width:calc(100% - 20px)!important;left:10px!important;height:auto!important}
+  .window-body{max-height:300px}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)}
+  #taskbar{bottom:0;left:0;right:0;transform:none;border-radius:0;justify-content:center}
+  .taskbar-icon{width:40px;height:40px;font-size:1.1rem}
+  #clock-time{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<div id="custom-cursor"></div>
+<canvas id="bg-canvas"></canvas>
+
+<div id="desktop">
+  <!-- Desktop Icons -->
+  <div class="desktop-icon" style="top:30px;left:30px" ondblclick="openWindow('terminal-window')">
+    <div class="icon">⌨️</div>
+    <div class="label">Terminal</div>
+  </div>
+  <div class="desktop-icon" style="top:130px;left:30px" ondblclick="openWindow('about-window')">
+    <div class="icon">ℹ️</div>
+    <div class="label">About</div>
+  </div>
+  <div class="desktop-icon" style="top:230px;left:30px" ondblclick="openWindow('gallery-window')">
+    <div class="icon">🎨</div>
+    <div class="label">Gallery</div>
+  </div>
+  <div class="desktop-icon" style="top:330px;left:30px" ondblclick="openWindow('settings-window')">
+    <div class="icon">⚙️</div>
+    <div class="label">Settings</div>
+  </div>
+  <div class="desktop-icon" style="top:430px;left:30px" ondblclick="openWindow('music-window')">
+    <div class="icon">🎵</div>
+    <div class="label">Music</div>
+  </div>
+
+  <!-- Windows -->
+  <div class="os-window" id="terminal-window">
+    <div class="window-header" onmousedown="startDrag(event,'terminal-window')">
+      <span class="window-title">SYNTH://TERMINAL</span>
+      <div class="window-controls">
+        <span class="win-min" onclick="minimizeWindow('terminal-window')"></span>
+        <span class="win-max"></span>
+        <span class="win-close" onclick="closeWindow('terminal-window')"></span>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="terminal-content" id="terminal-output">
+        <div class="terminal-line">SYNTH OS v3.7.1 — Quantum Desktop Environment</div>
+        <div class="terminal-line">Copyright (c) 2847 Synth Corporation</div>
+        <div class="terminal-line">---</div>
+        <div class="terminal-line"><span class="terminal-prompt">root@synth:~$</span> welcome</div>
+        <div class="terminal-line">Welcome to SYNTH OS. Type 'help' for commands.</div>
+      </div>
+      <div class="terminal-input">
+        <span class="terminal-prompt">root@synth:~$</span>
+        <input type="text" id="terminal-input" autofocus placeholder="Type a command...">
+      </div>
+    </div>
+  </div>
+
+  <div class="os-window" id="about-window">
+    <div class="window-header" onmousedown="startDrag(event,'about-window')">
+      <span class="window-title">ABOUT SYNTH OS</span>
+      <div class="window-controls">
+        <span class="win-min" onclick="minimizeWindow('about-window')"></span>
+        <span class="win-max"></span>
+        <span class="win-close" onclick="closeWindow('about-window')"></span>
+      </div>
+    </div>
+    <div class="window-body">
+      <h2>SYNTH OS</h2>
+      <p>A quantum-accelerated desktop environment designed for the post-singularity era. Every process runs on entangled qubits, achieving computation speeds that classical systems couldn't dream of.</p>
+      <p>SYNTH OS doesn't just run programs — it dreams them into existence. The neural-link interface adapts to your cognitive patterns, predicting needs before they form as conscious thoughts.</p>
+      <p style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(230,100,255,0.4);margin-top:20px">Build: 3.7.1-quantum | Kernel: SYNTH-CORE 9.0 | Memory: ∞ TB</p>
+    </div>
+  </div>
+
+  <div class="os-window" id="gallery-window">
+    <div class="window-header" onmousedown="startDrag(event,'gallery-window')">
+      <span class="window-title">PROCEDURAL GALLERY</span>
+      <div class="window-controls">
+        <span class="win-min" onclick="minimizeWindow('gallery-window')"></span>
+        <span class="win-max"></span>
+        <span class="win-close" onclick="closeWindow('gallery-window')"></span>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </div>
+  </div>
+
+  <div class="os-window" id="settings-window">
+    <div class="window-header" onmousedown="startDrag(event,'settings-window')">
+      <span class="window-title">SYSTEM SETTINGS</span>
+      <div class="window-controls">
+        <span class="win-min" onclick="minimizeWindow('settings-window')"></span>
+        <span class="win-max"></span>
+        <span class="win-close" onclick="closeWindow('settings-window')"></span>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="settings-group">
+        <label>Particle Density</label>
+        <input type="range" class="settings-slider" id="particle-density" min="50" max="500" value="200">
+      </div>
+      <div class="settings-group">
+        <label>Background Hue</label>
+        <input type="range" class="settings-slider" id="bg-hue" min="0" max="360" value="260">
+      </div>
+      <div class="settings-group">
+        <label>Window Blur</label>
+        <input type="range" class="settings-slider" id="blur-amount" min="0" max="50" value="30">
+      </div>
+      <div class="settings-group">
+        <label>Animations</label>
+        <div class="settings-toggle" onclick="this.querySelector('.toggle-track').classList.toggle('on')">
+          <div class="toggle-track on"></div>
+          <span style="font-size:0.8rem;color:rgba(255,255,255,0.5)">Enable background animations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="os-window" id="music-window">
+    <div class="window-header" onmousedown="startDrag(event,'music-window')">
+      <span class="window-title">SYNTH PLAYER</span>
+      <div class="window-controls">
+        <span class="win-min" onclick="minimizeWindow('music-window')"></span>
+        <span class="win-max"></span>
+        <span class="win-close" onclick="closeWindow('music-window')"></span>
+      </div>
+    </div>
+    <div class="window-body">
+      <div style="text-align:center;margin-bottom:15px">
+        <div style="font-size:1rem;color:#e664ff">Quantum Resonance</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">SYNTH COLLECTIVE</div>
+      </div>
+      <div class="music-viz" id="music-viz"></div>
+      <div class="music-controls">
+        <button class="music-btn" onclick="playUIClick()">⏮</button>
+        <button class="music-btn play" id="play-btn" onclick="togglePlay()">▶</button>
+        <button class="music-btn" onclick="playUIClick()">⏭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="clock-widget">
+  <div id="clock-time">00:00</div>
+  <div id="clock-date">Loading...</div>
+</div>
+
+<div class="notification" id="notification">
+  <div class="notif-title">SYSTEM</div>
+  <div class="notif-text" id="notif-text">Welcome to SYNTH OS</div>
+</div>
+
+<button id="sound-toggle" onclick="toggleSound()">🔇 SOUND</button>
+
+<!-- Taskbar -->
+<div id="taskbar">
+  <div class="taskbar-icon" onclick="openWindow('terminal-window')" title="Terminal">⌨️</div>
+  <div class="taskbar-icon" onclick="openWindow('about-window')" title="About">ℹ️</div>
+  <div class="taskbar-icon" onclick="openWindow('gallery-window')" title="Gallery">🎨</div>
+  <div class="taskbar-icon" onclick="openWindow('settings-window')" title="Settings">⚙️</div>
+  <div class="taskbar-icon" onclick="openWindow('music-window')" title="Music">🎵</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// --- Shape-morphing cursor ---
+const cursorEl = document.getElementById('custom-cursor');
+let cmx = 0, cmy = 0;
+
+document.addEventListener('mousemove', e => {
+  cmx = e.clientX; cmy = e.clientY;
+  cursorEl.style.left = cmx + 'px';
+  cursorEl.style.top = cmy + 'px';
+});
+
+document.querySelectorAll('.taskbar-icon,.desktop-icon,.music-btn,.win-close,.win-min,.win-max,.settings-toggle,#sound-toggle,button,input').forEach(el => {
+  el.addEventListener('mouseenter', () => cursorEl.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => cursorEl.classList.remove('hovering'));
+});
+
+// --- 3D Background: rotating geometric shapes ---
+const bgCanvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 30;
+
+// Floating 3D shapes
+const shapes = [];
+const geos = [
+  new THREE.IcosahedronGeometry(1, 0),
+  new THREE.OctahedronGeometry(1, 0),
+  new THREE.TetrahedronGeometry(1, 0),
+  new THREE.TorusGeometry(0.7, 0.3, 8, 16),
+  new THREE.BoxGeometry(1, 1, 1)
+];
+
+for(let i = 0; i < 25; i++){
+  const geo = geos[Math.floor(Math.random() * geos.length)];
+  const mat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color().setHSL(0.78 + Math.random() * 0.1, 0.6, 0.3),
+    wireframe: true,
+    transparent: true,
+    opacity: 0.15 + Math.random() * 0.1
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(
+    (Math.random()-0.5) * 50,
+    (Math.random()-0.5) * 30,
+    (Math.random()-0.5) * 20 - 10
+  );
+  mesh.scale.setScalar(0.5 + Math.random() * 2);
+  mesh.userData = {
+    rotSpeed: { x: (Math.random()-0.5)*0.01, y: (Math.random()-0.5)*0.01 },
+    floatSpeed: Math.random() * 0.5 + 0.2,
+    floatOffset: Math.random() * Math.PI * 2,
+    baseY: mesh.position.y
+  };
+  scene.add(mesh);
+  shapes.push(mesh);
+}
+
+let time = 0;
+function animateBG(){
+  requestAnimationFrame(animateBG);
+  time += 0.01;
+
+  shapes.forEach(s => {
+    s.rotation.x += s.userData.rotSpeed.x;
+    s.rotation.y += s.userData.rotSpeed.y;
+    s.position.y = s.userData.baseY + Math.sin(time * s.userData.floatSpeed + s.userData.floatOffset) * 1;
+  });
+
+  camera.position.x = Math.sin(time * 0.1) * 2;
+  camera.position.y = Math.cos(time * 0.08) * 1;
+
+  renderer.render(scene, camera);
+}
+animateBG();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// --- Window management ---
+let activeZ = 100;
+
+function openWindow(id){
+  const win = document.getElementById(id);
+  win.classList.add('open');
+  win.style.zIndex = ++activeZ;
+  playUIClick();
+}
+
+function closeWindow(id){
+  document.getElementById(id).classList.remove('open');
+  playUIClick();
+}
+
+function minimizeWindow(id){
+  const win = document.getElementById(id);
+  win.style.transform = 'scale(0.8)';
+  win.style.opacity = '0';
+  setTimeout(() => {
+    win.classList.remove('open');
+    win.style.transform = '';
+    win.style.opacity = '';
+  }, 300);
+  playUIClick();
+}
+
+// Drag
+let dragging = null, dragOff = { x: 0, y: 0 };
+
+function startDrag(e, id){
+  dragging = document.getElementById(id);
+  dragging.style.zIndex = ++activeZ;
+  const rect = dragging.getBoundingClientRect();
+  dragOff.x = e.clientX - rect.left;
+  dragOff.y = e.clientY - rect.top;
+}
+
+document.addEventListener('mousemove', e => {
+  if(!dragging) return;
+  dragging.style.left = (e.clientX - dragOff.x) + 'px';
+  dragging.style.top = (e.clientY - dragOff.y) + 'px';
+});
+
+document.addEventListener('mouseup', () => dragging = null);
+
+// --- Terminal ---
+const termInput = document.getElementById('terminal-input');
+const termOutput = document.getElementById('terminal-output');
+
+const commands = {
+  help: 'Available commands: help, about, clear, date, matrix, echo [text], neofetch, hack',
+  about: 'SYNTH OS v3.7.1 — A quantum desktop environment for the post-singularity era.',
+  date: () => new Date().toLocaleString(),
+  clear: () => { termOutput.innerHTML = ''; return ''; },
+  matrix: 'Wake up, Neo... The Matrix has you.',
+  neofetch: `
+    ╔══════════════════╗
+    ║   SYNTH OS 3.7   ║
+    ║ Kernel: Q-CORE 9 ║
+    ║ Shell: SYNTH-SH   ║
+    ║ CPU: Quantum 256q ║
+    ║ Memory: ∞ TB      ║
+    ║ Uptime: Eternal   ║
+    ╚══════════════════╝`,
+  hack: () => {
+    showNotification('SECURITY', 'Nice try. Access denied. 😏');
+    return 'ACCESS DENIED — Quantum firewall active.';
+  }
+};
+
+termInput.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const cmd = termInput.value.trim().toLowerCase();
+  termInput.value = '';
+  if(!cmd) return;
+
+  const line1 = document.createElement('div');
+  line1.className = 'terminal-line';
+  line1.innerHTML = `<span class="terminal-prompt">root@synth:~$</span> ${cmd}`;
+  termOutput.appendChild(line1);
+
+  let response = '';
+  if(cmd.startsWith('echo ')){
+    response = cmd.slice(5);
+  } else if(commands[cmd]){
+    response = typeof commands[cmd] === 'function' ? commands[cmd]() : commands[cmd];
+  } else {
+    response = `Command not found: ${cmd}. Type 'help' for available commands.`;
+  }
+
+  if(response){
+    const line2 = document.createElement('div');
+    line2.className = 'terminal-line';
+    line2.style.whiteSpace = 'pre-wrap';
+    line2.textContent = response;
+    termOutput.appendChild(line2);
+  }
+
+  termOutput.scrollTop = termOutput.scrollHeight;
+  playUIClick();
+});
+
+// --- Gallery: procedural art ---
+const galleryGrid = document.getElementById('gallery-grid');
+
+for(let i = 0; i < 9; i++){
+  const item = document.createElement('div');
+  item.className = 'gallery-item';
+  const c = document.createElement('canvas');
+  c.width = 150; c.height = 150;
+  item.appendChild(c);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'gallery-overlay';
+  overlay.textContent = `ART_${String(i+1).padStart(3,'0')}`;
+  item.appendChild(overlay);
+
+  galleryGrid.appendChild(item);
+
+  // Generate procedural art
+  const ctx = c.getContext('2d');
+  const hue = 260 + Math.random() * 60;
+  ctx.fillStyle = `hsl(${hue},30%,10%)`;
+  ctx.fillRect(0, 0, 150, 150);
+
+  for(let j = 0; j < 20; j++){
+    ctx.beginPath();
+    ctx.strokeStyle = `hsla(${hue + Math.random()*40},70%,50%,${Math.random()*0.4})`;
+    ctx.lineWidth = Math.random() * 3;
+    if(Math.random() > 0.5){
+      ctx.arc(Math.random()*150, Math.random()*150, Math.random()*40, 0, Math.PI*2);
+    } else {
+      ctx.moveTo(Math.random()*150, Math.random()*150);
+      ctx.lineTo(Math.random()*150, Math.random()*150);
+    }
+    ctx.stroke();
+  }
+}
+
+// --- Music visualizer ---
+const musicViz = document.getElementById('music-viz');
+const vizBars = [];
+for(let i = 0; i < 32; i++){
+  const bar = document.createElement('div');
+  bar.className = 'viz-bar';
+  bar.style.height = '3px';
+  musicViz.appendChild(bar);
+  vizBars.push(bar);
+}
+
+let playing = false;
+function togglePlay(){
+  playing = !playing;
+  document.getElementById('play-btn').textContent = playing ? '⏸' : '▶';
+  playUIClick();
+}
+
+function animateViz(){
+  requestAnimationFrame(animateViz);
+  if(playing){
+    vizBars.forEach((bar, i) => {
+      const h = Math.random() * 60 + 5;
+      bar.style.height = h + 'px';
+    });
+  }
+}
+animateViz();
+
+// --- Clock ---
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// --- Notifications ---
+function showNotification(title, text){
+  const notif = document.getElementById('notification');
+  document.querySelector('.notif-title').textContent = title;
+  document.getElementById('notif-text').textContent = text;
+  notif.classList.add('show');
+  setTimeout(() => notif.classList.remove('show'), 4000);
+}
+
+setTimeout(() => showNotification('SYNTH OS', 'Welcome! Double-click icons to open apps.'), 2000);
+
+// --- Audio: Musical reactive tones ---
+let audioCtx, soundEnabled = false;
+
+function toggleSound(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊 SOUND' : '🔇 SOUND';
+}
+
+function playUIClick(){
+  if(!soundEnabled || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  const notes = [523.25, 659.25, 783.99, 1046.50];
+  osc.frequency.value = notes[Math.floor(Math.random()*notes.length)];
+  osc.type = 'sine';
+  gain.gain.value = 0.05;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
+// Settings reactivity
+document.getElementById('bg-hue').addEventListener('input', e => {
+  const hue = e.target.value;
+  shapes.forEach(s => {
+    s.material.color.setHSL(hue / 360, 0.6, 0.3);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX FORGE | Define Your Limits</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="reticle-cursor"></div>
+
+    <nav class="apex-nav">
+        <div class="logo">APEX<span>FORGE</span></div>
+        <div class="nav-links">
+            <a href="#method">The Method</a>
+            <a href="#programs">Programs</a>
+            <a href="#analytics">Analytics</a>
+        </div>
+        <button class="join-btn">START TRIAL</button>
+    </nav>
+
+    <!-- 3D Hero -->
+    <header class="hero">
+        <canvas id="body-canvas"></canvas>
+        <div class="hero-content">
+            <h1>BUILT DIFFERENT. <br>TRAIN DIFFERENT.</h1>
+            <div class="live-stats">
+                <div class="stat"><span class="highlight">48,912</span> active athletes</div>
+                <div class="stat"><span class="highlight">2.3M</span> workouts</div>
+            </div>
+            <button class="btn-main">FORGE YOUR LIMITS</button>
+        </div>
+    </header>
+
+    <!-- The Method -->
+    <section class="method-section" id="method">
+        <div class="method-grid">
+            <div class="method-col">
+                <div class="num">01</div>
+                <h3>SCIENCE-BASED</h3>
+                <p>Periodization, progressive overload, deload weeks. Math applied to muscle.</p>
+            </div>
+            <div class="method-col">
+                <div class="num">02</div>
+                <h3>PRECISION NUTRITION</h3>
+                <p>Macro tracking, meal timing, hydration protocols for maximum recovery.</p>
+            </div>
+            <div class="method-col">
+                <div class="num">03</div>
+                <h3>RECOVERY INTEL</h3>
+                <p>Sleep scoring, HRV tracking, and mobility work mapped to your exact CNS strain.</p>
+            </div>
+            <div class="method-col">
+                <div class="num">04</div>
+                <h3>MENTAL FORTITUDE</h3>
+                <p>Visualization, consistency streaks, mindset challenges. Break limits.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programs Carousel (CSS 3D) -->
+    <section class="programs-section" id="programs">
+        <h2>PROGRAMS</h2>
+        <div class="perspective-wrap">
+            <div class="carousel" id="prog-carousel">
+                <div class="prog-card active">
+                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80" alt="Hypertrophy">
+                    <div class="prog-info">
+                        <h3>HYPERTROPHY BLUEPRINT</h3>
+                        <p>12 Weeks • Advanced</p>
+                    </div>
+                </div>
+                <div class="prog-card next">
+                    <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=800&q=80" alt="Athletic">
+                    <div class="prog-info">
+                        <h3>ATHLETIC PERFORMANCE</h3>
+                        <p>8 Weeks • Intermediate</p>
+                    </div>
+                </div>
+                <div class="prog-card">
+                    <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80" alt="Endurance">
+                    <div class="prog-info">
+                        <h3>HIIT ENDURANCE</h3>
+                        <p>6 Weeks • Absolute Pain</p>
+                    </div>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="p-prev">PREV</button>
+                <button id="p-next">NEXT</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Dashboard Mockup -->
+    <section class="analytics-section" id="analytics">
+        <div class="analytics-inner">
+            <div class="text-block">
+                <h2>YOUR DATA. <br>YOUR WEAPON.</h2>
+                <p>Visualizing strength progression. Track 1RM trends, body composition, and CNS strain in real time.</p>
+                <button class="btn-outline">VIEW DASHBOARD</button>
+            </div>
+            <div class="mockup-chart">
+                <div class="chart-header">VOLUME BENCHMARK (LBS)</div>
+                <div class="bars">
+                    <div class="bar" style="height: 30%"></div>
+                    <div class="bar" style="height: 45%"></div>
+                    <div class="bar" style="height: 35%"></div>
+                    <div class="bar" style="height: 60%"></div>
+                    <div class="bar" style="height: 80%"></div>
+                    <div class="bar" style="height: 100%"></div>
+                </div>
+                <div class="chart-labels">
+                    <span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="f-logo">APEX<span>FORGE</span></div>
+        <div class="f-links">
+            <a href="#">Trainers</a>
+            <a href="#">Pricing</a>
+            <a href="#">Shop</a>
+        </div>
+        <p class="disclaimer">&copy; 2026 APEX FORGE. Consult a physician before dying.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

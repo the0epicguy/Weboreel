@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMOS LEARN | Curiosity, Unlocked</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="cosmos-cursor"></div>
+
+    <nav class="cosmos-nav">
+        <div class="logo">COSMOS LEARN</div>
+        <div class="nav-links">
+            <a href="#explore">Explore</a>
+            <a href="#courses">Courses</a>
+            <a href="#demo">Try Coding</a>
+        </div>
+        <div class="user-actions">
+            <span>XP: 140</span>
+            <button class="btn-primary">Sign In</button>
+        </div>
+    </nav>
+
+    <!-- Hero with 3D Starfield -->
+    <header class="cosmos-hero">
+        <canvas id="cosmos-canvas"></canvas>
+        <div class="hero-content">
+            <h1>Your universe of knowledge starts here.</h1>
+            <div class="search-wrap">
+                <input type="text" placeholder="What do you want to learn today? (e.g. Python, Biology)">
+                <button class="search-btn">SEARCH</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- How It Works (Scroll Flips) -->
+    <section class="how-it-works">
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-num">01</div>
+                <h3>Choose Your Path</h3>
+                <p>Select your starting point, from high school algebra to quantum mechanics.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">02</div>
+                <h3>Learn Through Doing</h3>
+                <p>Write real code, simulate physics, and explore interactive models in the browser.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">03</div>
+                <h3>Track Your Growth</h3>
+                <p>Earn XP, unlock badges, and visualize your growing neural network of knowledge.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subject Explorer Globe -->
+    <section class="subject-explorer" id="explore">
+        <div class="explorer-text">
+            <h2>The Terrain of Knowledge</h2>
+            <p>Spin the globe to discover new disciplines. Our curriculum is mapped geographically—adjacent subjects share core concepts.</p>
+        </div>
+        <div class="globe-container">
+            <canvas id="globe-canvas"></canvas>
+            <div class="globe-tooltip">Mathematics<br><span>412 Active Learners</span></div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo (Code Editor) -->
+    <section class="interactive-demo" id="demo">
+        <div class="demo-header">
+            <h2>Try a Mini-Lesson</h2>
+            <p>Write your first Python loop right here. No setup required.</p>
+        </div>
+        <div class="editor-layout">
+            <div class="lesson-panel">
+                <div class="badge">BEGINNER</div>
+                <h3>Print a sequence</h3>
+                <p>Use a <code>for</code> loop to print numbers from 1 to 3.</p>
+                <div class="hint">Hint: use <code>range(1, 4)</code></div>
+            </div>
+            <div class="code-panel">
+                <div class="panel-header">
+                    <span>main.py</span>
+                    <button id="run-btn">Run Code ▶</button>
+                </div>
+                <div class="code-area">
+                    <div class="line-numbers">1<br>2<br>3</div>
+                    <textarea spellcheck="false" id="code-input"># Write your code here
+for i in range(1, 4):
+    </textarea>
+                </div>
+                <div class="console-output" id="console-output">> Ready.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Courses -->
+    <section class="featured-courses" id="courses">
+        <h2 class="section-title">Trending Now</h2>
+        <div class="course-grid">
+            <!-- Course 1 -->
+            <div class="course-card">
+                <div class="course-thumb" style="background-color: #e5e5d8;"></div>
+                <div class="course-info">
+                    <span class="tag">COMPUTER SCIENCE</span>
+                    <h3>Machine Learning Fundamentals</h3>
+                    <p>Instructor: Dr. Alan Chen</p>
+                    <div class="course-meta">
+                        <span>4.9 ★</span> • <span>Beginner</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Course 2 -->
+            <div class="course-card">
+                <div class="course-thumb" style="background-color: #d1ccb9;"></div>
+                <div class="course-info">
+                    <span class="tag">PHYSICS</span>
+                    <h3>Orbital Mechanics</h3>
+                    <p>Instructor: Sarah Lin</p>
+                    <div class="course-meta">
+                        <span>4.8 ★</span> • <span>Intermediate</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Course 3 -->
+            <div class="course-card">
+                <div class="course-thumb" style="background-color: #ede9dc;"></div>
+                <div class="course-info">
+                    <span class="tag">MATHEMATICS</span>
+                    <h3>Calculus II: Integration</h3>
+                    <p>Instructor: Prof. James Miller</p>
+                    <div class="course-meta">
+                        <span>4.7 ★</span> • <span>Advanced</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Course 4 -->
+            <div class="course-card">
+                <div class="course-thumb" style="background-color: #dedac8;"></div>
+                <div class="course-info">
+                    <span class="tag">BIOLOGY</span>
+                    <h3>Cellular Structures</h3>
+                    <p>Instructor: Emily Rostova</p>
+                    <div class="course-meta">
+                        <span>4.9 ★</span> • <span>Beginner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="cosmos-footer">
+        <div class="footer-wrap">
+            <div class="f-col">
+                <h3>COSMOS LEARN</h3>
+                <p>Curiosity, Unlocked.</p>
+            </div>
+            <div class="f-col">
+                <a href="#">For Schools</a>
+                <a href="#">Pricing</a>
+            </div>
+            <div class="f-col">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

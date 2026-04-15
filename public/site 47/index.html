@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARHAVEN | Deep Space Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;800&family=JetBrains+Mono:wght@100;400&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Tactical Cursor -->
+    <div class="tactical-cursor"></div>
+
+    <!-- UI Overlay (Simulating Observatory HUD) -->
+    <div class="hud-overlay">
+        <div class="hud-top-left">SYS.ON // OMEGA PROT.</div>
+        <div class="hud-top-right" id="hud-time">T+ 00:00:00</div>
+        <div class="hud-bottom-left">LOC: SEC-7.A</div>
+        <div class="hud-bottom-right">TKL-ACT</div>
+    </div>
+
+    <nav class="star-nav">
+        <div class="logo">STARHAVEN</div>
+        <div class="nav-links">
+            <a href="#missions">Missions</a>
+            <a href="#fleet">Fleet</a>
+            <a href="#data">Telemetry</a>
+        </div>
+        <button class="launch-btn">INITIATE LAUNCH</button>
+    </nav>
+
+    <!-- Warp Speed Hero -->
+    <header class="warp-hero">
+        <canvas id="warp-canvas"></canvas>
+        <div class="hero-content">
+            <h1>BEYOND THE <br>HELIOSPHERE</h1>
+            <p>Advancing multi-planetary logistics and deep space data analysis. We build the infrastructure for the next frontier.</p>
+            <div class="mission-status">
+                <span class="status-indicator beep"></span>
+                <span>MISSION ZERO-G CURRENTLY IN ORBIT</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mission Control Stats -->
+    <section class="telemetry-section" id="data">
+        <div class="tel-grid">
+            <div class="tel-card">
+                <div class="t-label">CURRENT ALTITUDE</div>
+                <div class="t-val">408<span class="unit">KM</span></div>
+                <div class="t-graph"><div class="line w-70"></div></div>
+            </div>
+            <div class="tel-card">
+                <div class="t-label">VELOCITY</div>
+                <div class="t-val">27.5<span class="unit">KM/S</span></div>
+                <div class="t-graph"><div class="line w-90"></div></div>
+            </div>
+            <div class="tel-card">
+                <div class="t-label">CREW VITALS AVG.</div>
+                <div class="t-val">98<span class="unit">%</span></div>
+                <div class="t-graph"><div class="line w-100"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Fleet -->
+    <section class="fleet-section" id="fleet">
+        <div class="section-heading">
+            <h2>THE FLEET</h2>
+            <p>Next-generation vehicles engineered for maximum payload and survivability.</p>
+        </div>
+        
+        <div class="fleet-showcase">
+            <div class="ship-controls">
+                <button class="ship-btn active" data-target="ship1">SH-VANGUARD</button>
+                <button class="ship-btn" data-target="ship2">SH-ORION</button>
+                <button class="ship-btn" data-target="ship3">SH-APOLLO</button>
+            </div>
+            
+            <div class="ship-display">
+                <!-- Using abstract geometry representation instead of external model -->
+                <canvas id="ship-canvas"></canvas>
+                <div class="ship-info">
+                    <h3 id="si-name">SH-VANGUARD</h3>
+                    <p id="si-desc">Heavy-lift orbital class rocket. Fully reusable first stage. Designed to carry satellites into Low Earth Orbit.</p>
+                    <div class="specs">
+                        <div class="spec"><span>PAYLOAD TO LEO</span><br>22,800 KG</div>
+                        <div class="spec"><span>HEIGHT</span><br>70 M</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Missions -->
+    <section class="missions-section" id="missions">
+        <div class="section-heading">
+            <h2>ACTIVE MISSIONS</h2>
+        </div>
+        <div class="mission-cards">
+            <!-- Card 1 -->
+            <div class="m-card">
+                <div class="m-img">
+                    <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=80" alt="Earth from Space">
+                </div>
+                <div class="m-data">
+                    <div class="m-tag">LEO SATELLITE</div>
+                    <h3>Project Artemis</h3>
+                    <p>Deploying a mesh network of 48 weather monitoring satellites to provide real-time climate data to global farming sectors.</p>
+                    <a href="#" class="btn-text">Read Report [+]</a>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="m-card">
+                <div class="m-img">
+                    <img src="https://images.unsplash.com/photo-1541873676-a18131494184?w=800&q=80" alt="Rover">
+                </div>
+                <div class="m-data">
+                    <div class="m-tag">DEEP SPACE EXTRACTION</div>
+                    <h3>Tether-1 Asteroid Intercept</h3>
+                    <p>Probing carbonaceous asteroid Bennu for rare earth metals. Currently on approach vector.</p>
+                    <a href="#" class="btn-text">Read Report [+]</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="star-footer">
+        <div class="f-top">
+            <div class="f-logo">STARHAVEN ADVANCED SYSTEMS</div>
+            <div class="f-links">
+                <a href="#">Security Protocol</a>
+                <a href="#">Public API</a>
+                <a href="#">Engineering Careers</a>
+            </div>
+        </div>
+        <div class="f-bot">
+            <p>CLASSIFIED MATERIAL. NEUTRAL THEME EDITION.</p>
+            <p>&copy; 2026 STARHAVEN CORP.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BATTLEGROUND — Web Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+
+        canvas {
+            display: block;
+            cursor: none;
+        }
+
+        .screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(2, 8, 2, 0.97), rgba(5, 14, 5, 0.97));
+            z-index: 100;
+            color: #a8c8a8;
+            gap: 14px;
+        }
+
+        .screen.hidden {
+            display: none !important;
+        }
+
+        .logo {
+            font-size: clamp(38px, 6vw, 72px);
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            color: #3ddc6f;
+            text-transform: uppercase;
+            text-shadow: 0 0 50px rgba(61, 220, 111, 0.7), 0 0 100px rgba(61, 220, 111, 0.3);
+            margin-bottom: 2px;
+            animation: lp 3s ease-in-out infinite;
+        }
+
+        @keyframes lp {
+
+            0%,
+            100% {
+                text-shadow: 0 0 50px rgba(61, 220, 111, 0.7), 0 0 100px rgba(61, 220, 111, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 70px rgba(61, 220, 111, 1), 0 0 130px rgba(61, 220, 111, 0.5);
+            }
+        }
+
+        .tagline {
+            font-size: 12px;
+            letter-spacing: 0.35em;
+            color: #4a7a4a;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .ctrl-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px 24px;
+            background: rgba(0, 15, 0, 0.7);
+            border: 1px solid #1a3a1a;
+            padding: 16px 24px;
+            font-size: 11px;
+            max-width: 380px;
+            width: 90%;
+            margin-bottom: 4px;
+        }
+
+        .ck {
+            color: #3ddc6f;
+            font-weight: 700;
+            min-width: 56px;
+            display: inline-block;
+        }
+
+        .cd {
+            color: #6a8a6a;
+        }
+
+        .player-count {
+            font-size: 11px;
+            color: #4a6a4a;
+            letter-spacing: 0.2em;
+            border-top: 1px solid #1a3a1a;
+            padding-top: 10px;
+            width: 100%;
+            text-align: center;
+            max-width: 380px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #3ddc6f;
+            color: #3ddc6f;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            padding: 13px 44px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(61, 220, 111, 0.08);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 28px rgba(61, 220, 111, 0.5);
+            letter-spacing: 0.42em;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .result-title {
+            font-size: clamp(30px, 5vw, 58px);
+            font-weight: 900;
+            letter-spacing: 0.15em;
+        }
+
+        .result-title.win {
+            color: #3ddc6f;
+            text-shadow: 0 0 50px rgba(61, 220, 111, 0.8);
+            animation: lp 2s infinite;
+        }
+
+        .result-title.dead {
+            color: #e03838;
+            text-shadow: 0 0 50px rgba(224, 56, 56, 0.8);
+        }
+
+        .result-stats {
+            font-size: 12px;
+            color: #7a9a7a;
+            letter-spacing: 0.12em;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .srow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sval {
+            color: #a8c8a8;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Mobile UI Overlay */
+        #mobileUI { position:fixed; inset:0; pointer-events:none; z-index:50; display:none; }
+        .joy-zone { position:absolute; top:0; bottom:0; width:50%; pointer-events:auto; }
+        #tz-left { left:0; } #tz-right { right:0; }
+        .stick-base {
+          position:absolute; width:120px; height:120px; border-radius:50%;
+          background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.2);
+          transform:translate(-50%,-50%); display:none; pointer-events:none;
+        }
+        .stick-knob {
+          position:absolute; width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.4);
+          top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 0 10px rgba(0,0,0,0.5);
+        }
+        .mbtn {
+          position:absolute; border-radius:50%; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3);
+          display:flex; justify-content:center; align-items:center; font-family:'Courier New',monospace;
+          color:rgba(255,255,255,0.8); font-weight:bold; pointer-events:auto; font-size:16px; user-select:none;
+        }
+        .mbtn:active { background:rgba(255,255,255,0.3); }
+        #mbtn-f { width:70px; height:70px; bottom:180px; right:60px; font-size:18px; }
+        #mbtn-h { width:55px; height:55px; bottom:265px; right:20px; }
+        #mbtn-r { width:55px; height:55px; bottom:265px; right:95px; }
+    </style>
+</head>
+
+<body>
+    <canvas id="gc"></canvas>
+    <div id="mobileUI">
+      <div class="joy-zone" id="tz-left"><div class="stick-base" id="joy-l-base"><div class="stick-knob" id="joy-l-knob"></div></div></div>
+      <div class="joy-zone" id="tz-right"><div class="stick-base" id="joy-r-base"><div class="stick-knob" id="joy-r-knob"></div></div></div>
+      <div class="mbtn" id="mbtn-f">LOOT</div>
+      <div class="mbtn" id="mbtn-h">HEAL</div>
+      <div class="mbtn" id="mbtn-r">RLD</div>
+    </div>
+    <div id="menuScreen" class="screen">
+        <div class="logo">BATTLEGROUND</div>
+        <div class="tagline">Drop · Loot · Survive</div>
+        <div class="ctrl-grid">
+            <div><span class="ck">W A S D</span><span class="cd">Move</span></div>
+            <div><span class="ck">SHIFT</span><span class="cd">Sprint</span></div>
+            <div><span class="ck">LMB</span><span class="cd">Fire</span></div>
+            <div><span class="ck">RMB</span><span class="cd">Aim Down Sights</span></div>
+            <div><span class="ck">R</span><span class="cd">Reload</span></div>
+            <div><span class="ck">F</span><span class="cd">Pick Up Weapon</span></div>
+            <div><span class="ck">H</span><span class="cd">Use Bandage</span></div>
+            <div><span class="ck">1 2 3</span><span class="cd">Switch Weapon</span></div>
+        </div>
+        <div class="player-count">⬡ 25 COMBATANTS &nbsp;·&nbsp; LAST STANDING WINS</div>
+        <button class="btn" id="startBtn">▶ &nbsp;DEPLOY</button>
+    </div>
+    <div id="deathScreen" class="screen hidden">
+        <div class="result-title dead">ELIMINATED</div>
+        <div class="result-stats">
+            <div class="srow">KILLS &nbsp;<span class="sval" id="dKills">0</span></div>
+            <div class="srow">SURVIVORS &nbsp;<span class="sval" id="dRemaining">0</span></div>
+            <div class="srow">SURVIVED &nbsp;<span class="sval" id="dTime">0:00</span></div>
+        </div>
+        <button class="btn" id="respawnBtn">↺ &nbsp;REDEPLOY</button>
+    </div>
+    <div id="winScreen" class="screen hidden">
+        <div class="result-title win">⬡ VICTORY ⬡</div>
+        <div class="tagline">WINNER WINNER CHICKEN DINNER</div>
+        <div class="result-stats">
+            <div class="srow">KILLS &nbsp;<span class="sval" id="wKills">0</span></div>
+            <div class="srow">SURVIVED &nbsp;<span class="sval" id="wTime">0:00</span></div>
+        </div>
+        <button class="btn" id="playAgainBtn">↺ &nbsp;PLAY AGAIN</button>
+    </div>
+    <script>
+        "use strict";
+        // =====================================================================
+        //  BATTLEGROUND — Fully Debugged + Realistic Edition
+        //  Bugs fixed:
+        //  1. LootItem.draw: 'type' undefined in draw() → use 'this.type'
+        //  2. SafeZone: broken incremental lerp → proper normalized t + stored start
+        //  3. Input: added justPressed() to prevent hold-key spam on heal/reload/switch
+        //  4. KillFeed: misaligned text positions fixed with measured widths
+        //  5. Camera: shake drift (added to coords without reset) → isolated _shakeX/Y
+        //  6. Bot _think(): zone override clobbered engage state → priority order fixed
+        //  7. Weapon switch: spamming → debounce + just()
+        //  8. Heal: fires every frame holding H → just() + cooldown
+        //  9. Dead bots: no loot drops → bot.dropLoot() on death
+        // 10. Bullet: single-frame movement missed fast bullets → sub-step loop
+        // 11. Bot friendly-fire chaos: bots now only engage other bots at close range
+        // 12. Reload: duplicate calls on hold → just('KeyR')
+        // 13. Camera follow: no lead → slight aim-direction offset added
+        // 14. Building collision: off-by-epsilon → added +0.5 overlap push
+        // =====================================================================
+
+        const TAU = Math.PI * 2;
+        const CFG = {
+            W: 4000, H: 4000,
+            NUM_BOTS: 24,
+            PLAYER_SPEED: 165, SPRINT_MULT: 1.65, CROUCH_MULT: 0.55,
+            PLAYER_R: 13, BOT_R: 12, LOOT_R: 9,
+            PICKUP_R: 44, NEARBY_R: 90,
+            PARTICLE_MAX: 400, BULLET_MAX: 180,
+            ZONE_PHASES: [
+                [1800, 30, 50, 0.8], [1100, 22, 40, 2.5], [620, 16, 30, 5],
+                [300, 12, 24, 9], [130, 9, 18, 14], [50, 6, 12, 22], [18, 0, 9, 40],
+            ],
+        };
+
+        // ── WEAPONS ──────────────────────────────────────────────────────────
+        const WEAPONS = {
+            Glock: { id: 'Glock', name: 'G18', cat: 'pistol', dmg: 22, crit: 2.2, rate: 7, mag: 15, res: 60, rl: 1.6, bspd: 420, spread: 0.07, adsS: 0.025, recoil: 2.2, rarity: 12, range: 350 },
+            P92: { id: 'P92', name: 'P92', cat: 'pistol', dmg: 28, crit: 2.3, rate: 4, mag: 15, res: 60, rl: 1.7, bspd: 400, spread: 0.06, adsS: 0.020, recoil: 3.5, rarity: 8, range: 380 },
+            UMP9: { id: 'UMP9', name: 'UMP9', cat: 'smg', dmg: 26, crit: 2.0, rate: 13, mag: 25, res: 100, rl: 2.0, bspd: 430, spread: 0.09, adsS: 0.035, recoil: 1.8, rarity: 9, range: 300 },
+            M4A1: { id: 'M4A1', name: 'M4A1', cat: 'ar', dmg: 36, crit: 2.5, rate: 10, mag: 30, res: 90, rl: 2.3, bspd: 920, spread: 0.05, adsS: 0.012, recoil: 3.0, rarity: 7, range: 600 },
+            AKM: { id: 'AKM', name: 'AKM', cat: 'ar', dmg: 44, crit: 2.5, rate: 7, mag: 30, res: 90, rl: 2.5, bspd: 820, spread: 0.07, adsS: 0.020, recoil: 5.5, rarity: 6, range: 580 },
+            SCAR: { id: 'SCAR', name: 'SCAR-L', cat: 'ar', dmg: 40, crit: 2.5, rate: 8, mag: 30, res: 90, rl: 2.4, bspd: 870, spread: 0.055, adsS: 0.015, recoil: 4.0, rarity: 4, range: 600 },
+            S686: { id: 'S686', name: 'S686', cat: 'shotgun', dmg: 18, crit: 1.5, rate: 1.4, mag: 2, res: 20, rl: 2.8, bspd: 500, spread: 0.20, adsS: 0.13, recoil: 15, rarity: 5, range: 120, pellets: 8 },
+            M24: { id: 'M24', name: 'M24', cat: 'sniper', dmg: 88, crit: 3.5, rate: 0.9, mag: 5, res: 30, rl: 3.8, bspd: 1450, spread: 0.008, adsS: 0.001, recoil: 18, rarity: 2, range: 1200 },
+            Kar98: { id: 'K98', name: 'KAR98', cat: 'sniper', dmg: 100, crit: 4.0, rate: 0.7, mag: 5, res: 25, rl: 4.0, bspd: 1500, spread: 0.007, adsS: 0.0008, recoil: 22, rarity: 1, range: 1400 },
+            MG3: { id: 'MG3', name: 'MG3', cat: 'lmg', dmg: 30, crit: 2.0, rate: 14, mag: 75, res: 200, rl: 5.5, bspd: 860, spread: 0.06, adsS: 0.025, recoil: 2.2, rarity: 3, range: 550 },
+        };
+        const WLIST = Object.values(WEAPONS);
+        function randWeapon() {
+            const tot = WLIST.reduce((s, w) => s + w.rarity, 0);
+            let r = Math.random() * tot;
+            for (const w of WLIST) { r -= w.rarity; if (r <= 0) return w; }
+            return WLIST[0];
+        }
+        const RARITY_COL = { 12: '#aaaaaa', 8: '#44aaff', 9: '#44aaff', 7: '#44aaff', 6: '#aa44ff', 5: '#aa44ff', 4: '#ff8800', 3: '#ff8800', 2: '#ff2222', 1: '#ff2222' };
+
+        // ── MATH ──────────────────────────────────────────────────────────────
+        function lerp(a, b, t) { return a + (b - a) * t; }
+        function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+        function rand(a, b) { return a + Math.random() * (b - a); }
+        function randInt(a, b) { return Math.floor(a + Math.random() * (b - a + 1)); }
+        function chance(p) { return Math.random() < p; }
+        function dst(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return Math.sqrt(dx * dx + dy * dy); }
+        function ang(ax, ay, bx, by) { return Math.atan2(by - ay, bx - ax); }
+        function fmtTime(s) { const m = Math.floor(s / 60), ss = Math.floor(s % 60); return `${m}:${ss < 10 ? '0' : ''}${ss}`; }
+        function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+            const nx = clamp(cx, rx, rx + rw), ny = clamp(cy, ry, ry + rh), dx = cx - nx, dy = cy - ny;
+            return dx * dx + dy * dy < cr * cr;
+        }
+        function resolveCircleRect(e, b) {
+            if (!circleRect(e.x, e.y, e.r, b.x, b.y, b.w, b.h)) return;
+            const nx = clamp(e.x, b.x, b.x + b.w), ny = clamp(e.y, b.y, b.y + b.h);
+            let dx = e.x - nx, dy = e.y - ny, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 0.001) { dx = 1; dy = 0; d = 1; }
+            const ov = e.r - d + 0.5;
+            e.x += (dx / d) * ov; e.y += (dy / d) * ov;
+        }
+        function segHitsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+            const dx = x2 - x1, dy = y2 - y1; let tmin = 0, tmax = 1;
+            function clip(p, q) {
+                if (Math.abs(p) < 1e-9) return q >= 0;
+                const t = q / p;
+                if (p < 0) { if (t > tmax) return false; if (t > tmin) tmin = t; }
+                else { if (t < tmin) return false; if (t < tmax) tmax = t; }
+                return true;
+            }
+            return clip(-dx, x1 - rx) && clip(dx, rx + rw - x1) && clip(-dy, y1 - ry) && clip(dy, ry + rh - y1);
+        }
+        function hasLOS(ax, ay, bx, by, walls) {
+            for (const w of walls) if (segHitsRect(ax, ay, bx, by, w.x, w.y, w.w, w.h)) return false;
+            return true;
+        }
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+        }
+
+        // ── INPUT ─────────────────────────────────────────────────────────────
+        const Input = {
+            _k: {}, _prev: {},
+            mouse: { x: 0, y: 0, left: false, right: false },
+            _ml: false, _mr: false,
+            mlJust: false,
+            init(cv) {
+                window.addEventListener('keydown', e => {
+                    if (!this._k[e.code]) this._prev[e.code] = false;
+                    this._k[e.code] = true;
+                    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+                });
+                window.addEventListener('keyup', e => { this._k[e.code] = false; this._prev[e.code] = false; });
+                cv.addEventListener('mousemove', e => {
+                    const r = cv.getBoundingClientRect();
+                    this.mouse.x = e.clientX - r.left; this.mouse.y = e.clientY - r.top;
+                });
+                cv.addEventListener('mousedown', e => { if (e.button === 0) this._ml = true; if (e.button === 2) this._mr = true; });
+                cv.addEventListener('mouseup', e => { if (e.button === 0) this._ml = false; if (e.button === 2) this._mr = false; });
+                cv.addEventListener('contextmenu', e => e.preventDefault());
+                cv.addEventListener('mouseleave', () => { this._ml = false; this._mr = false; });
+            },
+            tick() {
+                this.mlJust = this._ml && !this.mouse.left;
+                this.mouse.left = this._ml; this.mouse.right = this._mr;
+            },
+            down(c) { return !!this._k[c]; },
+            // BUG FIX: justPressed — true only on first frame of keydown
+            just(c) {
+                if (this._k[c] && !this._prev[c]) { this._prev[c] = true; return true; }
+                return false;
+            },
+        };
+
+        // ── CAMERA ────────────────────────────────────────────────────────────
+        class Camera {
+            constructor(cw, ch) {
+                this.x = CFG.W / 2; this.y = CFG.H / 2;
+                this.zoom = 1; this.targetZoom = 1;
+                this.cw = cw; this.ch = ch;
+                // BUG FIX: isolated shake offsets so they don't drift camera position
+                this._sx = 0; this._sy = 0; this._sp = 0;
+            }
+            w2s(wx, wy) { return [(wx - this.x) * this.zoom + this.cw / 2 + this._sx, (wy - this.y) * this.zoom + this.ch / 2 + this._sy]; }
+            s2w(sx, sy) { return [(sx - this.cw / 2 - this._sx) / this.zoom + this.x, (sy - this.ch / 2 - this._sy) / this.zoom + this.y]; }
+            follow(tx, ty, dt) { this.x = lerp(this.x, tx, clamp(dt * 10, 0, 1)); this.y = lerp(this.y, ty, clamp(dt * 10, 0, 1)); }
+            shake(p) { this._sp = Math.max(this._sp, p); }
+            update(dt) {
+                this.zoom = lerp(this.zoom, this.targetZoom, dt * 9);
+                if (this._sp > 0.1) {
+                    this._sx = rand(-1, 1) * this._sp; this._sy = rand(-1, 1) * this._sp;
+                    this._sp = lerp(this._sp, 0, dt * 18);
+                } else { this._sx = 0; this._sy = 0; this._sp = 0; }
+            }
+            inView(wx, wy, m = 120) {
+                const [sx, sy] = this.w2s(wx, wy);
+                return sx >= -m && sx <= this.cw + m && sy >= -m && sy <= this.ch + m;
+            }
+        }
+
+        // ── PARTICLES ─────────────────────────────────────────────────────────
+        class Particle {
+            constructor(x, y, vx, vy, col, sz, life, grav = 0) {
+                this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+                this.col = col; this.sz = sz; this.life = life; this.ml = life;
+                this.grav = grav; this.dead = false;
+            }
+            update(dt) {
+                this.life -= dt; if (this.life <= 0) { this.dead = true; return; }
+                this.x += this.vx * dt; this.y += this.vy * dt; this.vy += this.grav * dt;
+                const drag = Math.pow(0.88, dt * 60); this.vx *= drag; this.vy *= drag;
+            }
+            draw(ctx, cam) {
+                if (this.dead || !cam.inView(this.x, this.y, 10)) return;
+                const t = this.life / this.ml;
+                const [sx, sy] = cam.w2s(this.x, this.y);
+                ctx.save(); ctx.globalAlpha = clamp(t, 0, 1); ctx.fillStyle = this.col;
+                ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.3, this.sz * cam.zoom * (0.3 + t * 0.7)), 0, TAU); ctx.fill();
+                ctx.restore();
+            }
+        }
+        class GroundDecal {
+            constructor(x, y, r, col) { this.x = x; this.y = y; this.r = r; this.col = col; this.age = 0; this.dead = false; }
+            update(dt) { this.age += dt; if (this.age > 40) this.dead = true; }
+            draw(ctx, cam) {
+                if (!cam.inView(this.x, this.y, this.r + 10)) return;
+                const fade = clamp(1 - (this.age - 28) / 12, 0, 1);
+                if (fade <= 0) return;
+                const [sx, sy] = cam.w2s(this.x, this.y);
+                ctx.save(); ctx.globalAlpha = 0.6 * fade; ctx.fillStyle = this.col;
+                ctx.beginPath(); ctx.arc(sx, sy, this.r * cam.zoom, 0, TAU); ctx.fill();
+                ctx.restore();
+            }
+        }
+        class FloatText {
+            constructor(x, y, text, col, sz = 13) {
+                this.x = x; this.y = y; this.oy = y; this.text = text; this.col = col; this.sz = sz;
+                this.life = 1.4; this.ml = 1.4; this.dead = false;
+            }
+            update(dt) { this.life -= dt; if (this.life <= 0) { this.dead = true; return; } this.y = this.oy - 44 * (1 - this.life / this.ml); }
+            draw(ctx, cam) {
+                if (this.dead || !cam.inView(this.x, this.y, 60)) return;
+                const t = this.life / this.ml;
+                const [sx, sy] = cam.w2s(this.x, this.y);
+                ctx.save(); ctx.globalAlpha = Math.min(1, t * 2);
+                ctx.font = `bold ${Math.max(8, Math.round(this.sz * cam.zoom))}px 'Courier New'`;
+                ctx.fillStyle = this.col; ctx.textAlign = 'center';
+                ctx.shadowColor = this.col; ctx.shadowBlur = 8;
+                ctx.fillText(this.text, sx, sy); ctx.restore();
+            }
+        }
+
+        // Particle helpers
+        function spawnBlood(parts, decals, x, y, dir, cnt = 14) {
+            for (let i = 0; i < cnt; i++) {
+                const a = dir != null ? dir + rand(-0.9, 0.9) : rand(0, TAU), spd = rand(25, 110);
+                parts.push(new Particle(x, y, Math.cos(a) * spd, Math.sin(a) * spd,
+                    chance(0.5) ? '#aa1111' : '#cc3333', rand(1.5, 3.5), rand(0.3, 0.8), 200));
+            }
+            decals.push(new GroundDecal(x + rand(-6, 6), y + rand(-6, 6), rand(7, 18), '#440000'));
+        }
+        function spawnImpact(parts, x, y, col, cnt = 8) {
+            for (let i = 0; i < cnt; i++) {
+                const a = rand(0, TAU), spd = rand(30, 130);
+                parts.push(new Particle(x, y, Math.cos(a) * spd, Math.sin(a) * spd, col, rand(1, 3), rand(0.15, 0.5), 80));
+            }
+        }
+        function spawnMuzzle(parts, x, y, a, cnt = 5) {
+            for (let i = 0; i < cnt; i++) {
+                const aa = a + rand(-0.3, 0.3), spd = rand(60, 200);
+                parts.push(new Particle(x, y, Math.cos(aa) * spd, Math.sin(aa) * spd,
+                    chance(0.4) ? '#ffffff' : '#ffee44', rand(1, 3.5), rand(0.04, 0.14)));
+            }
+        }
+        function spawnSmoke(parts, x, y, cnt = 5) {
+            for (let i = 0; i < cnt; i++) {
+                const a = rand(0, TAU), spd = rand(8, 35);
+                parts.push(new Particle(x, y, Math.cos(a) * spd, Math.sin(a) * spd,
+                    `rgba(${randInt(80, 110)},${randInt(80, 110)},${randInt(80, 110)},0.6)`, rand(3, 7), rand(0.6, 1.3), -25));
+            }
+        }
+        function spawnGrass(parts, x, y, cnt = 3) {
+            for (let i = 0; i < cnt; i++) {
+                const a = rand(0, TAU), spd = rand(10, 45);
+                parts.push(new Particle(x, y, Math.cos(a) * spd, Math.sin(a) * spd, '#2d5a1e', rand(1, 2.5), rand(0.2, 0.5), 80));
+            }
+        }
+
+        // ── BULLET ────────────────────────────────────────────────────────────
+        class Bullet {
+            constructor(x, y, vx, vy, dmg, crit, owner, range, isCrit) {
+                this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+                this.px = x; this.py = y;
+                this.dmg = isCrit ? dmg * crit : dmg;
+                this.isCrit = isCrit;
+                this.owner = owner; this.range = range; this.dist = 0; this.dead = false;
+                this.grav = 16;
+            }
+            update(dt, entities, buildings, parts, decals) {
+                if (this.dead) return;
+                // BUG FIX: sub-step loop for fast bullets to prevent tunneling
+                const STEPS = 3, sdt = dt / STEPS;
+                for (let s = 0; s < STEPS; s++) {
+                    this.px = this.x; this.py = this.y;
+                    this.vy += this.grav * sdt;
+                    const nx = this.x + this.vx * sdt, ny = this.y + this.vy * sdt;
+                    this.dist += dst(this.x, this.y, nx, ny);
+                    if (this.dist >= this.range || nx < 0 || nx > CFG.W || ny < 0 || ny > CFG.H) { this.dead = true; return; }
+                    for (const b of buildings) {
+                        if (segHitsRect(this.x, this.y, nx, ny, b.x, b.y, b.w, b.h)) {
+                            spawnImpact(parts, nx, ny, '#886644', 5);
+                            decals.push(new GroundDecal(nx, ny, rand(3, 6), '#332211'));
+                            this.dead = true; return;
+                        }
+                    }
+                    for (const e of entities) {
+                        if (e === this.owner || e.dead || e.invincible) continue;
+                        if ((nx - e.x) ** 2 + (ny - e.y) ** 2 < (e.r + 2) ** 2) {
+                            const dir = ang(this.owner.x, this.owner.y, e.x, e.y);
+                            e.takeDamage(this.dmg, this.owner);
+                            spawnBlood(parts, decals, nx, ny, dir + Math.PI, this.isCrit ? 20 : 10);
+                            this.dead = true; return;
+                        }
+                    }
+                    this.x = nx; this.y = ny;
+                }
+            }
+            draw(ctx, cam) {
+                if (this.dead) return;
+                const [sx, sy] = cam.w2s(this.x, this.y), [px, py] = cam.w2s(this.px, this.py);
+                ctx.save();
+                ctx.strokeStyle = this.isCrit ? 'rgba(255,70,70,0.95)' : 'rgba(255,228,60,0.9)';
+                ctx.lineWidth = this.isCrit ? 3 * cam.zoom : 2 * cam.zoom;
+                ctx.shadowColor = this.isCrit ? '#ff4444' : '#ffe040'; ctx.shadowBlur = 5;
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy); ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // ── WEAPON ────────────────────────────────────────────────────────────
+        class Weapon {
+            constructor(data) {
+                this.data = data; this.ammo = data.mag; this.reserve = data.res;
+                this.reloading = false; this.reloadTimer = 0; this.reloadMax = data.rl;
+                this._nf = 0; this.bloom = 0;
+            }
+            canFire(now) { return now >= this._nf && this.ammo > 0 && !this.reloading; }
+            fire(now, x, y, aimA, ads, owner, parts, decals, bullets) {
+                if (!this.canFire(now)) return false;
+                this.ammo--; this._nf = now + 1 / this.data.rate;
+                const spread = Math.min((ads ? this.data.adsS : this.data.spread) + this.bloom, this.data.spread * 4);
+                this.bloom = Math.min(this.bloom + this.data.spread * 0.45, this.data.spread * 3);
+                const pc = this.data.pellets || 1;
+                for (let i = 0; i < pc; i++) {
+                    const a = aimA + rand(-spread, spread);
+                    const isCrit = chance(0.08);
+                    bullets.push(new Bullet(x, y, Math.cos(a) * this.data.bspd, Math.sin(a) * this.data.bspd,
+                        this.data.dmg, this.data.crit, owner, this.data.range, isCrit));
+                }
+                const mx = x + Math.cos(aimA) * 18, my = y + Math.sin(aimA) * 18;
+                spawnMuzzle(parts, mx, my, aimA);
+                spawnGrass(parts, x, y, 2);
+                return true;
+            }
+            tryReload() {
+                if (this.reloading || this.ammo === this.data.mag || this.reserve === 0) return false;
+                this.reloading = true; this.reloadTimer = this.data.rl; return true;
+            }
+            update(dt) {
+                this.bloom = Math.max(0, this.bloom - dt * this.data.spread * 9);
+                if (!this.reloading) return;
+                this.reloadTimer -= dt;
+                if (this.reloadTimer <= 0) {
+                    const give = Math.min(this.data.mag - this.ammo, this.reserve);
+                    this.ammo += give; this.reserve -= give; this.reloading = false;
+                }
+            }
+            get progress() { return this.reloading ? 1 - this.reloadTimer / this.reloadMax : 1; }
+        }
+
+        // ── ENTITY BASE ───────────────────────────────────────────────────────
+        class Entity {
+            constructor(x, y, r, hp) {
+                this.x = x; this.y = y; this.r = r;
+                this.hp = hp; this.maxHp = hp; this.armor = 0; this.maxArmor = 80;
+                this.dead = false; this.invincible = false;
+                this.weapons = []; this.wIdx = 0; this.kills = 0; this.dmgFlash = 0;
+                this._killer = null; this._deathDone = false;
+            }
+            get weapon() { return this.weapons[this.wIdx] || null; }
+            takeDamage(dmg, by) {
+                if (this.dead || this.invincible) return 0;
+                let d = dmg;
+                if (this.armor > 0) { const abs = d * 0.45; this.armor = Math.max(0, this.armor - abs * 1.1); d *= 0.55; }
+                this.hp = Math.max(0, this.hp - d); this.dmgFlash = 0.25;
+                if (this.hp <= 0 && !this.dead) { this.dead = true; this._killer = by; if (by && by.kills != null) by.kills++; }
+                return d;
+            }
+            healHp(a) { this.hp = Math.min(this.maxHp, this.hp + a); }
+            addArmor(a) { this.armor = Math.min(this.maxArmor, this.armor + a); }
+            updateWeapons(dt) { for (const w of this.weapons) w.update(dt); }
+        }
+
+        // ── LOOT ──────────────────────────────────────────────────────────────
+        const LOOT_CFG = {
+            weapon: { col: '#ff8833', glow: '#ff6600' },
+            ammo_ar: { col: '#f5e642', glow: '#e0cc00' },
+            ammo_smg: { col: '#f5e642', glow: '#e0cc00' },
+            ammo_pistol: { col: '#f5e642', glow: '#e0cc00' },
+            ammo_sniper: { col: '#f5e642', glow: '#e0cc00' },
+            ammo_shotgun: { col: '#f5e642', glow: '#e0cc00' },
+            ammo_lmg: { col: '#f5e642', glow: '#e0cc00' },
+            heal: { col: '#33ff88', glow: '#00cc55' },
+            armor: { col: '#4499ff', glow: '#2277ff' },
+            armor_plate: { col: '#55aaff', glow: '#3388ff' },
+            boost: { col: '#cc55ff', glow: '#aa33dd' },
+        };
+        class LootItem {
+            constructor(x, y, type, data) {
+                this.x = x; this.y = y;
+                // BUG FIX #1: store type as instance property, not closure variable
+                this.type = type;
+                this.data = data; this.dead = false; this.r = CFG.LOOT_R; this.bobT = rand(0, TAU);
+                const cfg = LOOT_CFG[type] || { col: '#ffffff', glow: '#ffffff' };
+                this.col = cfg.col; this.glow = cfg.glow;
+                // BUG FIX #1 continued: was using bare 'type' in draw() which is undefined in method scope
+                this.icon = type === 'weapon' && data ? data.name.substring(0, 3).toUpperCase() :
+                    ({ heal: '+', armor: '⬡', armor_plate: '▣', boost: '⬆' }[type] || 'A');
+                this.rarCol = type === 'weapon' && data ? (RARITY_COL[data.rarity] || '#aaaaaa') : null;
+            }
+            update(dt) { this.bobT += dt * 1.9; }
+            draw(ctx, cam) {
+                // BUG FIX #1: use this.type not bare 'type'
+                if (!cam.inView(this.x, this.y, 30)) return;
+                const bob = Math.sin(this.bobT) * 3;
+                const [sx, sy] = cam.w2s(this.x, this.y + bob);
+                const r = CFG.LOOT_R * cam.zoom;
+                ctx.save();
+                const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 2.5);
+                grd.addColorStop(0, this.glow + '44'); grd.addColorStop(1, 'transparent');
+                ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(sx, sy, r * 2.5, 0, TAU); ctx.fill();
+                ctx.strokeStyle = this.rarCol || this.col; ctx.fillStyle = (this.rarCol || this.col) + '33';
+                ctx.lineWidth = 1.8; ctx.shadowColor = this.glow; ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.moveTo(sx, sy - r * 1.4); ctx.lineTo(sx + r, sy);
+                ctx.lineTo(sx, sy + r * 1.4); ctx.lineTo(sx - r, sy);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.font = `bold ${Math.max(6, Math.round(8 * cam.zoom))}px 'Courier New'`;
+                ctx.fillStyle = this.rarCol || this.col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(this.icon, sx, sy);
+                // BUG FIX #1: was 'type==="weapon"' → 'this.type==="weapon"'
+                if (this.type === 'weapon' && this.data && cam.zoom > 0.7) {
+                    ctx.shadowBlur = 0; ctx.font = `${Math.max(5, Math.round(7 * cam.zoom))}px 'Courier New'`;
+                    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.textBaseline = 'alphabetic';
+                    ctx.fillText(this.data.name, sx, sy + r * 2.0);
+                }
+                ctx.restore();
+            }
+        }
+
+        // ── MAP OBJECTS (Pseudo-3D Projection) ──────────────────────────
+        class Building {
+            constructor(x, y, w, h, v = 0) { this.x = x; this.y = y; this.w = w; this.h = h; this.v = v; }
+            draw(ctx, cam) {
+                if (!cam.inView(this.x + this.w / 2, this.y + this.h / 2, Math.max(this.w, this.h) + 100)) return;
+                const [sx, sy] = cam.w2s(this.x, this.y);
+                const sw = this.w * cam.zoom, sh = this.h * cam.zoom;
+                
+                // Height projection math
+                const hFactor = 0.25; 
+                // cx, cy are the origin of projection (screen center)
+                const cx = cam.cw / 2, cy = cam.ch / 2;
+                
+                // Roof coordinates are shifted away from center based on height
+                const rsx = sx + (sx - cx) * hFactor;
+                const rsy = sy + (sy - cy) * hFactor;
+                const rsw = sw + (sw) * hFactor; // Roof is technically slightly larger perspectively, but standard isometric keeps it same. We'll stretch it properly.
+                // Wait, true extrusion shifts the points:
+                // Point 1 (Base): px, py. Point 1 (Roof): px + (px-cx)*hFactor
+                
+                const pt1 = {bx: sx, by: sy, rx: sx + (sx-cx)*hFactor, ry: sy + (sy-cy)*hFactor};
+                const pt2 = {bx: sx+sw, by: sy, rx: sx+sw + (sx+sw-cx)*hFactor, ry: sy + (sy-cy)*hFactor};
+                const pt3 = {bx: sx+sw, by: sy+sh, rx: sx+sw + (sx+sw-cx)*hFactor, ry: sy+sh + (sy+sh-cy)*hFactor};
+                const pt4 = {bx: sx, by: sy+sh, rx: sx + (sx-cx)*hFactor, ry: sy+sh + (sy+sh-cy)*hFactor};
+
+                const wcs = ['#1a2a1a', '#1e2416', '#221e18', '#1a2820'];
+                const bCol = wcs[this.v % wcs.length];
+                ctx.fillStyle = bCol; ctx.strokeStyle = '#050a05'; ctx.lineWidth = 1;
+                
+                // Draw Base
+                ctx.fillRect(sx, sy, sw, sh);
+                
+                // Draw Side Walls (Back to front sorting)
+                // Left Wall
+                if (cx < sx) { ctx.fillStyle='#111'; ctx.beginPath(); ctx.moveTo(pt1.bx, pt1.by); ctx.lineTo(pt1.rx, pt1.ry); ctx.lineTo(pt4.rx, pt4.ry); ctx.lineTo(pt4.bx, pt4.by); ctx.fill(); ctx.stroke(); }
+                // Right Wall
+                if (cx > sx+sw) { ctx.fillStyle='#111'; ctx.beginPath(); ctx.moveTo(pt2.bx, pt2.by); ctx.lineTo(pt2.rx, pt2.ry); ctx.lineTo(pt3.rx, pt3.ry); ctx.lineTo(pt3.bx, pt3.by); ctx.fill(); ctx.stroke(); }
+                // Top Wall
+                if (cy < sy) { ctx.fillStyle='#151515'; ctx.beginPath(); ctx.moveTo(pt1.bx, pt1.by); ctx.lineTo(pt1.rx, pt1.ry); ctx.lineTo(pt2.rx, pt2.ry); ctx.lineTo(pt2.bx, pt2.by); ctx.fill(); ctx.stroke(); }
+                // Bottom Wall
+                if (cy > sy+sh) { ctx.fillStyle='#222'; ctx.beginPath(); ctx.moveTo(pt4.bx, pt4.by); ctx.lineTo(pt4.rx, pt4.ry); ctx.lineTo(pt3.rx, pt3.ry); ctx.lineTo(pt3.bx, pt3.by); ctx.fill(); ctx.stroke(); }
+                
+                // Draw Roof
+                const g = ctx.createLinearGradient(pt1.rx, pt1.ry, pt3.rx, pt3.ry);
+                g.addColorStop(0, '#2a3a22'); g.addColorStop(1, bCol);
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.moveTo(pt1.rx, pt1.ry); ctx.lineTo(pt2.rx, pt2.ry); ctx.lineTo(pt3.rx, pt3.ry); ctx.lineTo(pt4.rx, pt4.ry); ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                
+                // Roof Hatch
+                const dw = Math.max(9, (pt2.rx - pt1.rx) * 0.14);
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(pt4.rx + (pt3.rx-pt4.rx)/2 - dw/2, pt4.ry - (pt4.ry-pt1.ry)*0.28, dw, (pt4.ry-pt1.ry)*0.28);
+            }
+        }
+        class Tree {
+            constructor(x, y, r) { this.x = x; this.y = y; this.r = r; this.v = randInt(0, 3); }
+            draw(ctx, cam) {
+                if (!cam.inView(this.x, this.y, this.r * 2 + 50)) return;
+                const [sx, sy] = cam.w2s(this.x, this.y); const r = this.r * cam.zoom;
+                
+                // Height projection for trunk and top
+                const hFactor = 0.5;
+                const cx = cam.cw / 2, cy = cam.ch / 2;
+                const tx = sx + (sx - cx) * hFactor;
+                const ty = sy + (sy - cy) * hFactor;
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath(); ctx.ellipse(sx + r * 0.3, sy + r * 0.6, r * 1.3, r * 0.6, 0, 0, TAU); ctx.fill();
+                
+                // Trunk
+                ctx.strokeStyle = '#321'; ctx.lineWidth = 4 * cam.zoom;
+                ctx.beginPath(); ctx.moveTo(sx, Math.min(sy, ty)); ctx.lineTo(sx, Math.max(sy, ty)); ctx.stroke();
+                
+                // Top
+                const cs = ['#0f1f0f', '#121e10', '#142214', '#102010'];
+                ctx.fillStyle = cs[this.v]; ctx.strokeStyle = '#1a3012'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(tx, ty, r, 0, TAU); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = 'rgba(22,52,14,0.7)'; ctx.beginPath(); ctx.arc(tx - r * 0.2, ty - r * 0.2, r * 0.6, 0, TAU); ctx.fill();
+                ctx.fillStyle = 'rgba(34,68,20,0.4)'; ctx.beginPath(); ctx.arc(tx + r * 0.15, ty + r * 0.1, r * 0.5, 0, TAU); ctx.fill();
+            }
+        }
+        class Rock {
+            constructor(x, y, r) { this.x = x; this.y = y; this.r = r; this.a = rand(0, TAU); }
+            draw(ctx, cam) {
+                if (!cam.inView(this.x, this.y, this.r * 2 + 50)) return;
+                const [sx, sy] = cam.w2s(this.x, this.y); const r = this.r * cam.zoom;
+                
+                const hFactor = 0.2;
+                const tx = sx + (sx - cam.cw/2) * hFactor;
+                const ty = sy + (sy - cam.ch/2) * hFactor;
+                
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.beginPath(); ctx.ellipse(sx + r*0.2, sy + r*0.4, r*1.1, r*0.7, this.a, 0, TAU); ctx.fill();
+                
+                ctx.translate(tx, ty); ctx.rotate(this.a);
+                ctx.fillStyle = '#2a2a22'; ctx.strokeStyle = '#3a3a2a'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.65, 0, 0, TAU); ctx.fill(); ctx.stroke();
+                
+                // Extruded rock side approximation
+                ctx.fillStyle = '#1e1e18';
+                ctx.beginPath(); ctx.ellipse(r*0.1, r*0.2, r*0.9, r*0.5, 0, 0, TAU); ctx.fill();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                ctx.beginPath(); ctx.ellipse(-r * 0.2, -r * 0.2, r * 0.4, r * 0.25, 0, 0, TAU); ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // ── SAFE ZONE ─────────────────────────────────────────────────────────
+        class SafeZone {
+            constructor() {
+                this.phases = CFG.ZONE_PHASES; this.phaseIdx = 0;
+                this.state = 'waiting'; this.timer = this.phases[0][1];
+                this.cx = CFG.W / 2; this.cy = CFG.H / 2; this.cr = this.phases[0][0];
+                this.ncx = CFG.W / 2; this.ncy = CFG.H / 2; this.nr = this.phases[1] ? this.phases[1][0] : 15;
+                // BUG FIX #2: store shrink start for proper lerp
+                this._scx = this.cx; this._scy = this.cy; this._scr = this.cr;
+                this.flashT = 0; this._pickNext();
+            }
+            _pickNext() {
+                const ni = this.phaseIdx + 1;
+                if (ni >= this.phases.length) { this.ncx = this.cx; this.ncy = this.cy; this.nr = 12; return; }
+                const nr = this.phases[ni][0];
+                const mo = Math.max(0, this.cr - nr) * 0.65;
+                this.ncx = clamp(this.cx + rand(-mo, mo), nr + 80, CFG.W - nr - 80);
+                this.ncy = clamp(this.cy + rand(-mo, mo), nr + 80, CFG.H - nr - 80);
+                this.nr = nr;
+            }
+            update(dt) {
+                this.flashT += dt;
+                if (this.state === 'waiting') {
+                    this.timer -= dt;
+                    if (this.timer <= 0) {
+                        this.state = 'shrinking';
+                        this.timer = this.phases[this.phaseIdx][2];
+                        // BUG FIX #2: snapshot start positions here
+                        this._scx = this.cx; this._scy = this.cy; this._scr = this.cr;
+                    }
+                } else {
+                    this.timer -= dt;
+                    const dur = this.phases[this.phaseIdx][2];
+                    // BUG FIX #2: proper normalized t from start, not incremental 0.02 lerp
+                    const t = clamp(1 - this.timer / dur, 0, 1);
+                    const ease = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+                    this.cx = lerp(this._scx, this.ncx, ease);
+                    this.cy = lerp(this._scy, this.ncy, ease);
+                    this.cr = lerp(this._scr, this.nr, ease);
+                    if (this.timer <= 0) {
+                        this.cx = this.ncx; this.cy = this.ncy; this.cr = this.nr;
+                        this.phaseIdx = Math.min(this.phaseIdx + 1, this.phases.length - 1);
+                        this.state = 'waiting';
+                        this.timer = Math.max(0, (this.phases[this.phaseIdx] || [0, 0])[1]);
+                        this._pickNext();
+                    }
+                }
+            }
+            isInside(x, y) { const dx = x - this.cx, dy = y - this.cy; return dx * dx + dy * dy <= this.cr * this.cr; }
+            getDPS() { return this.phases[this.phaseIdx][3] * (this.state === 'waiting' ? 0.3 : 1); }
+            getLabel() {
+                if (this.phaseIdx >= this.phases.length - 1 && this.state !== 'shrinking') return 'Final Circle';
+                return this.state === 'waiting' ? `Phase ${this.phaseIdx + 2} in ${Math.ceil(this.timer)}s` : `Closing — ${Math.ceil(this.timer)}s`;
+            }
+            getFrac() { return this.state === 'shrinking' ? clamp(1 - this.timer / this.phases[this.phaseIdx][2], 0, 1) : 0; }
+            draw(ctx, cam) {
+                const [sx, sy] = cam.w2s(this.cx, this.cy); const sr = Math.max(1, this.cr * cam.zoom);
+                const [nsx, nsy] = cam.w2s(this.ncx, this.ncy); const nsr = Math.max(1, this.nr * cam.zoom);
+                const fl = 0.09 + 0.05 * Math.sin(this.flashT * 3);
+                ctx.save();
+                ctx.fillStyle = `rgba(0,25,130,${fl})`; ctx.fillRect(0, 0, cam.cw, cam.ch);
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath(); ctx.arc(sx, sy, sr, 0, TAU); ctx.fill();
+                ctx.restore();
+                if (this.state === 'waiting' && nsr > 2) {
+                    ctx.save(); ctx.setLineDash([10, 7]); ctx.strokeStyle = 'rgba(80,160,255,0.38)'; ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.arc(nsx, nsy, nsr, 0, TAU); ctx.stroke(); ctx.restore();
+                }
+                ctx.save();
+                for (let i = 3; i >= 0; i--) {
+                    ctx.strokeStyle = `rgba(60,140,255,${0.07 * (4 - i)})`; ctx.lineWidth = (4 - i) * 3 * cam.zoom;
+                    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, TAU); ctx.stroke();
+                }
+                ctx.strokeStyle = '#55aaff'; ctx.lineWidth = 2 * cam.zoom; ctx.shadowColor = '#3a8fff'; ctx.shadowBlur = 18;
+                ctx.beginPath(); ctx.arc(sx, sy, sr, 0, TAU); ctx.stroke(); ctx.restore();
+            }
+        }
+
+        // ── KILL FEED ─────────────────────────────────────────────────────────
+        class KillFeed {
+            constructor() { this.entries = []; }
+            add(killer, victim, isP) {
+                this.entries.unshift({ killer, victim, isP, life: 7 });
+                if (this.entries.length > 7) this.entries.pop();
+            }
+            update(dt) { this.entries = this.entries.filter(e => (e.life -= dt) > 0); }
+            draw(ctx, cw) {
+                // BUG FIX #4: Completely rewrote text positioning to use measured widths correctly
+                const rx = cw - 14, sy = 76;
+                ctx.save(); ctx.font = '11px "Courier New"';
+                this.entries.forEach((e, i) => {
+                    const y = sy + i * 22, alpha = Math.min(1, e.life * 0.8);
+                    ctx.globalAlpha = alpha;
+                    const kw = ctx.measureText(e.killer).width;
+                    const sep = ' ✕ ', sw = ctx.measureText(sep).width;
+                    const vw = ctx.measureText(e.victim).width;
+                    const tw = kw + sw + vw;
+                    ctx.fillStyle = 'rgba(0,8,0,0.75)';
+                    roundRect(ctx, rx - tw - 20, y - 14, tw + 20, 18, 3); ctx.fill();
+                    // Draw killer right-aligned at correct position
+                    ctx.fillStyle = e.isP ? '#3ddc6f' : '#cc8844'; ctx.textAlign = 'right';
+                    ctx.fillText(e.killer, rx - sw - vw - 8, y);
+                    ctx.fillStyle = '#666666';
+                    ctx.fillText(sep, rx - vw - 8 + sw, y);
+                    ctx.fillStyle = '#dd4444';
+                    ctx.fillText(e.victim, rx - 8, y);
+                });
+                ctx.globalAlpha = 1; ctx.textAlign = 'left'; ctx.restore();
+            }
+        }
+
+        // ── PLAYER ────────────────────────────────────────────────────────────
+        class Player extends Entity {
+            constructor(x, y) {
+                super(x, y, CFG.PLAYER_R, 150);
+                this.aimAngle = 0; this.ads = false; this.sprinting = false; this.crouching = false;
+                this.weapons = [new Weapon(WEAPONS.Glock)]; this.wIdx = 0;
+                this.inv = {
+                    heal: 2, armor_plate: 0, ammo_ar: 30, ammo_smg: 0, ammo_pistol: 60,
+                    ammo_sniper: 0, ammo_shotgun: 0, ammo_lmg: 0
+                };
+                this.recoilYaw = 0; this.recoilPitch = 0;
+                this.dmgScreen = 0; this.footT = 0;
+                this.survivalTime = 0; this.lootNear = null;
+                this._healCd = 0; this._wcd = 0;// weapon switch cooldown
+            }
+            update(dt, cam, world, parts, decals, bullets, floats) {
+                if (this.dead) return;
+                this.survivalTime += dt; this.dmgFlash = Math.max(0, this.dmgFlash - dt * 4);
+                this.dmgScreen = Math.max(0, this.dmgScreen - dt * 2.5);
+                this._healCd = Math.max(0, this._healCd - dt); this._wcd = Math.max(0, this._wcd - dt);
+                this.updateWeapons(dt);
+                // Aim
+                const [wx, wy] = cam.s2w(Input.mouse.x, Input.mouse.y);
+                if (window.joyRActive) this.aimAngle = window.joyRAngle;
+                else this.aimAngle = ang(this.x, this.y, wx, wy);
+                this.ads = Input.mouse.right;
+                cam.targetZoom = this.ads ? (this.weapon?.data.cat === 'sniper' ? 2.4 : 1.7) : 1.0;
+                // Movement
+                let mx = window.joyLx || 0, my = window.joyLy || 0;
+                if (Input.down('KeyW') || Input.down('ArrowUp')) my = -1;
+                if (Input.down('KeyS') || Input.down('ArrowDown')) my = 1;
+                if (Input.down('KeyA') || Input.down('ArrowLeft')) mx = -1;
+                if (Input.down('KeyD') || Input.down('ArrowRight')) mx = 1;
+                const mL = Math.sqrt(mx * mx + my * my);
+                if (mL > 0) { mx /= mL; my /= mL; }
+                this.sprinting = Input.down('ShiftLeft') && mL > 0 && !this.crouching;
+                this.crouching = Input.down('ControlLeft');
+                let spd = CFG.PLAYER_SPEED;
+                if (this.sprinting) spd *= CFG.SPRINT_MULT;
+                else if (this.crouching) spd *= CFG.CROUCH_MULT;
+                if (this.ads && !this.crouching) spd *= 0.72;
+                this.x += mx * spd * dt; this.y += my * spd * dt;
+                this.x = clamp(this.x, this.r, CFG.W - this.r); this.y = clamp(this.y, this.r, CFG.H - this.r);
+                for (const b of world.buildings) resolveCircleRect(this, b);
+                // Footsteps
+                if (mL > 0) { this.footT -= dt; if (this.footT <= 0) { spawnGrass(parts, this.x + rand(-5, 5), this.y + rand(-5, 5), 2); this.footT = this.sprinting ? 0.13 : 0.22; } }
+                // BUG FIX #3,7: weapon switch uses just() — only fires once per keypress
+                if (this._wcd <= 0) {
+                    if (Input.just('Digit1')) { this.wIdx = 0; this._wcd = 0.12; }
+                    if (Input.just('Digit2') && this.weapons.length > 1) { this.wIdx = 1; this._wcd = 0.12; }
+                    if (Input.just('Digit3') && this.weapons.length > 2) { this.wIdx = 2; this._wcd = 0.12; }
+                }
+                this.wIdx = clamp(this.wIdx, 0, this.weapons.length - 1);
+                // Fire
+                const now = performance.now() / 1000;
+                if (Input.mouse.left && this.weapon) {
+                    const fired = this.weapon.fire(now, this.x, this.y, this.aimAngle + this.recoilYaw, this.ads, this, parts, decals, bullets);
+                    if (fired) {
+                        const rc = this.weapon.data.recoil;
+                        this.recoilYaw += rand(-0.008, 0.008) * rc; this.recoilPitch += rc * 0.06;
+                        const cat = this.weapon.data.cat;
+                        if (cat === 'sniper') { cam.shake(12); spawnSmoke(parts, this.x, this.y); }
+                        else if (cat === 'shotgun') cam.shake(7); else cam.shake(1.5);
+                        if (this.weapon.ammo === 0 && !this.weapon.reloading) this._reload();
+                    }
+                }
+                this.recoilYaw = lerp(this.recoilYaw, 0, dt * (this.ads ? 12 : 7));
+                this.recoilPitch = lerp(this.recoilPitch, 0, dt * 10);
+                // BUG FIX #12: reload uses just() not down()
+                if (Input.just('KeyR')) this._reload();
+                // BUG FIX #8: heal uses just() + cooldown to prevent holding H spam
+                if (Input.just('KeyH') && this._healCd <= 0 && this.inv.heal > 0 && this.hp < this.maxHp) {
+                    this.healHp(40); this.inv.heal--; this._healCd = 0.5;
+                    floats.push(new FloatText(this.x, this.y - 30, '+40 HP', '#44ff88', 14));
+                }
+                if (Input.just('KeyG') && this._healCd <= 0 && this.inv.armor_plate > 0) {
+                    this.addArmor(30); this.inv.armor_plate--; this._healCd = 0.5;
+                    floats.push(new FloatText(this.x, this.y - 30, '+30 Armor', '#55aaff', 13));
+                }
+                // Loot
+                this.lootNear = null; let nd = CFG.NEARBY_R, nl = null;
+                for (const item of world.loot) {
+                    if (item.dead) continue;
+                    const d = dst(this.x, this.y, item.x, item.y);
+                    if (d < nd) { nd = d; nl = item; }
+                }
+                if (nl) {
+                    this.lootNear = nl;
+                    if (nd < CFG.PICKUP_R && nl.type !== 'weapon') this._pickup(nl, floats, world);
+                    if (Input.just('KeyF') && nl.type === 'weapon') this._pickup(nl, floats, world);
+                }
+                // Camera with aim lead
+                const leadX = this.x + Math.cos(this.aimAngle) * 38, leadY = this.y + Math.sin(this.aimAngle) * 38;
+                cam.follow(leadX, leadY, dt);
+            }
+            _reload() {
+                if (!this.weapon || this.weapon.reloading) return;
+                const k = 'ammo_' + this.weapon.data.cat;
+                if (this.inv[k] && this.weapon.reserve < this.weapon.data.res) {
+                    const give = Math.min(this.inv[k], this.weapon.data.res - this.weapon.reserve);
+                    this.weapon.reserve += give; this.inv[k] -= give;
+                }
+                this.weapon.tryReload();
+            }
+            _pickup(item, floats, world) {
+                item.dead = true; const t = item.type;
+                if (t === 'weapon') {
+                    const w = new Weapon(item.data);
+                    if (this.weapons.length < 3) { this.weapons.push(w); this.wIdx = this.weapons.length - 1; }
+                    else { this.weapons[this.wIdx] = w; }
+                    floats.push(new FloatText(this.x, this.y - 32, 'EQUIPPED ' + item.data.name, '#ff9933', 14));
+                } else if (t === 'heal') { this.inv.heal = Math.min(6, this.inv.heal + (item.data.qty || 1)); floats.push(new FloatText(this.x, this.y - 28, '+Bandage', '#44ff88')); }
+                else if (t === 'armor') { this.addArmor(item.data.amt || 30); floats.push(new FloatText(this.x, this.y - 28, `+${item.data.amt || 30} Armor`, '#4499ff')); }
+                else if (t === 'armor_plate') { this.inv.armor_plate = Math.min(4, (this.inv.armor_plate || 0) + 1); floats.push(new FloatText(this.x, this.y - 28, '+Armor Plate', '#55aaff')); }
+                else if (t.startsWith('ammo')) { this.inv[t] = (this.inv[t] || 0) + (item.data.qty || 30); floats.push(new FloatText(this.x, this.y - 28, `+Ammo`, '#f5e642')); }
+                else if (t === 'boost') { this.healHp(25); this.addArmor(15); floats.push(new FloatText(this.x, this.y - 28, '+Boost', '#cc55ff')); }
+            }
+            takeDamage(dmg, by) {
+                const d = super.takeDamage(dmg, by);
+                if (d > 0) this.dmgScreen = Math.min(0.85, this.dmgScreen + 0.3);
+                return d;
+            }
+            draw(ctx, cam) {
+                if (this.dead) return;
+                const [sx, sy] = cam.w2s(this.x, this.y); const r = this.r * cam.zoom;
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.ellipse(sx + 2, sy + 3, r * 1.1, r * 0.5, 0, 0, TAU); ctx.fill();
+                ctx.shadowColor = this.dmgFlash > 0 ? '#ff4444' : '#3ddc6f'; ctx.shadowBlur = this.dmgFlash > 0 ? 20 : 16;
+                ctx.beginPath(); ctx.arc(sx, sy, r * (this.crouching ? 0.78 : 1), 0, TAU);
+                ctx.fillStyle = this.dmgFlash > 0 ? '#ff6666' : '#ddf0dd'; ctx.fill();
+                ctx.strokeStyle = '#3ddc6f'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.shadowBlur = 0;
+                const ea = this.aimAngle, el = r + (this.weapon?.data.cat === 'sniper' ? 14 : 8);
+                const ex = sx + Math.cos(ea) * el, ey = sy + Math.sin(ea) * el;
+                ctx.strokeStyle = '#3ddc6f'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+                ctx.fillStyle = '#3ddc6f'; ctx.beginPath(); ctx.arc(ex, ey, 2.5, 0, TAU); ctx.fill();
+                // HP/Armor bars
+                const bw = r * 3, bx = sx - bw / 2, by = sy - r - 11;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(bx, by, bw, 5);
+                const hf = this.hp / this.maxHp;
+                ctx.fillStyle = hf > 0.6 ? '#3ddc6f' : hf > 0.3 ? '#f5c842' : '#e03838'; ctx.fillRect(bx, by, bw * hf, 5);
+                if (this.armor > 0) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(bx, by + 6, bw, 3);
+                    ctx.fillStyle = '#4499ff'; ctx.fillRect(bx, by + 6, bw * (this.armor / this.maxArmor), 3);
+                }
+                ctx.restore();
+                if (this.lootNear?.type === 'weapon') {
+                    ctx.save(); ctx.font = `${Math.round(10.5 * cam.zoom)}px 'Courier New'`;
+                    ctx.fillStyle = '#ffe066'; ctx.textAlign = 'center'; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 8;
+                    ctx.fillText('[F] ' + this.lootNear.data.name, sx, sy - r - 22); ctx.restore();
+                }
+                if (this.ads && this.weapon?.data.cat === 'sniper') {
+                    ctx.save(); ctx.strokeStyle = 'rgba(61,220,111,0.55)'; ctx.lineWidth = 1;
+                    const mx = Input.mouse.x, my = Input.mouse.y;
+                    ctx.beginPath(); ctx.moveTo(mx - 40, my); ctx.lineTo(mx + 40, my); ctx.moveTo(mx, my - 40); ctx.lineTo(mx, my + 40); ctx.stroke();
+                    ctx.strokeStyle = 'rgba(61,220,111,0.35)';
+                    ctx.beginPath(); ctx.arc(mx, my, 20, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.arc(mx, my, 8, 0, TAU); ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        }
+
+        // ── BOT ───────────────────────────────────────────────────────────────
+        const BNAMES = ['Shadow', 'Phantom', 'Ghost', 'Raven', 'Wolf', 'Cobra', 'Tiger', 'Eagle', 'Viper', 'Hawk',
+            'Storm', 'Blade', 'Frost', 'Iron', 'Steel', 'Apex', 'Vector', 'Reaper', 'Nova', 'Zero', 'Ace', 'Rex', 'Max', 'Thor'];
+        let bnIdx = 0;
+        class Bot extends Entity {
+            constructor(x, y) {
+                super(x, y, CFG.BOT_R, 100);
+                this.name = BNAMES[bnIdx++ % BNAMES.length] + '_' + randInt(10, 99);
+                this.aimAngle = rand(0, TAU); this.target = null;
+                this.state = 'roam';
+                this.roamDest = { x: rand(200, CFG.W - 200), y: rand(200, CFG.H - 200) };
+                this.thinkT = rand(0, 0.6); this.stuckT = 0; this._lx = x; this._ly = y;
+                this.accuracy = rand(0.20, 0.55); this.reaction = rand(0.4, 0.85);
+                this._lockT = 0; this.healCd = 0; this.aimS = 0;
+                this.strafeDir = chance(0.5) ? 1 : -1; this.strafeT = rand(1, 3);
+                this.weapons = [new Weapon(randWeapon())]; this.wIdx = 0;
+                if (chance(0.3)) this.weapons.push(new Weapon(randWeapon()));
+                this.col = `hsl(${randInt(0, 25)},${randInt(65, 85)}%,${randInt(48, 62)}%)`;
+            }
+            update(dt, player, allBots, world, parts, decals, bullets, floats, zone) {
+                if (this.dead) return;
+                this.dmgFlash = Math.max(0, this.dmgFlash - dt * 4);
+                this.healCd = Math.max(0, this.healCd - dt);
+                this.updateWeapons(dt);
+                this.strafeT -= dt; if (this.strafeT <= 0) { this.strafeDir *= -1; this.strafeT = rand(1.5, 4); }
+                // BUG FIX #6: zone check before think, but don't override engage if already fighting
+                const inZone = zone.isInside(this.x, this.y);
+                this.thinkT -= dt;
+                if (this.thinkT <= 0) {
+                    this.thinkT = rand(0.2, 0.45);
+                    this._think(player, allBots, world, zone, inZone);
+                }
+                let mx = 0, my = 0;
+                const spd = CFG.PLAYER_SPEED * (this.state === 'retreat' ? 1.4 : 0.82);
+                if (this.state === 'engage' && this.target && !this.target.dead) {
+                    const d = dst(this.x, this.y, this.target.x, this.target.y);
+                    const opt = Math.min(this.weapon ? this.weapon.data.range * 0.55 : 250, 250);
+                    if (d > opt * 1.2) { mx = (this.target.x - this.x) / d; my = (this.target.y - this.y) / d; }
+                    else if (d < opt * 0.4) { mx = -(this.target.x - this.x) / d; my = -(this.target.y - this.y) / d; }
+                    else { const px = -(this.target.y - this.y) / d, py = (this.target.x - this.x) / d; mx = px * this.strafeDir; my = py * this.strafeDir; }
+                    const ta = ang(this.x, this.y, this.target.x + rand(-8, 8), this.target.y + rand(-8, 8));
+                    const miss = (1 - this.accuracy) * 1.1;
+                    this.aimS = lerp(this.aimS, ta + rand(-miss, miss), dt * 4);
+                    this.aimAngle = this.aimS;
+                    this._lockT += dt;
+                    if (this._lockT >= this.reaction && this.weapon && d < this.weapon.data.range * 1.1) {
+                        if (hasLOS(this.x, this.y, this.target.x, this.target.y, world.buildings)) {
+                            const now = performance.now() / 1000;
+                            const fired = this.weapon.fire(now, this.x, this.y, this.aimAngle, d > 100, this, parts, decals, bullets);
+                            if (fired && this.weapon.ammo === 0) this.weapon.tryReload();
+                        }
+                    }
+                } else if (this.state === 'roam' || this.state === 'loot') {
+                    const dx = this.roamDest.x - this.x, dy = this.roamDest.y - this.y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 25) this._newRoam(); else { mx = dx / d; my = dy / d; this.aimAngle = Math.atan2(my, mx); }
+                } else if (this.state === 'retreat') {
+                    if (this.target && !this.target.dead) { const dx = this.x - this.target.x, dy = this.y - this.target.y; const d = Math.sqrt(dx * dx + dy * dy) || 1; mx = dx / d; my = dy / d; }
+                    else { this._newRoam(); this.state = 'roam'; }
+                    if (this.healCd <= 0 && this.hp < 50) { this.healHp(30); this.healCd = 8; floats.push(new FloatText(this.x, this.y - 25, '+HP', '#44ff88')); }
+                } else if (this.state === 'zone') {
+                    const dx = zone.cx - this.x, dy = zone.cy - this.y; const d = Math.sqrt(dx * dx + dy * dy) || 1;
+                    mx = dx / d * 0.85 + rand(-0.25, 0.25); my = dy / d * 0.85 + rand(-0.25, 0.25);
+                    this.aimAngle = Math.atan2(my, mx);
+                    if (inZone) this.state = 'roam';
+                }
+                const mL = Math.sqrt(mx * mx + my * my); if (mL > 0) { mx /= mL; my /= mL; }
+                this.x += mx * spd * dt; this.y += my * spd * dt;
+                this.x = clamp(this.x, this.r, CFG.W - this.r); this.y = clamp(this.y, this.r, CFG.H - this.r);
+                for (const b of world.buildings) resolveCircleRect(this, b);
+                this.stuckT += dt;
+                if (this.stuckT > 2) { if (dst(this.x, this.y, this._lx, this._ly) < 8) { this._newRoam(); this.state = 'roam'; } this._lx = this.x; this._ly = this.y; this.stuckT = 0; }
+            }
+            _think(player, allBots, world, zone, inZone) {
+                let best = null, bestS = -1;
+                if (!player.dead) {
+                    const d = dst(this.x, this.y, player.x, player.y);
+                    if (d < this.accuracy * 600 + 150) {
+                        const s = 1000 - d + (hasLOS(this.x, this.y, player.x, player.y, world.buildings) ? 200 : 0);
+                        if (s > bestS) { bestS = s; best = player; }
+                    }
+                }
+                // BUG FIX #11: bots only engage other bots at very close range to prevent chaos
+                for (const b of allBots) {
+                    if (b === this || b.dead) continue;
+                    const d = dst(this.x, this.y, b.x, b.y);
+                    if (d < 100) { const s = 500 - d; if (s > bestS) { bestS = s; best = b; } }
+                }
+                if (best !== this.target) this._lockT = 0;
+                this.target = best;
+                // BUG FIX #6: proper state priority — zone > retreat > engage > roam
+                if (!inZone) { this.state = 'zone'; return; }
+                if (best && !best.dead) { this.state = this.hp < 22 ? 'retreat' : 'engage'; }
+                else { if (this.state === 'engage') { this.state = 'roam'; } this.target = null; if (chance(0.12)) this.state = 'loot'; }
+            }
+            _newRoam() { this.roamDest = { x: rand(150, CFG.W - 150), y: rand(150, CFG.H - 150) }; }
+            // BUG FIX #9: bots now drop loot on death
+            dropLoot(world, parts, decals, floats) {
+                if (this.weapon) world.loot.push(new LootItem(this.x + rand(-20, 20), this.y + rand(-20, 20), 'weapon', this.weapon.data));
+                if (chance(0.55)) world.loot.push(new LootItem(this.x + rand(-15, 15), this.y + rand(-15, 15), 'heal', { qty: 1 }));
+                if (chance(0.4)) {
+                    const ats = ['ammo_ar', 'ammo_pistol', 'ammo_smg'];
+                    world.loot.push(new LootItem(this.x + rand(-15, 15), this.y + rand(-15, 15), ats[randInt(0, ats.length - 1)], { qty: randInt(15, 45) }));
+                }
+                spawnBlood(parts, decals, this.x, this.y, null, 22);
+                spawnSmoke(parts, this.x, this.y, 4);
+                floats.push(new FloatText(this.x, this.y - 32, 'ELIMINATED', '#ff4444', 13));
+            }
+            draw(ctx, cam) {
+                if (this.dead || !cam.inView(this.x, this.y, this.r * 3)) return;
+                const [sx, sy] = cam.w2s(this.x, this.y); const r = this.r * cam.zoom;
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.26)'; ctx.beginPath(); ctx.ellipse(sx + 2, sy + 3, r * 1.1, r * 0.5, 0, 0, TAU); ctx.fill();
+                ctx.shadowColor = this.dmgFlash > 0 ? '#ff6666' : this.col; ctx.shadowBlur = 12;
+                ctx.beginPath(); ctx.arc(sx, sy, r, 0, TAU);
+                ctx.fillStyle = this.dmgFlash > 0 ? '#cc3333' : this.col; ctx.fill();
+                ctx.strokeStyle = 'rgba(255,80,80,0.75)'; ctx.lineWidth = 2; ctx.stroke(); ctx.shadowBlur = 0;
+                const ex = sx + Math.cos(this.aimAngle) * (r + 6), ey = sy + Math.sin(this.aimAngle) * (r + 6);
+                ctx.strokeStyle = 'rgba(255,80,80,0.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+                const bw = r * 2.8, bx = sx - bw / 2, by = sy - r - 9;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(bx, by, bw, 4);
+                ctx.fillStyle = this.hp > 60 ? '#e05050' : this.hp > 30 ? '#e08030' : '#ff2020'; ctx.fillRect(bx, by, bw * (this.hp / this.maxHp), 4);
+                if (this.state === 'engage') { ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(sx + r + 3, sy - r, 3, 0, TAU); ctx.fill(); }
+                ctx.restore();
+            }
+        }
+
+        // ── WORLD ─────────────────────────────────────────────────────────────
+        function buildWorld() {
+            const buildings = [], trees = [], rocks = [], loot = [];
+            const W = CFG.W, H = CFG.H;
+            const towns = Array.from({ length: 7 }, () => ({ x: rand(500, W - 500), y: rand(500, H - 500), sz: randInt(5, 12) }));
+            for (const t of towns) {
+                for (let j = 0; j < t.sz; j++) {
+                    const bx = t.x + rand(-260, 260) - 50, by = t.y + rand(-260, 260) - 50;
+                    const bw = rand(70, 220), bh = rand(65, 160);
+                    if (bx > 80 && bx + bw < W - 80 && by > 80 && by + bh < H - 80) buildings.push(new Building(bx, by, bw, bh, randInt(0, 3)));
+                }
+            }
+            for (let i = 0; i < 18; i++) {
+                const bx = rand(100, W - 220), by = rand(100, H - 200), bw = rand(55, 160), bh = rand(50, 120);
+                buildings.push(new Building(bx, by, bw, bh, randInt(0, 3)));
+            }
+            for (let i = 0; i < 120; i++)trees.push(new Tree(rand(30, W - 30), rand(30, H - 30), rand(12, 28)));
+            for (let i = 0; i < 60; i++)rocks.push(new Rock(rand(30, W - 30), rand(30, H - 30), rand(10, 24)));
+            const LP = [{ t: 'weapon', w: 18 }, { t: 'ammo_ar', w: 16 }, { t: 'ammo_smg', w: 12 }, { t: 'ammo_pistol', w: 15 },
+            { t: 'ammo_sniper', w: 5 }, { t: 'ammo_shotgun', w: 8 }, { t: 'ammo_lmg', w: 4 },
+            { t: 'heal', w: 22 }, { t: 'armor', w: 12 }, { t: 'armor_plate', w: 10 }, { t: 'boost', w: 7 }];
+            const totW = LP.reduce((s, t) => s + t.w, 0);
+            function pickT() { let r = Math.random() * totW; for (const t of LP) { r -= t.w; if (r <= 0) return t.t; } return 'heal'; }
+            for (let i = 0; i < 260; i++) {
+                let lx, ly;
+                if (chance(0.6) && towns.length) { const t = towns[randInt(0, towns.length - 1)]; lx = t.x + rand(-280, 280); ly = t.y + rand(-280, 280); }
+                else { lx = rand(80, W - 80); ly = rand(80, H - 80); }
+                lx = clamp(lx, 80, W - 80); ly = clamp(ly, 80, H - 80);
+                const tp = pickT(); let data = {};
+                if (tp === 'weapon') data = randWeapon();
+                else if (tp === 'heal') data = { qty: randInt(1, 2) };
+                else if (tp === 'armor') data = { amt: randInt(20, 45) };
+                else if (tp === 'armor_plate') data = { qty: 1 };
+                else data = { qty: randInt(18, 55) };
+                loot.push(new LootItem(lx, ly, tp, data));
+            }
+            return { buildings, trees, rocks, loot };
+        }
+
+        // ── MINIMAP & COMPASS ─────────────────────────────────────────────────
+        function drawMinimap(ctx, game, mx, my, mw, mh) {
+            const sc = mw / CFG.W;
+            ctx.save();
+            ctx.fillStyle = 'rgba(3,10,3,0.9)'; roundRect(ctx, mx - 1, my - 1, mw + 2, mh + 2, 4); ctx.fill();
+            ctx.strokeStyle = '#1a3a1a'; ctx.lineWidth = 1.5; roundRect(ctx, mx - 1, my - 1, mw + 2, mh + 2, 4); ctx.stroke();
+            ctx.beginPath(); roundRect(ctx, mx, my, mw, mh, 3); ctx.clip();
+            ctx.fillStyle = '#0a120a'; ctx.fillRect(mx, my, mw, mh);
+            ctx.fillStyle = 'rgba(26,44,20,0.9)';
+            for (const b of game.world.buildings) ctx.fillRect(mx + b.x * sc, my + b.y * sc, Math.max(2, b.w * sc), Math.max(2, b.h * sc));
+            const z = game.zone;
+            ctx.fillStyle = 'rgba(0,28,110,0.2)'; ctx.fillRect(mx, my, mw, mh);
+            ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath(); ctx.arc(mx + z.cx * sc, my + z.cy * sc, z.cr * sc, 0, TAU); ctx.fill(); ctx.restore();
+            ctx.strokeStyle = 'rgba(80,160,255,0.8)'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.arc(mx + z.cx * sc, my + z.cy * sc, z.cr * sc, 0, TAU); ctx.stroke();
+            ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(80,160,255,0.4)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(mx + z.ncx * sc, my + z.ncy * sc, z.nr * sc, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+            for (const b of game.bots) {
+                if (b.dead) continue;
+                ctx.fillStyle = b.state === 'engage' ? '#ff4444' : '#cc4444';
+                ctx.beginPath(); ctx.arc(mx + b.x * sc, my + b.y * sc, 2, 0, TAU); ctx.fill();
+            }
+            ctx.fillStyle = '#3ddc6f'; ctx.shadowColor = '#3ddc6f'; ctx.shadowBlur = 5;
+            ctx.beginPath(); ctx.arc(mx + game.player.x * sc, my + game.player.y * sc, 3.5, 0, TAU); ctx.fill();
+            const px = mx + game.player.x * sc, py = my + game.player.y * sc;
+            ctx.strokeStyle = 'rgba(61,220,111,0.5)'; ctx.lineWidth = 0.8; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(game.player.aimAngle) * 16, py + Math.sin(game.player.aimAngle) * 16); ctx.stroke();
+            ctx.restore();
+            ctx.font = '8px "Courier New"'; ctx.fillStyle = '#2a4a2a'; ctx.textAlign = 'left'; ctx.fillText('MAP', mx + 3, my + mh - 3);
+        }
+        function drawCompass(ctx, cx, cy, player) {
+            const r = 26;
+            ctx.save();
+            ctx.fillStyle = 'rgba(3,10,3,0.85)'; ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, TAU); ctx.fill();
+            ctx.strokeStyle = '#1a3a1a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, TAU); ctx.stroke();
+            const dirs = [['N', 0, '#ff5555'], ['E', Math.PI / 2, '#888'], ['S', Math.PI, '#888'], ['W', -Math.PI / 2, '#888']];
+            for (const [l, a, c] of dirs) {
+                const ra = a - player.aimAngle - Math.PI / 2;
+                ctx.fillStyle = c; ctx.font = `bold 8px "Courier New"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(l, cx + Math.cos(ra) * r, cy + Math.sin(ra) * r);
+            }
+            ctx.strokeStyle = '#3ddc6f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - r + 8); ctx.stroke();
+            ctx.fillStyle = '#3ddc6f'; ctx.beginPath(); ctx.arc(cx, cy - r + 8, 3, 0, TAU); ctx.fill();
+            ctx.restore();
+        }
+
+        // ── HUD ───────────────────────────────────────────────────────────────
+        function drawHUD(ctx, game, cw, ch) {
+            const p = game.player; if (p.dead) return;
+            const PAD = 14;
+            // Damage flash
+            if (p.dmgScreen > 0.02) {
+                ctx.save(); ctx.globalAlpha = p.dmgScreen * 0.38; ctx.fillStyle = '#cc1111'; ctx.fillRect(0, 0, cw, ch);
+                const v = ctx.createRadialGradient(cw / 2, ch / 2, cw * 0.25, cw / 2, ch / 2, cw * 0.75);
+                v.addColorStop(0, 'transparent'); v.addColorStop(1, `rgba(180,0,0,${p.dmgScreen * 0.38})`);
+                ctx.fillStyle = v; ctx.fillRect(0, 0, cw, ch); ctx.restore();
+            }
+            // Bottom-left health panel
+            const pw = 228, ph = 120;
+            ctx.fillStyle = 'rgba(3,10,3,0.88)'; roundRect(ctx, PAD - 6, ch - ph - PAD, pw, ph, 6); ctx.fill();
+            ctx.strokeStyle = '#1a3a1a'; ctx.lineWidth = 1; roundRect(ctx, PAD - 6, ch - ph - PAD, pw, ph, 6); ctx.stroke();
+            const lx = PAD + 2, ly = ch - ph - PAD + 14, bw = pw - 22;
+            ctx.font = '10px "Courier New"'; ctx.fillStyle = '#4a8a4a'; ctx.textAlign = 'left'; ctx.fillText('HEALTH', lx, ly);
+            const hf = p.hp / p.maxHp; const hcol = hf > 0.6 ? '#3ddc6f' : hf > 0.3 ? '#f5c842' : '#e03838';
+            ctx.font = 'bold 18px "Courier New"'; ctx.fillStyle = hcol; ctx.textAlign = 'right'; ctx.fillText(Math.ceil(p.hp), lx + bw, ly); ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(0,30,0,0.8)'; ctx.fillRect(lx, ly + 4, bw, 9); ctx.fillStyle = hcol; ctx.fillRect(lx, ly + 4, bw * hf, 9);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 0.5; ctx.strokeRect(lx, ly + 4, bw, 9);
+            ctx.font = '10px "Courier New"'; ctx.fillStyle = '#3a6a9a'; ctx.fillText('ARMOR', lx, ly + 22);
+            ctx.font = 'bold 15px "Courier New"'; ctx.fillStyle = '#4499ff'; ctx.textAlign = 'right'; ctx.fillText(Math.ceil(p.armor), lx + bw, ly + 22); ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(0,20,50,0.8)'; ctx.fillRect(lx, ly + 26, bw, 7);
+            ctx.fillStyle = '#4499ff'; ctx.fillRect(lx, ly + 26, bw * (p.armor / p.maxArmor), 7);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 0.5; ctx.strokeRect(lx, ly + 26, bw, 7);
+            ctx.font = '10px "Courier New"'; ctx.fillStyle = '#5a8a5a'; ctx.fillText(`[H] Bandage×${p.inv.heal}  [G] Plate×${p.inv.armor_plate || 0}`, lx, ly + 48);
+            const w = p.weapon;
+            if (w) {
+                const ak = 'ammo_' + w.data.cat, ia = p.inv[ak] || 0;
+                ctx.font = '10px "Courier New"'; ctx.fillStyle = '#5a8a5a'; ctx.fillText('AMMO', lx, ly + 64);
+                ctx.font = `bold ${w.reloading ? 13 : 17}px "Courier New"`;
+                ctx.fillStyle = w.ammo === 0 ? '#e03838' : w.ammo < 5 ? '#f5c842' : '#c8e8c8';
+                ctx.fillText(w.reloading ? 'RELOADING…' : `${w.ammo} / ${ia}`, lx, ly + 82);
+                if (w.reloading) { ctx.fillStyle = 'rgba(0,20,0,0.8)'; ctx.fillRect(lx, ly + 84, bw, 5); ctx.fillStyle = '#f5c842'; ctx.fillRect(lx, ly + 84, bw * w.progress, 5); }
+                ctx.font = '9px "Courier New"'; ctx.fillStyle = '#3a5a3a'; ctx.fillText(w.data.name + '  ' + w.data.cat.toUpperCase(), lx, ly + 96);
+            }
+            // Weapon slots (bottom center)
+            const sw = 88, sh = 56, sg = 4; const tsx = cw / 2 - p.weapons.length * (sw + sg) / 2, sy2 = ch - sh - PAD;
+            for (let i = 0; i < p.weapons.length; i++) {
+                const wx = tsx + i * (sw + sg), active = i === p.wIdx;
+                ctx.fillStyle = active ? 'rgba(8,24,8,0.95)' : 'rgba(3,10,3,0.78)'; roundRect(ctx, wx, sy2, sw, sh, 4); ctx.fill();
+                ctx.strokeStyle = active ? '#3ddc6f' : '#1a3a1a'; ctx.lineWidth = active ? 2 : 1; roundRect(ctx, wx, sy2, sw, sh, 4); ctx.stroke();
+                const ww = p.weapons[i];
+                ctx.font = `bold ${active ? 13 : 11}px "Courier New"`; ctx.fillStyle = active ? '#3ddc6f' : '#4a7a4a'; ctx.textAlign = 'center';
+                ctx.fillText(ww.data.name, wx + sw / 2, sy2 + 18);
+                ctx.font = '10px "Courier New"'; ctx.fillStyle = active ? '#a8c8a8' : '#3a5a3a'; ctx.fillText(`${ww.ammo}/${ww.reserve}`, wx + sw / 2, sy2 + 32);
+                if (ww.reloading) { ctx.fillStyle = '#f5c842'; ctx.font = '9px "Courier New"'; ctx.fillText('↺ RELOAD', wx + sw / 2, sy2 + 44); }
+                ctx.font = '9px "Courier New"'; ctx.fillStyle = '#223322'; ctx.textAlign = 'left'; ctx.fillText(`[${i + 1}]`, wx + 4, sy2 + 11);
+            }
+            ctx.textAlign = 'left';
+            // Top-right alive
+            ctx.fillStyle = 'rgba(3,10,3,0.88)'; roundRect(ctx, cw - 115, 10, 105, 46, 5); ctx.fill();
+            ctx.strokeStyle = '#1a3a1a'; ctx.lineWidth = 1; roundRect(ctx, cw - 115, 10, 105, 46, 5); ctx.stroke();
+            ctx.font = '9px "Courier New"'; ctx.fillStyle = '#4a7a4a'; ctx.textAlign = 'center'; ctx.fillText('PLAYERS ALIVE', cw - 62, 24);
+            ctx.font = 'bold 22px "Courier New"'; ctx.fillStyle = '#3ddc6f'; ctx.shadowColor = '#3ddc6f'; ctx.shadowBlur = 8;
+            ctx.fillText(game.aliveCount, cw - 62, 46); ctx.shadowBlur = 0; ctx.textAlign = 'left';
+            // Zone timer
+            const zt = game.zone.getLabel(), shr = game.zone.state === 'shrinking';
+            ctx.font = 'bold 11px "Courier New"'; const ztw = ctx.measureText(zt).width;
+            ctx.fillStyle = 'rgba(3,10,3,0.88)'; roundRect(ctx, cw / 2 - ztw / 2 - 14, 10, ztw + 28, 30, 5); ctx.fill();
+            ctx.strokeStyle = shr ? '#3a8fff' : '#1a3a1a'; ctx.lineWidth = 1; roundRect(ctx, cw / 2 - ztw / 2 - 14, 10, ztw + 28, 30, 5); ctx.stroke();
+            ctx.fillStyle = shr ? '#55aaff' : '#5a9a5a'; ctx.textAlign = 'center'; ctx.fillText(zt, cw / 2, 28); ctx.textAlign = 'left';
+            if (shr) { const sf = game.zone.getFrac(); ctx.fillStyle = 'rgba(0,20,60,0.6)'; ctx.fillRect(cw / 2 - 60, 38, 120, 4); ctx.fillStyle = '#55aaff'; ctx.fillRect(cw / 2 - 60, 38, 120 * sf, 4); }
+            // Out-of-zone
+            if (!game.zone.isInside(p.x, p.y)) {
+                ctx.save(); ctx.font = 'bold 13px "Courier New"'; ctx.textAlign = 'center';
+                ctx.fillStyle = `rgba(80,150,255,${0.75 + 0.22 * Math.sin(Date.now() * 0.006)})`;
+                ctx.shadowColor = '#3a8fff'; ctx.shadowBlur = 14;
+                ctx.fillText('⚠  OUTSIDE SAFE ZONE — TAKING DAMAGE', cw / 2, ch - sh - PAD - 24); ctx.restore();
+            }
+            // Kills
+            ctx.fillStyle = 'rgba(3,10,3,0.82)'; roundRect(ctx, cw - 115, 64, 105, 38, 5); ctx.fill();
+            ctx.strokeStyle = '#1a3a1a'; ctx.lineWidth = 1; roundRect(ctx, cw - 115, 64, 105, 38, 5); ctx.stroke();
+            ctx.font = '9px "Courier New"'; ctx.fillStyle = '#4a7a4a'; ctx.textAlign = 'center'; ctx.fillText('KILLS', cw - 62, 78);
+            ctx.font = 'bold 20px "Courier New"'; ctx.fillStyle = '#3ddc6f'; ctx.fillText(p.kills, cw - 62, 97); ctx.textAlign = 'left';
+            // Minimap + compass
+            drawMinimap(ctx, game, PAD, 60, 150, 150);
+            drawCompass(ctx, PAD + 12, 46, p);
+            // Kill feed
+            game.killFeed.draw(ctx, cw);
+            // Crosshair
+            if (!(p.ads && p.weapon?.data.cat === 'sniper')) {
+                const mx = Input.mouse.x, my = Input.mouse.y;
+                const bloom = p.weapon ? p.weapon.bloom : 0.06;
+                const spread = p.weapon ? (p.ads ? p.weapon.data.adsS : p.weapon.data.spread) + bloom : 0.06;
+                const gap = 6 + clamp(spread * 75, 1, 30), len = clamp(7 - spread * 18, 3, 9);
+                ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
+                ctx.beginPath(); ctx.moveTo(mx - gap - len, my); ctx.lineTo(mx - gap, my); ctx.moveTo(mx + gap, my); ctx.lineTo(mx + gap + len, my);
+                ctx.moveTo(mx, my - gap - len); ctx.lineTo(mx, my - gap); ctx.moveTo(mx, my + gap); ctx.lineTo(mx, my + gap + len); ctx.stroke();
+                ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); ctx.arc(mx, my, 1.5, 0, TAU); ctx.fill(); ctx.restore();
+            }
+            // Survival time
+            ctx.font = '9px "Courier New"'; ctx.fillStyle = '#2a4a2a'; ctx.textAlign = 'left'; ctx.fillText(fmtTime(p.survivalTime), PAD, 14);
+        }
+
+        // ── GAME ──────────────────────────────────────────────────────────────
+        class Game {
+            constructor(canvas) {
+                this.canvas = canvas; this.ctx = canvas.getContext('2d');
+                this.cam = new Camera(canvas.width, canvas.height);
+                this.world = buildWorld(); this.zone = new SafeZone(); this.killFeed = new KillFeed();
+                this.particles = []; this.decals = []; this.bullets = []; this.floats = [];
+                this.state = 'playing'; this.startT = performance.now() / 1000;
+                const px = rand(600, CFG.W - 600), py = rand(600, CFG.H - 600);
+                this.player = new Player(px, py);
+                this.cam.x = px; this.cam.y = py;
+                this.bots = [];
+                for (let i = 0; i < CFG.NUM_BOTS; i++) {
+                    let bx, by, tries = 0;
+                    do { bx = rand(200, CFG.W - 200); by = rand(200, CFG.H - 200); tries++; }
+                    while (dst(bx, by, px, py) < 350 && tries < 20);
+                    this.bots.push(new Bot(bx, by));
+                }
+            }
+            get aliveCount() { return (this.player.dead ? 0 : 1) + this.bots.filter(b => !b.dead).length; }
+            update(dt) {
+                if (this.state !== 'playing') return;
+                Input.tick(); this.cam.update(dt); this.zone.update(dt); this.killFeed.update(dt);
+                const allE = [this.player, ...this.bots];
+                // Player
+                this.player.update(dt, this.cam, this.world, this.particles, this.decals, this.bullets, this.floats);
+                if (!this.player.dead && !this.zone.isInside(this.player.x, this.player.y))
+                    this.player.takeDamage(this.zone.getDPS() * dt, null);
+                // Bots
+                for (const b of this.bots) {
+                    if (b.dead) continue;
+                    b.update(dt, this.player, this.bots, this.world, this.particles, this.decals, this.bullets, this.floats, this.zone);
+                    if (!this.zone.isInside(b.x, b.y)) b.takeDamage(this.zone.getDPS() * dt * 0.9, null);
+                }
+                // Death events
+                for (const b of this.bots) {
+                    if (b.dead && !b._deathDone) {
+                        b._deathDone = true;
+                        const kn = b._killer === this.player ? 'YOU' : (b._killer?.name || 'Zone');
+                        this.killFeed.add(kn, b.name, b._killer === this.player);
+                        // BUG FIX #9: drop loot on death
+                        b.dropLoot(this.world, this.particles, this.decals, this.floats);
+                        if (b._killer === this.player) this.cam.shake(5);
+                    }
+                }
+                if (this.player.dead && !this.player._deathDone) {
+                    this.player._deathDone = true;
+                    const elapsed = performance.now() / 1000 - this.startT;
+                    document.getElementById('dKills').textContent = this.player.kills;
+                    document.getElementById('dRemaining').textContent = this.aliveCount;
+                    document.getElementById('dTime').textContent = fmtTime(elapsed);
+                    setTimeout(() => document.getElementById('deathScreen').classList.remove('hidden'), 1400);
+                    this.state = 'dead'; spawnBlood(this.particles, this.decals, this.player.x, this.player.y, null, 24); this.cam.shake(22);
+                }
+                // Bullets
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    this.bullets[i].update(dt, allE, this.world.buildings, this.particles, this.decals);
+                    if (this.bullets[i].dead) this.bullets.splice(i, 1);
+                }
+                if (this.bullets.length > CFG.BULLET_MAX) this.bullets.splice(0, this.bullets.length - CFG.BULLET_MAX);
+                // Particles
+                for (let i = this.particles.length - 1; i >= 0; i--) { this.particles[i].update(dt); if (this.particles[i].dead) this.particles.splice(i, 1); }
+                if (this.particles.length > CFG.PARTICLE_MAX) this.particles.splice(0, this.particles.length - CFG.PARTICLE_MAX);
+                for (let i = this.decals.length - 1; i >= 0; i--) { this.decals[i].update(dt); if (this.decals[i].dead) this.decals.splice(i, 1); }
+                for (let i = this.floats.length - 1; i >= 0; i--) { this.floats[i].update(dt); if (this.floats[i].dead) this.floats.splice(i, 1); }
+                this.world.loot = this.world.loot.filter(l => !l.dead);
+                for (const l of this.world.loot) l.update(dt);
+                // Win check
+                if (!this.player.dead && this.bots.every(b => b.dead) && this.state === 'playing') {
+                    this.state = 'won'; const elapsed = performance.now() / 1000 - this.startT;
+                    document.getElementById('wKills').textContent = this.player.kills;
+                    document.getElementById('wTime').textContent = fmtTime(elapsed);
+                    setTimeout(() => document.getElementById('winScreen').classList.remove('hidden'), 800);
+                }
+            }
+            render() {
+                const { ctx, cam } = this; const cw = cam.cw, ch = cam.ch;
+                ctx.clearRect(0, 0, cw, ch);
+                // Terrain
+                ctx.fillStyle = '#0c140c'; ctx.fillRect(0, 0, cw, ch);
+                ctx.save(); ctx.strokeStyle = 'rgba(20,35,18,0.55)'; ctx.lineWidth = 0.8;
+                const gs = 100 * cam.zoom;
+                const ox = ((-cam.x * cam.zoom + cw / 2) % gs + gs) % gs, oy = ((-cam.y * cam.zoom + ch / 2) % gs + gs) % gs;
+                for (let x = ox - gs; x < cw + gs; x += gs) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke(); }
+                for (let y = oy - gs; y < ch + gs; y += gs) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke(); }
+                ctx.restore();
+                // World border
+                const [bsx, bsy] = cam.w2s(0, 0); const bsw = CFG.W * cam.zoom, bsh = CFG.H * cam.zoom;
+                ctx.save(); ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 18; ctx.strokeStyle = 'rgba(220,60,60,0.7)'; ctx.lineWidth = 3; ctx.strokeRect(bsx, bsy, bsw, bsh); ctx.restore();
+                this.zone.draw(ctx, cam);
+                // Decals (ground blood)
+                for (const d of this.decals) d.draw(ctx, cam);
+                // Trees / rocks
+                for (const t of this.world.trees) t.draw(ctx, cam);
+                for (const r of this.world.rocks) r.draw(ctx, cam);
+                // Buildings
+                for (const b of this.world.buildings) b.draw(ctx, cam);
+                // Loot
+                for (const l of this.world.loot) l.draw(ctx, cam);
+                // Bullets
+                for (const b of this.bullets) b.draw(ctx, cam);
+                // Particles
+                for (const p of this.particles) p.draw(ctx, cam);
+                // Entities
+                for (const b of this.bots) b.draw(ctx, cam);
+                this.player.draw(ctx, cam);
+                // Float texts
+                for (const f of this.floats) f.draw(ctx, cam);
+                // HUD
+                drawHUD(ctx, this, cw, ch);
+            }
+        }
+
+        // ── BOOT ──────────────────────────────────────────────────────────────
+        const canvas = document.getElementById('gc');
+        let game = null, lastT = 0;
+        function resize() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            if (game) { game.cam.cw = canvas.width; game.cam.ch = canvas.height; }
+        }
+        window.addEventListener('resize', resize); resize();
+        Input.init(canvas);
+        function menuBg() {
+            if (game) return;
+            const ctx = canvas.getContext('2d'), cw = canvas.width, ch = canvas.height;
+            ctx.fillStyle = '#060d06'; ctx.fillRect(0, 0, cw, ch);
+            ctx.strokeStyle = 'rgba(15,30,12,0.8)'; ctx.lineWidth = 0.8;
+            const g = 48;
+            for (let x = 0; x < cw; x += g) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke(); }
+            for (let y = 0; y < ch; y += g) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke(); }
+            const t = Date.now() / 1000;
+            const gr = ctx.createRadialGradient(cw / 2, ch / 2, 0, cw / 2, ch / 2, cw * 0.5);
+            gr.addColorStop(0, `rgba(20,80,30,${0.04 + 0.02 * Math.sin(t)})`); gr.addColorStop(1, 'transparent');
+            ctx.fillStyle = gr; ctx.fillRect(0, 0, cw, ch);
+            requestAnimationFrame(menuBg);
+        }
+        requestAnimationFrame(menuBg);
+        function loop(ts) {
+            requestAnimationFrame(loop);
+            const dt = Math.min((ts - lastT) / 1000, 0.05); lastT = ts;
+            if (game) { if (game.state === 'playing') game.update(dt); game.render(); }
+        }
+        requestAnimationFrame(t => { lastT = t; requestAnimationFrame(loop); });
+        function startGame() {
+            document.getElementById('menuScreen').classList.add('hidden');
+            document.getElementById('deathScreen').classList.add('hidden');
+            document.getElementById('winScreen').classList.add('hidden');
+            game = new Game(canvas);
+        }
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('respawnBtn').addEventListener('click', startGame);
+        document.getElementById('playAgainBtn').addEventListener('click', startGame);
+        // Mobile Controls Intercept
+        window.joyLx = 0; window.joyLy = 0; window.joyRActive = false; window.joyRAngle = 0;
+        let lTouch = null, rTouch = null;
+        
+        // Touch Detection
+        window.addEventListener('touchstart', () => { 
+            document.getElementById('mobileUI').style.display = 'block'; 
+        }, {once:true});
+
+        // Joysticks
+        function handleJoy(e, isLeft) {
+            e.preventDefault();
+            const tz = isLeft ? document.getElementById('tz-left') : document.getElementById('tz-right');
+            const base = isLeft ? document.getElementById('joy-l-base') : document.getElementById('joy-r-base');
+            const knob = isLeft ? document.getElementById('joy-l-knob') : document.getElementById('joy-r-knob');
+            const rect = tz.getBoundingClientRect();
+            
+            let t = null;
+            for(let i=0; i<e.touches.length; i++) {
+                const tx = e.touches[i].clientX;
+                if(isLeft ? tx <= window.innerWidth/2 : tx > window.innerWidth/2) {
+                    t = e.touches[i]; break;
+                }
+            }
+            if(!t) return;
+            
+            if(e.type === 'touchstart') {
+                base.style.display = 'block';
+                base.style.left = t.clientX + 'px';
+                base.style.top = t.clientY + 'px';
+            }
+            
+            const bx = parseFloat(base.style.left);
+            const by = parseFloat(base.style.top);
+            let dx = t.clientX - bx;
+            let dy = t.clientY - by;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const maxR = 60; // 120px base width/2
+            
+            if(dist > maxR) { dx = (dx/dist)*maxR; dy = (dy/dist)*maxR; }
+            knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+            
+            const nx = dx/maxR, ny = dy/maxR;
+            if(isLeft) { window.joyLx = nx; window.joyLy = ny; }
+            else {
+                window.joyRActive = true; 
+                window.joyRAngle = Math.atan2(ny, nx);
+                if(game) Input._ml = true; // Auto-fire while aiming
+            }
+        }
+
+        const tzL = document.getElementById('tz-left'), tzR = document.getElementById('tz-right');
+        tzL.addEventListener('touchstart', e => handleJoy(e, true));
+        tzL.addEventListener('touchmove', e => handleJoy(e, true));
+        tzL.addEventListener('touchend', e => { 
+            window.joyLx = 0; window.joyLy = 0; 
+            document.getElementById('joy-l-base').style.display = 'none';
+        });
+        
+        tzR.addEventListener('touchstart', e => handleJoy(e, false));
+        tzR.addEventListener('touchmove', e => handleJoy(e, false));
+        tzR.addEventListener('touchend', e => { 
+            window.joyRActive = false; if(game) Input._ml = false;
+            document.getElementById('joy-r-base').style.display = 'none'; 
+            document.getElementById('joy-r-knob').style.transform = 'translate(-50%,-50%)';
+        });
+
+        // Mobile Buttons
+        function b(id, code) {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', e => {
+                e.preventDefault(); e.stopPropagation();
+                if(!Input._k[code]) Input._prev[code] = false;
+                Input._k[code] = true;
+            });
+            btn.addEventListener('touchend', e => {
+                e.preventDefault(); e.stopPropagation();
+                Input._k[code] = false; Input._prev[code] = false;
+            });
+        }
+        b('mbtn-f', 'KeyF'); b('mbtn-h', 'KeyH'); b('mbtn-r', 'KeyR');
+
+    </script>
+</body>
+
+</html>

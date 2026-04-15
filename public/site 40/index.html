@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMIÈRE | Luxury Redefined</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor-loupe"></div>
+
+    <nav class="lumiere-nav">
+        <div class="nav-left">
+            <a href="#new">NEW ARRIVALS</a>
+            <a href="#collections">COLLECTIONS</a>
+        </div>
+        <div class="lumiere-logo">LUMIÈRE</div>
+        <div class="nav-right">
+            <a href="#about">THE HOUSE</a>
+            <a href="#cart">CART (0)</a>
+        </div>
+    </nav>
+
+    <!-- Cinematic Hero -->
+    <header class="hero-cinematic">
+        <div class="hero-grain"></div>
+        <img src="https://images.unsplash.com/photo-1548036328-c1589fac3102?w=1600&q=80" class="hero-img" alt="Luxury Watch">
+        <div class="hero-text">
+            <h1 class="fade-up">The art of possessing something extraordinary.</h1>
+            <div class="hero-ctas fade-up delay-1">
+                <a href="#new" class="btn-primary">Shop New Arrivals</a>
+                <a href="#collections" class="btn-secondary">Explore Collections</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Brand Philosophy -->
+    <section class="philosophy" id="about">
+        <p class="philosophy-statement js-split-text">
+            We believe luxury is not loudness — it is the quiet certainty of extraordinary craftsmanship.
+        </p>
+        <div class="philosophy-img-container parallax-img">
+            <img src="https://images.unsplash.com/photo-1616843413587-9e3a37f7bbd8?w=1200&q=80" alt="Craftsmanship">
+        </div>
+    </section>
+
+    <!-- New Arrivals w/ 3D Hover Parallax -->
+    <section class="new-arrivals" id="new">
+        <div class="section-title">
+            <h2>New Arrivals</h2>
+        </div>
+        <div class="product-grid">
+            <div class="product-card 3d-card">
+                <div class="card-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1542496658-e33a6fa18eb4?w=600&q=80" alt="Chronograph">
+                    <div class="quick-add">ADD TO CART</div>
+                </div>
+                <div class="product-details">
+                    <h3>LE NOIR CHRONOGRAPH</h3>
+                    <p>Watches</p>
+                    <span class="price">$4,200</span>
+                </div>
+            </div>
+            <div class="product-card 3d-card">
+                <div class="card-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1599643478524-fb66f72400de?w=600&q=80" alt="Perfume">
+                    <div class="quick-add">ADD TO CART</div>
+                </div>
+                <div class="product-details">
+                    <h3>ECLAT DE SOIE</h3>
+                    <p>Fragrances</p>
+                    <span class="price">$280</span>
+                </div>
+            </div>
+            <div class="product-card 3d-card">
+                <div class="card-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1515562141207-7a8efd38cd16?w=600&q=80" alt="Bag">
+                    <div class="quick-add">ADD TO CART</div>
+                </div>
+                <div class="product-details">
+                    <h3>THE ARCHIVE SATCHEL</h3>
+                    <p>Leather Goods</p>
+                    <span class="price">$1,850</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections -->
+    <section class="collections" id="collections">
+        <div class="collection-item">
+            <img src="https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=1200&q=80" alt="Noir Collection" class="collection-bg">
+            <h2 class="collection-title">The Noir Collection</h2>
+            <div class="overlay"></div>
+        </div>
+        <div class="collection-item">
+            <img src="https://images.unsplash.com/photo-1555529733-0e670560f7e1?w=1200&q=80" alt="Summer Riviera" class="collection-bg">
+            <h2 class="collection-title">Summer Riviera</h2>
+            <div class="overlay"></div>
+        </div>
+    </section>
+
+    <footer class="lumiere-footer">
+        <div class="footer-top">
+            <div class="newsletter">
+                <h3>Be the first to know.</h3>
+                <form>
+                    <input type="email" placeholder="Your email address">
+                    <button type="submit">SUBSCRIBE</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="lumiere-logo small">LUMIÈRE</div>
+            <div class="footer-links">
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+                <a href="#">Authenticity</a>
+            </div>
+            <p>&copy; 2026 Lumière Paris. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

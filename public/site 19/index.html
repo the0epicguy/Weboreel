@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VOID PROTOCOL - A cinematic interactive narrative experience through deep space">
+<title>VOID PROTOCOL — Cinematic Narrative</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{
+  background:#000;
+  color:#e0e0e0;
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+#custom-cursor{
+  position:fixed;
+  width:8px;height:8px;
+  background:rgba(120,200,255,0.9);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:10000;
+  mix-blend-mode:screen;
+  transition:transform 0.1s;
+  box-shadow:0 0 20px rgba(120,200,255,0.5);
+}
+
+.cursor-trail{
+  position:fixed;
+  width:4px;height:4px;
+  background:rgba(120,200,255,0.3);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:9999;
+  mix-blend-mode:screen;
+}
+
+#three-canvas{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:1;
+}
+
+.narrative-layer{
+  position:relative;
+  z-index:2;
+  pointer-events:none;
+}
+
+.chapter{
+  height:300vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.chapter-content{
+  position:sticky;
+  top:50%;
+  transform:translateY(-50%);
+  max-width:700px;
+  padding:40px;
+  opacity:0;
+  transition:opacity 1.5s ease, transform 1.5s ease;
+  transform:translateY(-50%) translateX(-60px);
+  pointer-events:auto;
+}
+
+.chapter-content.visible{
+  opacity:1;
+  transform:translateY(-50%) translateX(0);
+}
+
+.chapter-content h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,5vw,4.5rem);
+  font-weight:800;
+  line-height:1.05;
+  margin-bottom:30px;
+  background:linear-gradient(135deg,#78c8ff,#a855f7,#f472b6);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.chapter-content p{
+  font-size:clamp(1rem,2vw,1.3rem);
+  line-height:1.8;
+  color:rgba(200,210,230,0.8);
+  margin-bottom:20px;
+}
+
+.chapter-content .chapter-num{
+  font-family:'Syne',sans-serif;
+  font-size:0.75rem;
+  letter-spacing:8px;
+  text-transform:uppercase;
+  color:rgba(120,200,255,0.4);
+  margin-bottom:20px;
+  display:block;
+}
+
+.progress-line{
+  position:fixed;
+  left:40px;
+  top:0;
+  width:2px;
+  height:100vh;
+  background:rgba(120,200,255,0.1);
+  z-index:100;
+}
+
+.progress-fill{
+  width:100%;
+  height:0%;
+  background:linear-gradient(to bottom,#78c8ff,#a855f7);
+  transition:height 0.1s;
+}
+
+.progress-marker{
+  position:fixed;
+  left:30px;
+  width:22px;
+  height:22px;
+  border:2px solid rgba(120,200,255,0.3);
+  border-radius:50%;
+  z-index:101;
+  transition:all 0.5s;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.progress-marker.active{
+  border-color:#78c8ff;
+  box-shadow:0 0 15px rgba(120,200,255,0.4);
+}
+
+.progress-marker.active::after{
+  content:'';
+  width:6px;height:6px;
+  background:#78c8ff;
+  border-radius:50%;
+}
+
+#sound-toggle{
+  position:fixed;
+  top:30px;right:30px;
+  z-index:1000;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(120,200,255,0.2);
+  color:#78c8ff;
+  padding:10px 20px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.8rem;
+  letter-spacing:3px;
+  cursor:none;
+  pointer-events:auto;
+  transition:all 0.3s;
+  text-transform:uppercase;
+}
+
+#sound-toggle:hover{
+  background:rgba(120,200,255,0.1);
+  border-color:#78c8ff;
+}
+
+.intro-overlay{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:#000;
+  z-index:5000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  transition:opacity 2s ease;
+  cursor:none;
+}
+
+.intro-overlay.hidden{
+  opacity:0;
+  pointer-events:none;
+}
+
+.intro-overlay h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,6vw,5rem);
+  font-weight:800;
+  background:linear-gradient(135deg,#78c8ff,#a855f7);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:30px;
+}
+
+.intro-overlay .enter-btn{
+  background:transparent;
+  border:1px solid rgba(120,200,255,0.4);
+  color:#78c8ff;
+  padding:15px 50px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1rem;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  cursor:none;
+  transition:all 0.5s;
+  pointer-events:auto;
+}
+
+.intro-overlay .enter-btn:hover{
+  background:rgba(120,200,255,0.1);
+  border-color:#78c8ff;
+  box-shadow:0 0 30px rgba(120,200,255,0.2);
+}
+
+.glitch-line{
+  position:fixed;
+  width:100%;
+  height:2px;
+  background:rgba(120,200,255,0.1);
+  z-index:3;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.1s;
+}
+
+@media(max-width:768px){
+  .chapter{height:200vh}
+  .chapter-content{padding:20px;max-width:90%}
+  .progress-line,.progress-marker{display:none}
+  #sound-toggle{top:15px;right:15px;padding:8px 15px;font-size:0.7rem}
+  body{cursor:auto}
+  #custom-cursor,.cursor-trail{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="intro-overlay" id="intro">
+  <h1>VOID PROTOCOL</h1>
+  <p style="color:rgba(200,210,230,0.5);margin-bottom:40px;letter-spacing:5px;font-size:0.85rem">A CINEMATIC JOURNEY THROUGH DEEP SPACE</p>
+  <button class="enter-btn" id="enter-btn">BEGIN TRANSMISSION</button>
+</div>
+
+<div id="custom-cursor"></div>
+
+<canvas id="three-canvas"></canvas>
+
+<button id="sound-toggle">Sound: Off</button>
+
+<div class="progress-line"><div class="progress-fill" id="progress-fill"></div></div>
+
+<div class="narrative-layer">
+  <div class="chapter" id="ch0">
+    <div class="chapter-content" style="text-align:center;max-width:800px">
+      <span class="chapter-num">Prologue</span>
+      <h2>The Last Signal</h2>
+      <p>In the year 2847, humanity's deepest space probe — VOID-7 — captured an anomalous signal from beyond the observable universe. What followed changed everything we understood about existence.</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="ch1">
+    <div class="chapter-content">
+      <span class="chapter-num">Chapter I — Discovery</span>
+      <h2>Frequencies Beyond Comprehension</h2>
+      <p>The signal didn't follow any known pattern. It wasn't random noise. It was structured, recursive, self-referencing — like a language designed to teach itself to the listener.</p>
+      <p>Dr. Elara Voss was the first to notice the embedded mathematics. Prime sequences folded into harmonic resonances. The universe was speaking, and it had been waiting.</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="ch2">
+    <div class="chapter-content" style="margin-left:auto;text-align:right">
+      <span class="chapter-num">Chapter II — The Membrane</span>
+      <h2>Between Dimensions</h2>
+      <p>What VOID-7 discovered wasn't a message from another civilization. It was the vibrational frequency of reality's boundary — the membrane separating our universe from infinite others.</p>
+      <p>Each pulse carried the fingerprint of a parallel existence. Trillions of worlds, breathing in synchrony.</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="ch3">
+    <div class="chapter-content">
+      <span class="chapter-num">Chapter III — Convergence</span>
+      <h2>When All Timelines Collide</h2>
+      <p>The team realized that decoding the signal wasn't about understanding it — it was about resonating with it. The human mind, when tuned correctly, could perceive the membrane directly.</p>
+      <p>Consciousness became the key. Not technology. Not mathematics. The raw, unfiltered experience of being aware.</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="ch4">
+    <div class="chapter-content" style="text-align:center;max-width:800px;margin:0 auto">
+      <span class="chapter-num">Chapter IV — Transcendence</span>
+      <h2>The Void Answers</h2>
+      <p>On March 14th, 2849, every human being on Earth simultaneously experienced a moment of absolute clarity. For exactly 7 seconds, the boundaries dissolved.</p>
+      <p>Everyone saw everything. Every timeline. Every possibility. Every version of themselves. And in that infinite moment, they understood: we were never alone. We were never separate. We were the void, experiencing itself.</p>
+    </div>
+  </div>
+
+  <div class="chapter" id="ch5" style="height:150vh">
+    <div class="chapter-content" style="text-align:center;max-width:600px;margin:0 auto">
+      <span class="chapter-num">Epilogue</span>
+      <h2 style="font-size:clamp(1.5rem,4vw,3rem)">The signal continues.</h2>
+      <p style="color:rgba(120,200,255,0.4);font-size:0.9rem;letter-spacing:3px;margin-top:40px">SCROLL COMPLETE — VOID PROTOCOL TRANSMISSION ENDED</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  // --- INTRO ---
+  const intro = document.getElementById('intro');
+  const enterBtn = document.getElementById('enter-btn');
+  let started = false;
+  let audioCtx, soundEnabled = false;
+
+  enterBtn.addEventListener('click', () => {
+    intro.classList.add('hidden');
+    started = true;
+    initAudio();
+  });
+
+  // --- CURSOR SYSTEM: Particle trail ---
+  const cursor = document.getElementById('custom-cursor');
+  let mx = 0, my = 0, trails = [];
+  const TRAIL_COUNT = 20;
+
+  for(let i = 0; i < TRAIL_COUNT; i++){
+    const t = document.createElement('div');
+    t.className = 'cursor-trail';
+    document.body.appendChild(t);
+    trails.push({ el: t, x: 0, y: 0 });
+  }
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 4 + 'px';
+    cursor.style.top = my - 4 + 'px';
+  });
+
+  function animateTrails(){
+    let px = mx, py = my;
+    trails.forEach((t, i) => {
+      const speed = 0.15 + i * 0.02;
+      t.x += (px - t.x) * speed;
+      t.y += (py - t.y) * speed;
+      t.el.style.left = t.x - 2 + 'px';
+      t.el.style.top = t.y - 2 + 'px';
+      t.el.style.opacity = 1 - (i / TRAIL_COUNT);
+      t.el.style.transform = `scale(${1 - i * 0.03})`;
+      px = t.x; py = t.y;
+    });
+    requestAnimationFrame(animateTrails);
+  }
+  animateTrails();
+
+  // --- THREE.JS SCENE: Cinematic star field with nebula ---
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+  camera.position.set(0, 0, 100);
+
+  // Star particles
+  const starCount = 5000;
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(starCount * 3);
+  const starColors = new Float32Array(starCount * 3);
+  const starSizes = new Float32Array(starCount);
+
+  for(let i = 0; i < starCount; i++){
+    const i3 = i * 3;
+    starPos[i3] = (Math.random() - 0.5) * 800;
+    starPos[i3+1] = (Math.random() - 0.5) * 800;
+    starPos[i3+2] = (Math.random() - 0.5) * 1600 - 200;
+    const c = new THREE.Color();
+    c.setHSL(0.55 + Math.random() * 0.15, 0.6, 0.5 + Math.random() * 0.5);
+    starColors[i3] = c.r; starColors[i3+1] = c.g; starColors[i3+2] = c.b;
+    starSizes[i] = Math.random() * 3 + 0.5;
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+  starGeo.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+
+  const starMat = new THREE.ShaderMaterial({
+    vertexShader: `
+      attribute float size;
+      attribute vec3 color;
+      varying vec3 vColor;
+      void main(){
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * (200.0 / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main(){
+        float d = length(gl_PointCoord - 0.5);
+        if(d > 0.5) discard;
+        float a = 1.0 - smoothstep(0.0, 0.5, d);
+        gl_FragColor = vec4(vColor, a * 0.8);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true
+  });
+
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  // Nebula clouds
+  const nebulaGroup = new THREE.Group();
+  scene.add(nebulaGroup);
+
+  for(let i = 0; i < 8; i++){
+    const geo = new THREE.SphereGeometry(30 + Math.random() * 50, 16, 16);
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color().setHSL(0.7 + Math.random() * 0.2, 0.8, 0.15),
+      transparent: true,
+      opacity: 0.04 + Math.random() * 0.03,
+      blending: THREE.AdditiveBlending
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(
+      (Math.random()-0.5)*300,
+      (Math.random()-0.5)*200,
+      -300 - Math.random()*600
+    );
+    mesh.scale.set(1 + Math.random(), 0.5 + Math.random(), 1 + Math.random());
+    nebulaGroup.add(mesh);
+  }
+
+  // Scroll tracking
+  let scrollProgress = 0;
+  const totalScrollHeight = () => document.body.scrollHeight - window.innerHeight;
+
+  window.addEventListener('scroll', () => {
+    scrollProgress = window.scrollY / totalScrollHeight();
+    document.getElementById('progress-fill').style.height = (scrollProgress * 100) + '%';
+  });
+
+  // Chapter visibility
+  const chapters = document.querySelectorAll('.chapter-content');
+  const chapterPositions = [0.0, 0.15, 0.33, 0.5, 0.68, 0.85];
+
+  function updateChapters(){
+    chapters.forEach((ch, i) => {
+      const rect = ch.getBoundingClientRect();
+      const visible = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
+      ch.classList.toggle('visible', visible);
+    });
+  }
+
+  window.addEventListener('scroll', updateChapters);
+
+  // Markers
+  const markerContainer = document.querySelector('.narrative-layer');
+  chapterPositions.forEach((pos, i) => {
+    const m = document.createElement('div');
+    m.className = 'progress-marker';
+    m.style.top = `${15 + i * 15}%`;
+    document.body.appendChild(m);
+  });
+
+  const markers = document.querySelectorAll('.progress-marker');
+  window.addEventListener('scroll', () => {
+    markers.forEach((m, i) => {
+      m.classList.toggle('active', scrollProgress >= chapterPositions[i] - 0.05);
+    });
+  });
+
+  // Glitch effect
+  const glitchLine = document.createElement('div');
+  glitchLine.className = 'glitch-line';
+  document.body.appendChild(glitchLine);
+
+  function randomGlitch(){
+    if(Math.random() > 0.97 && started){
+      glitchLine.style.top = Math.random() * 100 + '%';
+      glitchLine.style.opacity = '1';
+      glitchLine.style.background = `rgba(120,200,255,${Math.random()*0.3})`;
+      setTimeout(() => glitchLine.style.opacity = '0', 50 + Math.random()*100);
+    }
+  }
+
+  // Animation loop
+  let time = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    time += 0.001;
+
+    if(started){
+      camera.position.z = 100 - scrollProgress * 800;
+      camera.position.x = Math.sin(scrollProgress * Math.PI * 2) * 30;
+      camera.position.y = Math.cos(scrollProgress * Math.PI * 3) * 15;
+      camera.rotation.z = Math.sin(time) * 0.02;
+
+      stars.rotation.y = time * 0.05;
+      stars.rotation.x = time * 0.02;
+
+      nebulaGroup.children.forEach((n, i) => {
+        n.rotation.y = time * (0.1 + i * 0.02);
+        n.material.opacity = 0.03 + Math.sin(time * 2 + i) * 0.02;
+      });
+
+      randomGlitch();
+      updateAudio();
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // --- AUDIO: Ambient sci-fi ---
+  function initAudio(){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  const soundToggle = document.getElementById('sound-toggle');
+  let droneOsc, droneGain, lfoOsc, lfoGain;
+
+  soundToggle.addEventListener('click', () => {
+    if(!audioCtx) initAudio();
+    soundEnabled = !soundEnabled;
+    soundToggle.textContent = `Sound: ${soundEnabled ? 'On' : 'Off'}`;
+
+    if(soundEnabled){
+      droneOsc = audioCtx.createOscillator();
+      droneGain = audioCtx.createGain();
+      droneOsc.type = 'sine';
+      droneOsc.frequency.value = 55;
+      droneGain.gain.value = 0;
+      droneOsc.connect(droneGain);
+
+      lfoOsc = audioCtx.createOscillator();
+      lfoGain = audioCtx.createGain();
+      lfoOsc.frequency.value = 0.15;
+      lfoGain.gain.value = 10;
+      lfoOsc.connect(lfoGain);
+      lfoGain.connect(droneOsc.frequency);
+      lfoOsc.start();
+
+      const reverb = audioCtx.createConvolver();
+      const len = audioCtx.sampleRate * 4;
+      const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+      for(let ch = 0; ch < 2; ch++){
+        const data = impulse.getChannelData(ch);
+        for(let i = 0; i < len; i++){
+          data[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2);
+        }
+      }
+      reverb.buffer = impulse;
+      droneGain.connect(reverb);
+      reverb.connect(audioCtx.destination);
+      droneGain.connect(audioCtx.destination);
+
+      droneOsc.start();
+      droneGain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 2);
+
+      const pad = audioCtx.createOscillator();
+      const padGain = audioCtx.createGain();
+      pad.type = 'triangle';
+      pad.frequency.value = 110;
+      padGain.gain.value = 0;
+      pad.connect(padGain);
+      padGain.connect(reverb);
+      pad.start();
+      padGain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 3);
+    } else {
+      if(droneGain){
+        droneGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+        setTimeout(() => { try{ droneOsc.stop(); }catch(e){} }, 1500);
+      }
+    }
+  });
+
+  function updateAudio(){
+    if(!soundEnabled || !droneOsc) return;
+    droneOsc.frequency.value = 55 + scrollProgress * 60;
+  }
+})();
+</script>
+</body>
+</html>

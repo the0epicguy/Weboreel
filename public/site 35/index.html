@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cosmic Piano</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --white-key: #ffffff;
+            --black-key: #1e293b;
+            --white-key-active: #e2e8f0;
+            --black-key-active: #0f172a;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .grid-floor {
+            position: absolute;
+            bottom: -50%; left: -50%; width: 200%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.4) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(600px) rotateX(70deg);
+            animation: gridMove 3s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 60px; }
+        }
+
+        /* Canvas for Visualizer */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* Let clicks pass through to UI/Piano */
+        }
+
+        /* UI Panel (Glassmorphism) */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 span {
+            color: var(--primary);
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        select, button {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        /* 3D Piano Container */
+        .piano-wrapper {
+            position: absolute;
+            bottom: 30px;
+            width: 100vw;
+            overflow-x: auto; /* Allow scrolling to see all 88 keys */
+            overflow-y: hidden;
+            display: flex;
+            justify-content: center; /* Center if it fits, else scroll */
+            perspective: 1000px; /* Enhanced 3D depth */
+            z-index: 5;
+            padding-bottom: 100px; /* Extra padding for floating */
+            padding-top: 50px;
+        }
+
+        .piano-container {
+            display: flex;
+            transform: rotateX(35deg) translateZ(0px); /* Angle the piano more */
+            transform-style: preserve-3d;
+            box-shadow: 0px 100px 150px rgba(56, 189, 248, 0.3), 0px 50px 50px rgba(0,0,0,1);
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 10px 10px 20px 20px;
+            border-bottom: 30px solid #050505;
+            position: relative;
+            transform-origin: center;
+            animation: floatPiano 6s ease-in-out infinite;
+        }
+
+        @keyframes floatPiano {
+            0% { transform: rotateX(35deg) translateY(0px) rotateY(-1deg); }
+            50% { transform: rotateX(30deg) translateY(-20px) rotateY(1deg); }
+            100% { transform: rotateX(35deg) translateY(0px) rotateY(-1deg); }
+        }
+
+        /* Add a glowing strip at the back of the piano */
+        .piano-container::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 -5px 20px var(--primary);
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Keys */
+        .key {
+            position: relative;
+            cursor: pointer;
+            border-radius: 0 0 5px 5px;
+            transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.15s;
+            transform-style: preserve-3d;
+            transform-origin: top center;
+        }
+
+        .white {
+            width: 40px;
+            height: 200px;
+            background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+            border: 1px solid #ccc;
+            border-top: none;
+            z-index: 1;
+            margin: 0 2px;
+            transform: translateZ(10px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.7);
+        }
+        
+        .white::after {
+            content: ''; position: absolute;
+            bottom: -15px; left: -1px; width: calc(100% + 2px); height: 15px;
+            background: #ccc;
+            transform-origin: top; transform: rotateX(-90deg);
+            border-radius: 0 0 5px 5px; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2);
+        }
+
+        .black {
+            width: 26px;
+            height: 130px;
+            background: linear-gradient(to bottom, #444 0%, #111 100%);
+            border: 1px solid #000;
+            z-index: 2;
+            margin: 0 -15px;
+            transform: translateZ(25px); /* Raised above white keys */
+            box-shadow: 0 15px 20px rgba(0,0,0,0.9);
+        }
+        
+        .black::after {
+            content: ''; position: absolute;
+            bottom: -12px; left: -1px; width: calc(100% + 2px); height: 12px;
+            background: #222;
+            transform-origin: top; transform: rotateX(-90deg);
+            border-radius: 0 0 3px 3px;
+        }
+
+        /* Pressed States */
+        .white.active {
+            transform: rotateX(10deg) translateZ(-5px);
+            background: linear-gradient(to bottom, #fff 0%, #d0d0d0 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .black.active {
+            transform: rotateX(12deg) translateZ(5px);
+            background: linear-gradient(to bottom, #222 0%, #000 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.9);
+        }
+
+        /* Learning Mode Highlight */
+        .white.highlight {
+            background: linear-gradient(to bottom, #fff 0%, var(--primary) 100%);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .black.highlight {
+            background: linear-gradient(to bottom, #333 0%, var(--secondary) 100%);
+            box-shadow: 0 0 15px var(--secondary);
+        }
+
+        /* Custom Scrollbar for Wrapper */
+        .piano-wrapper::-webkit-scrollbar {
+            height: 12px;
+        }
+        .piano-wrapper::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        .piano-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+        .piano-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        #start-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #start-btn {
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border-radius: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        #notification {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 20;
+            text-shadow: 0 0 5px var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-floor"></div>
+
+    <div id="start-overlay">
+        <button id="start-btn">Click to Enable Audio & Enter 3D Piano</button>
+    </div>
+
+    <!-- Background Canvas for Falling Notes & Particles -->
+    <canvas id="visualizer"></canvas>
+
+    <div id="ui-panel">
+        <h1>Cosmic <span>Piano</span></h1>
+        <div class="controls">
+            <select id="song-select">
+                <option value="none">Free Play Mode</option>
+                <option value="twinkle">Twinkle Twinkle</option>
+                <option value="ode">Ode to Joy</option>
+                <option value="scale">C Major Scale</option>
+            </select>
+            <button id="play-btn">Start Lesson</button>
+        </div>
+        <div style="font-size: 0.8rem; color: #aaa;">
+            Use mouse/touch or physical keyboard (A-L, Z-M, etc.) to play!
+        </div>
+    </div>
+
+    <div id="notification">Lesson Complete!</div>
+
+    <div class="piano-wrapper" id="piano-wrapper">
+        <div class="piano-container" id="piano-container">
+            <!-- Keys generated by JS -->
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Audio Engine ---
+        let audioCtx;
+        
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            document.getElementById('start-overlay').style.display = 'none';
+            // Scroll to middle of piano on start
+            const wrapper = document.getElementById('piano-wrapper');
+            wrapper.scrollLeft = (wrapper.scrollWidth - wrapper.clientWidth) / 2;
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            initAudio();
+        });
+
+        const activeNotes = {};
+
+        function playSound(freq, id) {
+            if (!audioCtx) return;
+            
+            // If already playing this note, stop it to restart (or handle polyphony better later)
+            if (activeNotes[id]) {
+                stopSound(id);
+            }
+
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Layered oscillators for a richer "Synth Piano" sound
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            // Soft detune
+            osc2.detune.setValueAtTime(5, audioCtx.currentTime);
+
+            // ADSR Envelope
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.01); // Attack
+            gainNode.gain.exponentialRampToValueAtTime(0.1, audioCtx.currentTime + 1.5); // Decay
+
+            osc1.connect(gainNode);
+            osc2.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc1.start();
+            osc2.start();
+
+            activeNotes[id] = { osc1, osc2, gainNode };
+        }
+
+        function stopSound(id) {
+            if (!audioCtx || !activeNotes[id]) return;
+            const { osc1, osc2, gainNode } = activeNotes[id];
+            
+            // Release phase
+            gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+            osc1.stop(audioCtx.currentTime + 0.5);
+            osc2.stop(audioCtx.currentTime + 0.5);
+            
+            delete activeNotes[id];
+        }
+
+
+        // --- 2. Piano Generation ---
+        // Standard piano keys from A0 (27.5Hz) to C8 (4186Hz)
+        // Note: 88 keys. Formula: freq = 2^((n-49)/12) * 440, where A4 is n=49.
+        const notesArray = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+        const pianoContainer = document.getElementById('piano-container');
+        
+        let startKeyIndex = 1; // n=1 is A0
+        const totalKeys = 88;
+        
+        // Map DOM elements for easy access
+        const keyElements = {}; 
+        // Mapping physical keyboard to middle octaves for easy playing
+        const keyboardMap = {
+            'z': 40, 's': 41, 'x': 42, 'd': 43, 'c': 44, 'v': 45, 'g': 46, 'b': 47, 'h': 48, 'n': 49, 'j': 50, 'm': 51,
+            ',': 52, 'l': 53, '.': 54, ';': 55, '/': 56, // C4 to E5 row
+            'q': 52, '2': 53, 'w': 54, '3': 55, 'e': 56, 'r': 57, '5': 58, 't': 59, '6': 60, 'y': 61, '7': 62, 'u': 63, 'i': 64, '9': 65, 'o': 66, '0': 67, 'p': 68, '[': 69, '=': 70, ']': 71
+        };
+
+        for (let i = 1; i <= totalKeys; i++) {
+            // Note indexing: A0 is i=1, A#0 is i=2, B0 is i=3, C1 is i=4...
+            const noteIndex = (i - 1) % 12;
+            const noteName = notesArray[noteIndex];
+            const octave = Math.floor((i + 8) / 12);
+            
+            const isBlack = noteName.includes('#');
+            const freq = Math.pow(2, (i - 49) / 12) * 440;
+            
+            const keyDiv = document.createElement('div');
+            keyDiv.className = `key ${isBlack ? 'black' : 'white'}`;
+            keyDiv.dataset.id = i;
+            keyDiv.dataset.note = noteName + octave;
+            
+            // Mouse & Touch Events
+            const pressKey = (e) => {
+                if(e) e.preventDefault();
+                if(keyDiv.classList.contains('active')) return;
+                keyDiv.classList.add('active');
+                playSound(freq, i);
+                createClickParticles(keyDiv);
+            };
+            const releaseKey = (e) => {
+                if(e) e.preventDefault();
+                if(!keyDiv.classList.contains('active')) return;
+                keyDiv.classList.remove('active');
+                stopSound(i);
+            };
+
+            keyDiv.addEventListener('mousedown', pressKey);
+            keyDiv.addEventListener('mouseup', releaseKey);
+            keyDiv.addEventListener('mouseleave', releaseKey);
+            keyDiv.addEventListener('touchstart', pressKey);
+            keyDiv.addEventListener('touchend', releaseKey);
+
+            keyElements[i] = { div: keyDiv, freq: freq, name: noteName+octave, pressKey, releaseKey };
+            pianoContainer.appendChild(keyDiv);
+        }
+
+        // Keyboard events
+        const physicalKeysPressed = {};
+        window.addEventListener('keydown', (e) => {
+            if(physicalKeysPressed[e.key] || !audioCtx) return;
+            const keyIndex = keyboardMap[e.key.toLowerCase()];
+            if (keyIndex && keyElements[keyIndex]) {
+                physicalKeysPressed[e.key] = true;
+                keyElements[keyIndex].pressKey();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            const keyIndex = keyboardMap[e.key.toLowerCase()];
+            if (keyIndex && keyElements[keyIndex]) {
+                physicalKeysPressed[e.key] = false;
+                keyElements[keyIndex].releaseKey();
+            }
+        });
+
+
+        // --- 3. Synthesia Visualizer & Learning Mode ---
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        
+        let canvasWidth, canvasHeight;
+        function resize() {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Particles System
+        let particles = [];
+        const noteChars = ['♪', '♫', '♬'];
+        function createClickParticles(keyDiv) {
+            const rect = keyDiv.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + 20;
+
+            const color = keyDiv.classList.contains('black') ? '#818cf8' : '#38bdf8';
+            for (let i = 0; i < 6; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 1) * 6 - 3,
+                    life: 1,
+                    color: color,
+                    char: noteChars[Math.floor(Math.random() * noteChars.length)],
+                    rot: Math.random() * Math.PI * 2,
+                    vrot: (Math.random() - 0.5) * 0.2
+                });
+            }
+        }
+
+        // Songs Database (Note ID, StartTime(ms), Duration(ms))
+        // Middle C (C4) is key index 40.
+        // Scale: C4(40), D4(42), E4(44), F4(45), G4(47), A4(49), B4(51), C5(52)
+        const songs = {
+            scale: [
+                { id: 40, start: 0, duration: 400 },
+                { id: 42, start: 500, duration: 400 },
+                { id: 44, start: 1000, duration: 400 },
+                { id: 45, start: 1500, duration: 400 },
+                { id: 47, start: 2000, duration: 400 },
+                { id: 49, start: 2500, duration: 400 },
+                { id: 51, start: 3000, duration: 400 },
+                { id: 52, start: 3500, duration: 800 },
+            ],
+            twinkle: [
+                { id: 40, start: 0, duration: 400 }, { id: 40, start: 500, duration: 400 },
+                { id: 47, start: 1000, duration: 400 }, { id: 47, start: 1500, duration: 400 },
+                { id: 49, start: 2000, duration: 400 }, { id: 49, start: 2500, duration: 400 },
+                { id: 47, start: 3000, duration: 800 },
+                
+                { id: 45, start: 4000, duration: 400 }, { id: 45, start: 4500, duration: 400 },
+                { id: 44, start: 5000, duration: 400 }, { id: 44, start: 5500, duration: 400 },
+                { id: 42, start: 6000, duration: 400 }, { id: 42, start: 6500, duration: 400 },
+                { id: 40, start: 7000, duration: 800 }
+            ],
+            ode: [
+                { id: 44, start: 0, duration: 400 }, { id: 44, start: 500, duration: 400 },
+                { id: 45, start: 1000, duration: 400 }, { id: 47, start: 1500, duration: 400 },
+                { id: 47, start: 2000, duration: 400 }, { id: 45, start: 2500, duration: 400 },
+                { id: 44, start: 3000, duration: 400 }, { id: 42, start: 3500, duration: 400 },
+                { id: 40, start: 4000, duration: 400 }, { id: 40, start: 4500, duration: 400 },
+                { id: 42, start: 5000, duration: 400 }, { id: 44, start: 5500, duration: 400 },
+                { id: 44, start: 6000, duration: 600 }, { id: 42, start: 6600, duration: 200 },
+                { id: 42, start: 6800, duration: 800 }
+            ]
+        };
+
+        let currentSong = null;
+        let songStartTime = 0;
+        let isPlaying = false;
+        let noteSpeed = 200; // pixels per second
+        let lookaheadTime = 3000; // 3 seconds ahead
+
+        document.getElementById('play-btn').addEventListener('click', () => {
+            const songName = document.getElementById('song-select').value;
+            if (songName === 'none' || !songs[songName]) return;
+            
+            // Scroll wrapper to center around middle C (key 40)
+            const wrapper = document.getElementById('piano-wrapper');
+            const middleCRect = keyElements[40].div.getBoundingClientRect();
+            wrapper.scrollTo({
+                left: wrapper.scrollLeft + middleCRect.left - window.innerWidth/2,
+                behavior: 'smooth'
+            });
+
+            currentSong = JSON.parse(JSON.stringify(songs[songName])); // deep copy
+            songStartTime = performance.now() + lookaheadTime; // start after delay so notes can fall
+            isPlaying = true;
+            
+            // Center the piano to middle C for viewing
+            
+        });
+
+        // Loop
+        function animate(time) {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Draw particles (Animated Music Notes)
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rot += p.vrot;
+                p.vy += 0.05; // lower gravity for floatier notes
+                p.life -= 0.015;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.font = '24px Arial';
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot);
+                ctx.fillText(p.char, -12, 12);
+                ctx.restore();
+            }
+            ctx.globalAlpha = 1.0;
+
+            // Handle Learning Mode Notes
+            if (isPlaying && currentSong) {
+                const currentTimeElapsed = time - songStartTime;
+                let allDone = true;
+
+                for (let i = 0; i < currentSong.length; i++) {
+                    const noteEvent = currentSong[i];
+                    if (noteEvent.played && noteEvent.released) continue;
+                    allDone = false;
+
+                    const timeUntilStart = noteEvent.start - currentTimeElapsed;
+                    const timeUntilEnd = (noteEvent.start + noteEvent.duration) - currentTimeElapsed;
+
+                    const keyEl = keyElements[noteEvent.id];
+                    if(!keyEl) continue;
+
+                    const rect = keyEl.div.getBoundingClientRect();
+                    // rect gets position relative to viewport, which is perfect since canvas is viewport sized
+                    
+                    // Draw falling note block
+                    if (timeUntilStart < lookaheadTime && timeUntilEnd > 0) {
+                        const yStart = canvasHeight - 100 - (timeUntilStart / 1000) * noteSpeed;
+                        const blockHeight = (noteEvent.duration / 1000) * noteSpeed;
+                        
+                        ctx.fillStyle = keyEl.div.classList.contains('black') ? 'rgba(129, 140, 248, 0.8)' : 'rgba(56, 189, 248, 0.8)';
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = ctx.fillStyle;
+                        // Match width of the corresponding key
+                        ctx.fillRect(rect.left, yStart - blockHeight, rect.width, blockHeight);
+                        ctx.shadowBlur = 0;
+                    }
+
+                    // Play note
+                    if (timeUntilStart <= 0 && !noteEvent.played) {
+                        noteEvent.played = true;
+                        keyEl.pressKey();
+                        keyEl.div.classList.add('highlight');
+                    }
+
+                    // Release note
+                    if (timeUntilEnd <= 0 && !noteEvent.released) {
+                        noteEvent.released = true;
+                        keyEl.releaseKey();
+                        keyEl.div.classList.remove('highlight');
+                    }
+                }
+
+                if (allDone && currentTimeElapsed > currentSong[currentSong.length-1].start + currentSong[currentSong.length-1].duration + 1000) {
+                    isPlaying = false;
+                    const notif = document.getElementById('notification');
+                    notif.style.opacity = 1;
+                    setTimeout(() => notif.style.opacity = 0, 3000);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+        
+        requestAnimationFrame(animate);
+
+    </script>
+</body>
+</html>

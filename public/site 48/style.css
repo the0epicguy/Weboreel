@@ -1,0 +1,99 @@
+:root {
+    /* Neutral / Architectural Palette */
+    --concrete: #e6e6e6;
+    --steel: #8a8d91;
+    --charcoal: #222222;
+    --black: #000000;
+    --white: #ffffff;
+    
+    --font-head: 'Inter', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--concrete); color: var(--charcoal); font-family: var(--font-head); overflow-x: hidden; }
+
+/* Custom Cursor */
+.arch-cursor {
+    position: fixed; width: 20px; height: 20px; border: 1px solid var(--charcoal); border-radius: 50%;
+    pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background 0.3s;
+}
+.arch-cursor.hover { width: 60px; height: 60px; background: rgba(34, 34, 34, 0.1); border-color: transparent; mix-blend-mode: multiply; }
+/* Drag state for horizontal scroll */
+.arch-cursor.drag { width: 40px; height: 40px; background: var(--charcoal); }
+.arch-cursor.drag::after { content: '< >'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--white); font-size: 10px; font-weight: bold; font-family: var(--font-head); }
+
+/* Nav */
+.aura-nav {
+    position: fixed; top: 0; width: 100%; padding: 30px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100;
+    mix-blend-mode: difference; color: var(--white);
+}
+.logo { font-weight: 500; font-size: 1.5rem; letter-spacing: 2px; }
+.nav-right a { color: var(--white); text-decoration: none; font-size: 0.9rem; font-weight: 400; margin-left: 40px; transition: opacity 0.3s; }
+.nav-right a:hover { opacity: 0.5; }
+
+/* Hero */
+.arch-hero { height: 100vh; position: relative; background: var(--white); }
+#arch-canvas { position: absolute; inset: 0; z-index: 1; opacity: 0.8; }
+.hero-overlay { position: absolute; top: 50%; left: 5%; transform: translateY(-50%); z-index: 2; pointer-events: none; }
+.hero-overlay h1 { font-size: 5rem; font-weight: 300; line-height: 1.1; margin-bottom: 20px; letter-spacing: -2px; }
+.hero-overlay p { font-size: 1.2rem; color: var(--steel); font-weight: 300; max-width: 500px; }
+.scroll-ind { position: absolute; bottom: 40px; left: 5%; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.scroll-ind span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
+.scroll-ind .bar { width: 1px; height: 50px; background: var(--charcoal); animation: grow 2s infinite; transform-origin: top; }
+@keyframes grow { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* Horizontal Projects */
+.projects-section { background: var(--black); color: var(--white); padding: 100px 0; overflow: hidden; /* For lenis or native horizontal scroll mapping */ }
+.horizontal-scroll-container { width: 100%; height: 80vh; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 0 5%; cursor: grab; }
+.horizontal-scroll-container::-webkit-scrollbar { display: none; }
+.horizontal-scroll-container:active { cursor: grabbing; }
+
+.horizontal-track { display: flex; gap: 100px; padding-right: 10vw; height: 60vh; }
+.intro-panel { width: 400px; display: flex; flex-direction: column; justify-content: center; flex-shrink: 0; }
+.intro-panel h2 { font-size: 4rem; font-weight: 300; line-height: 1; margin-bottom: 20px; }
+.intro-panel p { color: var(--steel); font-family: var(--font-serif); font-size: 1.5rem; font-style: italic; }
+
+.project-panel { position: relative; width: 60vw; height: 100%; flex-shrink: 0; overflow: hidden; }
+.project-panel img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: filter 0.5s, transform 0.5s; }
+.project-panel:hover img { filter: grayscale(20%); transform: scale(1.02); }
+.p-info { position: absolute; bottom: 30px; left: 30px; mix-blend-mode: difference; }
+.p-info h3 { font-size: 2.5rem; font-weight: 400; margin-bottom: 5px; }
+.p-info span { font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; }
+
+/* Philosophy */
+.philosophy-section { padding: 150px 5%; background: var(--concrete); }
+.phil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1400px; margin: 0 auto; }
+.phil-text h2 { font-size: 3rem; font-weight: 300; margin-bottom: 50px; }
+
+.accordion { border-top: 1px solid var(--charcoal); }
+.acc-item { border-bottom: 1px solid var(--charcoal); }
+.acc-head { padding: 30px 0; font-size: 1.5rem; font-weight: 400; display: flex; justify-content: space-between; transition: color 0.3s; }
+.acc-head:hover { color: var(--steel); }
+.acc-body { padding: 0 0 30px 0; font-size: 1.1rem; line-height: 1.6; color: var(--steel); display: none; }
+.acc-item.active .acc-body { display: block; }
+.acc-item.active .acc-head span { transform: rotate(45deg); display: inline-block; transition: transform 0.3s; }
+
+.phil-img { height: 600px; }
+.phil-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); }
+
+/* Footer */
+.aura-footer { padding: 100px 5% 50px; background: var(--white); }
+.f-headline { margin-bottom: 100px; text-align: center; }
+.f-headline h2 { font-size: 5rem; font-weight: 300; letter-spacing: -2px; margin-bottom: 30px; }
+.inquiry-btn { display: inline-block; font-size: 1.5rem; color: var(--charcoal); text-decoration: none; border-bottom: 2px solid var(--charcoal); padding-bottom: 5px; transition: color 0.3s, border-color 0.3s; }
+.inquiry-btn:hover { color: var(--steel); border-color: var(--steel); }
+
+.f-meta { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--concrete); padding-top: 50px; font-size: 0.9rem; }
+.f-meta strong { display: block; margin-bottom: 15px; font-weight: 500; }
+.f-meta a { display: block; color: var(--charcoal); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+.f-meta a:hover { color: var(--steel); }
+.f-meta p { color: var(--steel); line-height: 1.6; }
+.col.right { text-align: right; }
+
+@media (max-width: 900px) {
+    .phil-grid { grid-template-columns: 1fr; }
+    .project-panel { width: 85vw; }
+    .hero-overlay h1 { font-size: 3.5rem; }
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELVET | Automne/Hiver</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- GSAP Core & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Custom Editorial Cursor -->
+    <div class="v-cursor">
+        <span class="v-txt">VIEW</span>
+    </div>
+
+    <!-- Minimalist Nav -->
+    <nav class="velvet-nav">
+        <div class="nav-left">
+            <a href="#">Shop</a>
+            <a href="#">Collections</a>
+        </div>
+        <div class="logo">VELVET</div>
+        <div class="nav-right">
+            <a href="#">Search</a>
+            <a href="#">Cart (0)</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="v-hero">
+        <div class="hero-image-wrap" data-speed="0.8">
+            <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1200&q=80" alt="Fashion Editorial">
+        </div>
+        <div class="hero-text">
+            <h1>L'Élégance <br><span>Silencieuse</span></h1>
+            <p>Automne / Hiver 2026 Collection</p>
+        </div>
+    </header>
+
+    <!-- Editorial Intro -->
+    <section class="v-intro">
+        <div class="intro-content">
+            <h2>A dialogue between structured tailoring and fluid silk overlays. Designed for the modern sophisticate.</h2>
+            <a href="#" class="btn-editorial">Explore Collection</a>
+        </div>
+    </section>
+
+    <!-- Parallax Image Grid -->
+    <section class="v-gallery">
+        <div class="g-wrapper">
+            <!-- Left Column -->
+            <div class="g-col g-left">
+                <div class="img-block block-sm parallax" data-y="50">
+                    <img src="https://images.unsplash.com/photo-1550614000-4b95d4ebf32b?w=800&q=80" alt="Look 1">
+                    <span class="caption">Look 01. The Trench</span>
+                </div>
+                <div class="img-block block-lg parallax" data-y="-30">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80" alt="Look 2">
+                    <span class="caption">Look 02. Silk Blouse</span>
+                </div>
+            </div>
+            <!-- Right Column -->
+            <div class="g-col g-right">
+                <div class="img-block block-lg parallax" data-y="-80">
+                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80" alt="Look 3">
+                    <span class="caption">Look 03. Tailored Suit</span>
+                </div>
+                <div class="img-block block-sm parallax" data-y="20">
+                    <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80" alt="Look 4">
+                    <span class="caption">Look 04. Evening Gown</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Details/Video Section -->
+    <section class="v-details">
+        <div class="d-text">
+            <h2>The Craft</h2>
+            <p>Sourced from heritage mills in Italy, our textiles represent the pinnacle of ethical craftsmanship. Every seam is considered, every silhouette, refined.</p>
+        </div>
+        <div class="d-image">
+            <img src="https://images.unsplash.com/photo-1434389678224-b15392efbd29?w=1000&q=80" alt="Detail">
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="v-footer">
+        <div class="f-form">
+            <h3>Join the Maison</h3>
+            <div class="input-wrap">
+                <input type="email" placeholder="Email Address">
+                <button>→</button>
+            </div>
+        </div>
+        <div class="f-links">
+            <div class="col">
+                <h4>Customer Care</h4>
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="col">
+                <h4>Legal</h4>
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+            </div>
+            <div class="col socials">
+                <h4>Social</h4>
+                <a href="#">Instagram</a>
+                <a href="#">Pinterest</a>
+                <a href="#">Tiktok</a>
+            </div>
+        </div>
+        <div class="copy">
+            &copy; 2026 VELVET. PARIS.
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

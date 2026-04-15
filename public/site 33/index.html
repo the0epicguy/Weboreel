@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Stickman Action Mobile</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@700&display=swap');
+
+        :root {
+            --bg: #1c1c24;
+            --ground: #2d3436;
+            --text: #fff;
+            --accent: #ff4757;
+            --health-p: #2ed573;
+            --health-e: #ff4757;
+            --ui-bg: rgba(0,0,0,0.4);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            overflow: hidden;
+            font-family: 'Oswald', sans-serif;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .top-hud {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .player-profile {
+            display: flex;
+            flex-direction: column;
+            background: var(--ui-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--health-p);
+            min-width: 200px;
+        }
+
+        .hp-bar-bg {
+            width: 100%; height: 15px;
+            background: #111;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+        #hp-fill {
+            height: 100%; width: 100%;
+            background: var(--health-p);
+            transition: width 0.1s linear;
+        }
+
+        .weapon-text {
+            color: #dcdde1; font-size: 0.9rem; text-transform: uppercase;
+        }
+        #w-name { color: #fbc531; font-weight: bold; font-size: 1.1rem;}
+
+        .level-profile {
+            text-align: right;
+            background: var(--ui-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-right: 5px solid var(--accent);
+        }
+
+        #lvl-text {
+            font-family: 'Bangers', cursive;
+            font-size: 2.5rem; color: #fff;
+            text-shadow: 2px 2px 0 #000; line-height: 1; margin: 0;
+        }
+        #kill-text { color: #ccc; font-size: 1rem; }
+
+        .combo-counter {
+            position: absolute;
+            top: 25%;
+            right: 15%;
+            font-family: 'Bangers', cursive;
+            font-size: 4rem;
+            color: #fbc531;
+            text-shadow: 0 0 10px #ff9f43, 3px 3px 0 #000;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .combo-counter.show {
+            opacity: 1; transform: scale(1) rotate(-5deg);
+        }
+
+        /* --- MOBILE CONTROLS OVERLAY --- */
+        #touch-controls {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 50%;
+            z-index: 20;
+            display: flex;
+            pointer-events: none; /* Container is passthrough, children are active */
+        }
+
+        #joystick-zone {
+            flex: 1; height: 100%; pointer-events: auto;
+            position: relative;
+        }
+
+        #action-zone {
+            flex: 1; height: 100%; pointer-events: auto;
+            position: relative;
+        }
+
+        /* Visual Joystick */
+        #joystick-base {
+            position: absolute;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            display: none; /* Show only on touch */
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #joystick-knob {
+            position: absolute;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Action Buttons */
+        .btn-game {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: white; font-family: 'Bangers', cursive;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 2px #000;
+        }
+        .btn-game:active { background: rgba(255,255,255,0.4); transform: scale(0.95); }
+
+        #btn-atk {
+            width: 90px; height: 90px; font-size: 2.2rem;
+            bottom: 30px; right: 30px;
+            background: rgba(255, 71, 87, 0.2);
+            border-color: rgba(255, 71, 87, 0.6);
+        }
+        #btn-jump {
+            width: 70px; height: 70px; font-size: 1.5rem;
+            bottom: 130px; right: 40px;
+        }
+        #btn-dash {
+            width: 70px; height: 70px; font-size: 1.3rem;
+            bottom: 40px; right: 130px;
+        }
+
+        /* Hide touch controls on very wide desktop screens automatically unless testing */
+        @media (min-width: 1024px) {
+            #joystick-zone, #action-zone { opacity: 0.5; } /* Still functional for testing resizing, but faded */
+        }
+
+        /* --- SCREENS --- */
+        #splash {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.85); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #splash.active { opacity: 1; pointer-events: auto; }
+
+        .s-title { font-family: 'Bangers'; font-size: 5rem; color:#fff; text-shadow: 4px 4px 0 var(--accent); text-align: center; margin-bottom: 20px;}
+        .s-sub { font-size: 1.2rem; color: #ccc; margin-bottom: 30px; text-align: center;}
+        .s-btn {
+            background: var(--accent); color: white; border: none; padding: 15px 50px;
+            font-size: 2rem; font-family: 'Bangers'; border-radius: 5px;
+            box-shadow: 0 6px 0 #c23616; cursor: pointer; text-transform: uppercase;
+        }
+        .s-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #c23616; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI Overlay (Scores, Health) -->
+    <div id="ui-layer">
+        <div class="top-hud">
+            <div class="player-profile">
+                <div class="hp-bar-bg"><div id="hp-fill"></div></div>
+                <div class="weapon-text">WPN: <span id="w-name">FISTS</span></div>
+            </div>
+            <div class="level-profile">
+                <h1 id="lvl-text">WAVE 1</h1>
+                <div id="kill-text">Targets: 3</div>
+            </div>
+        </div>
+        <div class="combo-counter" id="combo-display">2 HITS!</div>
+    </div>
+
+    <!-- Mobile Virtual Controls -->
+    <div id="touch-controls">
+        <div id="joystick-zone">
+            <div id="joystick-base"><div id="joystick-knob"></div></div>
+        </div>
+        <div id="action-zone">
+            <div class="btn-game" id="btn-atk">ATK</div>
+            <div class="btn-game" id="btn-jump">JUMP</div>
+            <div class="btn-game" id="btn-dash">DASH</div>
+        </div>
+    </div>
+
+    <!-- Splash Screen -->
+    <div id="splash" class="active">
+        <div class="s-title" id="sp-title">STICKMAN ZERO</div>
+        <div class="s-sub" id="sp-sub">Swipe left side to Move. Tap right side to fight.<br>Keyboard: WASD to Move, SPACE to Attack, SHIFT to Dash</div>
+        <button class="s-btn" id="sp-btn">ENTER ARENA</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height, groundY;
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            groundY = height - Math.max(100, height * 0.15); // Adjust ground based on screen height
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Constants
+        const GRAVITY = 0.8;
+        const FRICTION = 0.85;
+
+        // Weapons Array (Playstore feel: crazy weapons)
+        const WEAPONS = [
+            { name: 'Fists', color: 'transparent', range: 45, dmg: 10, speed: 200, kb: 5, len: 0, glow: false },
+            { name: 'Nunchucks', color: '#ffb142', range: 60, dmg: 15, speed: 180, kb: 4, len: 35, glow: false },
+            { name: 'Spiked Bat', color: '#cc8e35', range: 75, dmg: 25, speed: 300, kb: 12, len: 55, glow: false },
+            { name: 'Dual Blades', color: '#d1ccc0', range: 65, dmg: 35, speed: 150, kb: 5, len: 45, glow: false },
+            { name: 'Katana', color: '#f1f2f6', range: 85, dmg: 50, speed: 220, kb: 8, len: 70, glow: true },
+            { name: 'Executioner Axe', color: '#576574', range: 90, dmg: 90, speed: 500, kb: 18, len: 75, glow: false },
+            { name: 'Plasma Sword', color: '#00d2d3', range: 110, dmg: 150, speed: 180, kb: 10, len: 85, glow: true }
+        ];
+
+        // Engine State
+        let lastTime = 0;
+        let gameState = 'MENU';
+        let level = 1;
+        let killsRequired = 0;
+        let currentKills = 0;
+        let shakeTime = 0;
+        let shakeMag = 0;
+        
+        let comboCount = 0;
+        let comboTimer = 0;
+        const comboDisplay = document.getElementById('combo-display');
+
+        let particles = [];
+        let texts = [];
+        let hitFx = []; // slash arcs, explosions
+
+        // Control State
+        const INP = { nx: 0, jump: false, atk: false, dash: false };
+
+        // Virtual Joystick Logic
+        const joyZone = document.getElementById('joystick-zone');
+        const joyBase = document.getElementById('joystick-base');
+        const joyKnob = document.getElementById('joystick-knob');
+        let joyActive = false;
+        let joyCenter = {x: 0, y: 0};
+
+        joyZone.addEventListener('touchstart', e => {
+            e.preventDefault();
+            let touches = e.changedTouches;
+            for(let i=0; i<touches.length; i++) {
+                let t = touches[i];
+                joyActive = true;
+                joyCenter = { x: t.clientX, y: t.clientY };
+                joyBase.style.display = 'block';
+                joyBase.style.left = joyCenter.x + 'px';
+                joyBase.style.top = joyCenter.y + 'px';
+                joyKnob.style.transform = `translate(-50%, -50%)`;
+                handleJoyMove(t.clientX, t.clientY);
+            }
+        }, {passive: false});
+
+        joyZone.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if(!joyActive) return;
+            for(let i=0; i<e.changedTouches.length; i++) {
+                handleJoyMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+            }
+        }, {passive: false});
+
+        function endJoy(e) {
+            e.preventDefault(); joyActive = false;
+            joyBase.style.display = 'none';
+            INP.nx = 0;
+        }
+        joyZone.addEventListener('touchend', endJoy);
+        joyZone.addEventListener('touchcancel', endJoy);
+
+        function handleJoyMove(cx, cy) {
+            let dx = cx - joyCenter.x;
+            let dy = cy - joyCenter.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            let maxR = 40; // max pixel distance for knob
+            
+            if(dist > maxR) {
+                let angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * maxR;
+                dy = Math.sin(angle) * maxR;
+            }
+            joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+            // Map to axis
+            INP.nx = (dist > 10) ? Math.sign(dx) : 0; 
+            // Optional: swipe up to jump on joystick? Let's leave jump to the dedicated button.
+        }
+
+        // Action Buttons Logic
+        function bindBtn(id, key) {
+            let el = document.getElementById(id);
+            el.addEventListener('touchstart', e => { e.preventDefault(); INP[key] = true; el.style.background = 'rgba(255,255,255,0.4)'; });
+            el.addEventListener('touchend', e => { e.preventDefault(); INP[key] = false; el.style.background = ''; });
+            // For desktop clicks on overlays
+            el.addEventListener('mousedown', e => { INP[key] = true; });
+            el.addEventListener('mouseup', e => { INP[key] = false; });
+        }
+        bindBtn('btn-atk', 'atk');
+        bindBtn('btn-jump', 'jump');
+        bindBtn('btn-dash', 'dash');
+
+        // Keyboard Logic
+        window.addEventListener('keydown', e => {
+            if(e.code === 'KeyD' || e.code === 'ArrowRight') INP.nx = 1;
+            if(e.code === 'KeyA' || e.code === 'ArrowLeft') INP.nx = -1;
+            if(e.code === 'KeyW' || e.code === 'ArrowUp') INP.jump = true;
+            if(e.code === 'Space') INP.atk = true;
+            if(e.code === 'ShiftLeft') INP.dash = true;
+        });
+        window.addEventListener('keyup', e => {
+            if(e.code === 'KeyD' || e.code === 'ArrowRight') INP.nx = 0;
+            if(e.code === 'KeyA' || e.code === 'ArrowLeft') INP.nx = 0;
+            if(e.code === 'KeyW' || e.code === 'ArrowUp') INP.jump = false;
+            if(e.code === 'Space') INP.atk = false;
+            if(e.code === 'ShiftLeft') INP.dash = false;
+        });
+
+        // Entities
+        class Fighter {
+            constructor(x, isPlayer) {
+                this.x = x;
+                this.y = groundY;
+                this.vx = 0; this.vy = 0;
+                this.isPlayer = isPlayer;
+                this.dir = isPlayer ? 1 : -1;
+                this.dead = false;
+
+                this.maxHp = isPlayer ? 300 : 50 + (level * 25);
+                this.hp = this.maxHp;
+                this.speed = isPlayer ? 8 : 2 + (level * 0.4);
+                
+                this.wIdx = 0; // Weapon index
+                
+                // State Timers
+                this.attackTimer = 0;
+                this.lastAttack = 0;
+                this.dashTimer = 0;
+                this.hitStun = 0;
+                
+                // Animation Params for Pivot-like rendering
+                this.animTime = 0;
+                this.sizeMult = isPlayer ? 1.0 : 0.95;
+                
+                // Colors
+                this.color = isPlayer ? '#ffffff' : '#ff4757';
+            }
+
+            getWpn() {
+                return WEAPONS[Math.min(this.wIdx, WEAPONS.length - 1)];
+            }
+
+            update(dt) {
+                if(this.dead) {
+                    this.vy += GRAVITY; this.y += this.vy; this.x += this.vx;
+                    if(this.y >= groundY) { this.y = groundY; this.vx *= 0.8; }
+                    return;
+                }
+
+                if(this.hitStun > 0) this.hitStun -= dt;
+                if(this.dashTimer > 0) this.dashTimer -= dt;
+
+                let wpn = this.getWpn();
+
+                // Applying movement
+                this.vy += GRAVITY;
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Floor
+                if(this.y >= groundY) {
+                    this.y = groundY; this.vy = 0;
+                    if(this.dashTimer <= 0) this.vx *= FRICTION;
+                }
+                
+                // Screen bounds
+                if(this.x < 30) this.x = 30;
+                if(this.x > width - 30) this.x = width - 30;
+
+                // AI Processing
+                if(!this.isPlayer && this.hitStun <= 0) {
+                    let dX = player.x - this.x;
+                    let dist = Math.abs(dX);
+                    if(dist > wpn.range - 10) {
+                        this.vx = Math.sign(dX) * this.speed;
+                        this.dir = Math.sign(dX);
+                    } else {
+                        this.vx *= FRICTION;
+                        this.dir = Math.sign(dX);
+                        if(Date.now() - this.lastAttack > wpn.speed + 600) {
+                            this.doAttack();
+                        }
+                    }
+                }
+
+                // Attack Processing
+                if(this.attackTimer > 0) {
+                    this.attackTimer -= dt;
+                    // Trigger hit at specific frame (mid-swing)
+                    if(this.attackTimer < wpn.speed * 0.5 && this.attackTimer + dt >= wpn.speed * 0.5) {
+                        checkHitbox(this);
+                        createSlash(this); // Visual fx
+                    }
+                }
+
+                // Animation clock
+                if(Math.abs(this.vx) > 1 && this.y >= groundY && this.hitStun <= 0) {
+                    this.animTime += Math.abs(this.vx) * dt * 0.002;
+                } else {
+                    this.animTime = 0;
+                }
+            }
+
+            doAttack() {
+                if(this.attackTimer > 0 || this.hitStun > 0 || this.dashTimer > 0) return;
+                let wpn = this.getWpn();
+                if(Date.now() - this.lastAttack < wpn.speed) return;
+
+                this.attackTimer = wpn.speed;
+                this.lastAttack = Date.now();
+                
+                // Little lunge forward
+                if(this.y >= groundY) this.vx = this.dir * 3;
+            }
+
+            doDash() {
+                if(this.dashTimer > 0 || this.hitStun > 0) return;
+                this.dashTimer = 300;
+                this.vx = this.dir * this.speed * 2.5; 
+                this.y -= 2; // small pop up
+                addFloatingText("DASH", this.x, this.y - 80, "#fff", 500, "1rem");
+            }
+
+            takeHit(dmg, kbForce, atkDir) {
+                if(this.dead) return;
+                this.hp -= dmg;
+                this.hitStun = 300; // 300ms stun
+                this.vx = atkDir * kbForce;
+                this.vy = -Math.max(4, kbForce/2); // pop up
+                
+                // Blood particles
+                spawnParticles(this.x, this.y-50, '#ff0033', Math.min(15, dmg/5));
+                addFloatingText(dmg, this.x, this.y-80, '#ff4757', 800, "2rem");
+
+                if(this.hp <= 0) {
+                    this.die();
+                }
+
+                if(!this.isPlayer) {
+                    addCombo();
+                    shakeScreen(kbForce * 1.5);
+                } else {
+                    updatePlayerUI();
+                    shakeScreen(15); // Big shake if player hit
+                    comboCount = 0; // Reset combo
+                }
+            }
+
+            die() {
+                this.dead = true;
+                this.hp = 0;
+                this.vy = -8;
+                this.vx *= 1.5; // fling them away
+                
+                if(!this.isPlayer) {
+                    currentKills++;
+                    if(currentKills >= killsRequired) {
+                        endLevel();
+                    } else {
+                        updatePlayerUI();
+                    }
+                } else {
+                    triggerGameOver();
+                }
+            }
+
+            // High Quality Pivot-Style Rendering
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.dir, 1);
+
+                let baseLineW = 6 * this.sizeMult;
+                ctx.lineWidth = baseLineW;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = this.color;
+                ctx.fillStyle = this.color;
+
+                const L_LEG = 45 * this.sizeMult;
+                const BODY = 50 * this.sizeMult;
+                const L_ARM = 40 * this.sizeMult;
+                const HEAD = 14 * this.sizeMult;
+
+                // Flinch pose
+                if(this.hitStun > 0 && !this.dead) {
+                    ctx.rotate(-0.3);
+                } else if (this.dead) {
+                    ctx.rotate(Math.PI/2 - 0.2);
+                    ctx.translate(0, 20);
+                }
+
+                // Leg calculations
+                let runPhase = this.animTime * Math.PI * 2;
+                let isJumping = this.y < groundY;
+                
+                let legFrontDir = 0, legBackDir = 0;
+                let legFrontKnee = 0, legBackKnee = 0;
+
+                if (isJumping && !this.dead) {
+                    legFrontDir = 0.5; legFrontKnee = 0;
+                    legBackDir = -0.2; legBackKnee = -0.5;
+                } else if (Math.abs(this.vx) > 1 && !this.dead) {
+                    // Running animation (cycles)
+                    legFrontDir = Math.sin(runPhase);
+                    legBackDir = Math.sin(runPhase + Math.PI);
+                    legFrontKnee = legFrontDir > 0 ? 0 : legFrontDir;
+                    legBackKnee = legBackDir > 0 ? 0 : legBackDir;
+                } else {
+                    // Idle
+                    legFrontDir = 0.2; legFrontKnee = 0.1;
+                    legBackDir = -0.2; legBackKnee = 0.1;
+                }
+
+                // Draw Back Leg
+                ctx.beginPath();
+                ctx.moveTo(0,-L_LEG);
+                let bKneeX = Math.sin(legBackDir) * L_LEG/2; let bKneeY = -L_LEG + Math.cos(legBackDir) * L_LEG/2;
+                ctx.lineTo(bKneeX, bKneeY);
+                ctx.lineTo(bKneeX + Math.sin(legBackDir+legBackKnee)*L_LEG/2, bKneeY + Math.cos(legBackDir+legBackKnee)*L_LEG/2);
+                ctx.stroke();
+
+                // Draw Front Leg
+                ctx.beginPath();
+                ctx.moveTo(0,-L_LEG);
+                let fKneeX = Math.sin(legFrontDir) * L_LEG/2; let fKneeY = -L_LEG + Math.cos(legFrontDir) * L_LEG/2;
+                ctx.lineTo(fKneeX, fKneeY);
+                ctx.lineTo(fKneeX + Math.sin(legFrontDir+legFrontKnee)*L_LEG/2, fKneeY + Math.cos(legFrontDir+legFrontKnee)*L_LEG/2);
+                ctx.stroke();
+
+                // Body (Pelvis to shoulder)
+                let shoulderY = -L_LEG - BODY;
+                // Slight lean forward if running
+                let lean = (Math.abs(this.vx) > 1 && !isJumping) ? 0.2 : 0;
+                let sColX = Math.sin(lean) * BODY;
+                ctx.beginPath();
+                ctx.moveTo(0, -L_LEG);
+                ctx.lineTo(sColX, shoulderY);
+                ctx.stroke();
+
+                // Head
+                ctx.beginPath();
+                ctx.arc(sColX, shoulderY - HEAD, HEAD, 0, Math.PI*2);
+                if(this.hitStun > 0 || this.dead) ctx.fill(); else ctx.stroke();
+
+                // Arm calculations
+                let fArmDir = 0, bArmDir = 0;
+                let fArmElbow = 0, bArmElbow = 0;
+                let wpn = this.getWpn();
+
+                if (this.attackTimer > 0) {
+                    // Attacking swing
+                    let p = 1.0 - (this.attackTimer / wpn.speed); // 0 to 1
+                    // Start high back, swing to low front
+                    fArmDir = -Math.PI*0.8 + (p * Math.PI*1.5);
+                    fArmElbow = 0; // straight arm
+                    bArmDir = fArmDir - 0.3; // follows closely
+                } else if (this.dashTimer > 0) {
+                    // Dash pose
+                    fArmDir = Math.PI/2;
+                    bArmDir = -Math.PI*0.8;
+                } else if (Math.abs(this.vx) > 1 && !isJumping) {
+                    // Run (opposite of legs)
+                    fArmDir = -legFrontDir - 0.5;
+                    bArmDir = -legBackDir - 0.5;
+                    fArmElbow = -0.5; bArmElbow = -0.5;
+                } else {
+                    // Idle (holding weapon ready)
+                    fArmDir = 0.5; fArmElbow = -0.5;
+                    bArmDir = 0.8; bArmElbow = -0.5;
+                }
+
+                // Draw Back Arm
+                let bElbX = sColX + Math.sin(bArmDir)*L_ARM/2; let bElbY = shoulderY + Math.cos(bArmDir)*L_ARM/2;
+                ctx.beginPath(); ctx.moveTo(sColX, shoulderY); ctx.lineTo(bElbX, bElbY);
+                let bHandX = bElbX + Math.sin(bArmDir+bArmElbow)*L_ARM/2; let bHandY = bElbY + Math.cos(bArmDir+bArmElbow)*L_ARM/2;
+                ctx.lineTo(bHandX, bHandY); ctx.stroke();
+
+                // Draw Front Arm
+                let fElbX = sColX + Math.sin(fArmDir)*L_ARM/2; let fElbY = shoulderY + Math.cos(fArmDir)*L_ARM/2;
+                ctx.beginPath(); ctx.moveTo(sColX, shoulderY); ctx.lineTo(fElbX, fElbY);
+                let fHandX = fElbX + Math.sin(fArmDir+fArmElbow)*L_ARM/2; let fHandY = fElbY + Math.cos(fArmDir+fArmElbow)*L_ARM/2;
+                ctx.lineTo(fHandX, fHandY); ctx.stroke();
+
+                // Draw Weapon in front hand
+                if(wpn.len > 0 && !this.dead) {
+                    ctx.save();
+                    ctx.translate(fHandX, fHandY);
+                    ctx.rotate(-fArmDir + Math.PI/1.5); // align with arm mostly
+                    
+                    ctx.strokeStyle = wpn.color;
+                    ctx.lineWidth = 6;
+                    
+                    if(wpn.glow) {
+                        ctx.shadowColor = wpn.color;
+                        ctx.shadowBlur = 15;
+                        ctx.strokeStyle = '#fff'; // inner core
+                    }
+
+                    if (wpn.name === 'Nunchucks') {
+                        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(15,0); ctx.stroke();
+                        ctx.strokeStyle = '#fff'; ctx.lineWidth=2;
+                        ctx.beginPath(); ctx.moveTo(15,0); ctx.lineTo(25,0); ctx.stroke();
+                        ctx.strokeStyle = wpn.color; ctx.lineWidth=6;
+                        let sAng = this.attackTimer > 0 ? Math.random()*2 : 1.5;
+                        ctx.beginPath(); ctx.moveTo(25,0); ctx.lineTo(25 + Math.cos(sAng)*15, Math.sin(sAng)*15); ctx.stroke();
+                    } else {
+                        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(wpn.len, 0); ctx.stroke();
+                        if (wpn.name === 'Executioner Axe') {
+                            ctx.fillStyle = '#bdc3c7';
+                            ctx.beginPath(); ctx.moveTo(wpn.len-10, -15); ctx.lineTo(wpn.len+5, 0); ctx.lineTo(wpn.len-10, 15); ctx.fill();
+                        }
+                    }
+                    ctx.restore();
+                }
+
+                ctx.restore();
+
+                // Enemy HP Bar
+                if(!this.isPlayer && !this.dead && this.hp < this.maxHp) {
+                    let hpW = 50;
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hpW/2, this.y - 120, hpW, 6);
+                    ctx.fillStyle = this.color; ctx.fillRect(this.x - hpW/2, this.y - 120, hpW * (this.hp/this.maxHp), 6);
+                }
+            }
+        }
+
+        let player;
+        let enemies = [];
+
+        function startGame() {
+            level = 1;
+            player = new Fighter(width/2, true);
+            startWave();
+            gameState = 'PLAYING';
+            document.getElementById('splash').classList.remove('active');
+        }
+
+        function startWave() {
+            killsRequired = level * 3;
+            currentKills = 0;
+            enemies = [];
+            
+            // Auto heal & Upgrade
+            player.hp = player.maxHp;
+            player.wIdx = level - 1;
+            
+            comboCount = 0;
+            comboDisplay.classList.remove('show');
+
+            updatePlayerUI();
+            addFloatingText(`WAVE ${level}`, width/2, height/2, '#fbc531', 2000, "5rem");
+        }
+
+        function checkHitbox(attacker) {
+            let wpn = attacker.getWpn();
+            let atkCx = attacker.x + (attacker.dir * wpn.range/2);
+            // Quick AABB against targets
+            let targets = attacker.isPlayer ? enemies : [player];
+            
+            let hitAnything = false;
+            for(let t of targets) {
+                if(t.dead) continue;
+                if(Math.abs(t.x - atkCx) < wpn.range/2 + 25) { // 25 is rough body width
+                    t.takeHit(wpn.dmg, wpn.kb, attacker.dir);
+                    hitAnything = true;
+                }
+            }
+
+            if(hitAnything && attacker.isPlayer) {
+                // Time stops briefly for impact feel (hit-stop)
+                // Just delay lastTime a bit to cause a small stutter
+                lastTime += 30; 
+            }
+        }
+
+        function createSlash(attacker) {
+            let wpn = attacker.getWpn();
+            let sx = attacker.x + attacker.dir * 20;
+            let sy = attacker.y - 60;
+            hitFx.push({
+                x: sx, y: sy, dir: attacker.dir,
+                color: wpn.glow ? wpn.color : '#fff',
+                life: 1.0, rad: wpn.range
+            });
+        }
+
+        function spawnParticles(x, y, color, count) {
+            for(let i=0; i<count; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random()-0.5)*15, vy: (Math.random()-1)*15,
+                    color: color, s: Math.random()*5 + 3, life: 1.0
+                });
+            }
+        }
+
+        function addFloatingText(text, x, y, col, duration, size) {
+            texts.push({text, x, y, col, life: 1.0, dur: duration, size});
+        }
+
+        function addCombo() {
+            comboCount++;
+            comboTimer = 2000; // 2 seconds to keep combo
+            comboDisplay.textContent = `${comboCount} HITS!`;
+            comboDisplay.classList.remove('show');
+            // Force reflow to restart css animation
+            void comboDisplay.offsetWidth;
+            comboDisplay.classList.add('show');
+        }
+
+        function shakeScreen(amount) {
+            shakeTime = 200;
+            shakeMag = amount;
+        }
+
+        function updatePlayerUI() {
+            let pRatio = Math.max(0, player.hp / player.maxHp);
+            document.getElementById('hp-fill').style.width = (pRatio*100) + '%';
+            if (pRatio < 0.3) document.getElementById('hp-fill').style.background = 'var(--health-e)';
+            else document.getElementById('hp-fill').style.background = 'var(--health-p)';
+
+            document.getElementById('w-name').textContent = player.getWpn().name;
+            document.getElementById('w-name').style.color = player.getWpn().color === 'transparent' ? '#fff' : player.getWpn().color;
+            
+            document.getElementById('lvl-text').textContent = `WAVE ${level}`;
+            document.getElementById('kill-text').textContent = `Targets: ${killsRequired - currentKills}`;
+        }
+
+        function endLevel() {
+            gameState = 'WAVE_CLEAR';
+            addFloatingText(`WAVE CLEAR!`, width/2, height/2 - 50, '#2ed573', 3000, "5rem");
+            setTimeout(() => {
+                level++;
+                startWave();
+                gameState = 'PLAYING';
+            }, 3000);
+        }
+
+        function triggerGameOver() {
+            gameState = 'GAMEOVER';
+            let sp = document.getElementById('splash');
+            document.getElementById('sp-title').textContent = "WASTED";
+            document.getElementById('sp-title').style.color = "var(--health-e)";
+            document.getElementById('sp-sub').textContent = `You reached Wave ${level}.`;
+            document.getElementById('sp-btn').textContent = "RETRY";
+            sp.classList.add('active');
+        }
+
+        function update(dt) {
+            // Player commands
+            if(INP.nx !== 0) { player.vx = INP.nx * player.speed; player.dir = INP.nx; }
+            else if(player.dashTimer <= 0) player.vx = 0;
+
+            if(INP.jump && player.y >= groundY) player.vy = -16;
+            if(INP.dash) player.doDash();
+            if(INP.atk) player.doAttack();
+
+            player.update(dt);
+
+            // Combo logic
+            if(comboTimer > 0) {
+                comboTimer -= dt;
+                if(comboTimer <= 0) {
+                    comboCount = 0;
+                    comboDisplay.classList.remove('show');
+                }
+            }
+
+            // Spawner
+            let maxEnemies = Math.min(4, Math.ceil(level/2));
+            let spawned = currentKills + enemies.length;
+            if(enemies.length < maxEnemies && spawned < killsRequired) {
+                if(Math.random() < 0.02 * (1 + level*0.1)) {
+                    let side = Math.random() > 0.5 ? -100 : width+100;
+                    let e = new Fighter(side, false);
+                    e.wIdx = Math.max(0, Math.floor(Math.random() * level));
+                    enemies.push(e);
+                }
+            }
+
+            for(let i=enemies.length-1; i>=0; i--){
+                enemies[i].update(dt);
+                // Slowly sink bodies
+                if(enemies[i].dead && enemies[i].y >= groundY) {
+                    enemies[i].animTime -= dt; // reuse as fade timer
+                    if(enemies[i].animTime < -3000) enemies.splice(i, 1);
+                }
+            }
+
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += GRAVITY * 0.8;
+                p.life -= dt * 0.002;
+                if(p.life <= 0) particles.splice(i,1);
+            }
+            
+            for(let i=hitFx.length-1; i>=0; i--){
+                let f = hitFx[i];
+                f.life -= dt * 0.005;
+                if(f.life <= 0) hitFx.splice(i,1);
+            }
+
+            for(let i=texts.length-1; i>=0; i--) {
+                texts[i].y -= dt * 0.05;
+                texts[i].life -= dt / texts[i].dur;
+                if(texts[i].life <= 0) texts.splice(i,1);
+            }
+        }
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            
+            if(shakeTime > 0) {
+                ctx.translate((Math.random()-0.5)*shakeMag, (Math.random()-0.5)*shakeMag);
+                shakeTime -= 16;
+            }
+
+            // BG Gradient
+            let grd = ctx.createLinearGradient(0,0,0,height);
+            grd.addColorStop(0, '#1c1c24'); grd.addColorStop(1, '#2f3640');
+            ctx.fillStyle = grd; ctx.fillRect(0,0,width,height);
+            
+            // Ground
+            ctx.fillStyle = '#2d3436';
+            ctx.fillRect(0, groundY, width, height - groundY);
+            ctx.strokeStyle = '#ff4757'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(width, groundY); ctx.stroke(); // Neon ground line
+
+            // Entities drawn sorted by Y isn't needed, but draw corpses first
+            for(let e of enemies) { if(e.dead) { ctx.globalAlpha = Math.max(0, 1 + e.animTime/3000); e.draw(ctx); ctx.globalAlpha = 1; } }
+            for(let e of enemies) { if(!e.dead) e.draw(ctx); }
+            player.draw(ctx);
+
+            // FX
+            for(let f of hitFx) {
+                ctx.save();
+                ctx.translate(f.x, f.y); ctx.scale(f.dir, 1);
+                ctx.beginPath();
+                ctx.arc(0, 0, f.rad, -Math.PI/4, Math.PI/4);
+                ctx.strokeStyle = f.color;
+                ctx.lineWidth = 10 * f.life;
+                ctx.globalAlpha = f.life;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            for(let p of particles) {
+                ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, p.s, p.s);
+            }
+            
+            ctx.textAlign = 'center';
+            for(let t of texts) {
+                ctx.fillStyle = t.col; ctx.globalAlpha = t.life;
+                ctx.font = t.size + ' Bangers';
+                ctx.fillText(t.text, t.x, t.y);
+            }
+
+            ctx.restore();
+        }
+
+        function loop(timestamp) {
+            let dt = timestamp - lastTime;
+            if(dt > 100) dt = 16;
+            lastTime = timestamp;
+
+            if(gameState === 'PLAYING' || gameState === 'WAVE_CLEAR' || gameState === 'GAMEOVER') {
+                update(dt);
+                drawFrame();
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        document.getElementById('sp-btn').addEventListener('click', startGame);
+
+        requestAnimationFrame((t) => { lastTime = t; requestAnimationFrame(loop); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+:root {
+    --v-bg: #1a0b2e; /* Deep purple */
+    --v-blue: #00f0ff;
+    --v-pink: #ff00ea;
+    --v-yellow: #fffb00;
+    --v-white: #ffffff;
+    
+    --font-pixel: 'Press Start 2P', cursive;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+body { background-color: var(--v-bg); color: var(--v-white); font-family: var(--font-pixel); overflow: hidden; background-image: radial-gradient(#ffffff22 1px, transparent 1px); background-size: 20px 20px; }
+
+/* Custom Blocky Cursor */
+.pixel-cursor {
+    position: fixed; width: 24px; height: 24px; background: var(--v-yellow); border: 3px solid #000;
+    pointer-events: none; z-index: 10000; transition: transform 0.1s; transform-origin: top left;
+}
+body:active .pixel-cursor { transform: scale(0.8); background: var(--v-pink); }
+
+/* Nav */
+.v-nav { position: fixed; top: 0; width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.logo { font-size: 1.5rem; text-shadow: 4px 4px 0px var(--v-pink); }
+.links { display: flex; gap: 20px; }
+
+/* 3D Pixel Buttons */
+.btn-3d {
+    display: inline-block; background: var(--v-white); color: #000; text-decoration: none; font-size: 0.8rem; padding: 15px 20px;
+    border: 4px solid #000; box-shadow: 4px 4px 0px 0px #000; transition: all 0.1s; text-transform: uppercase;
+}
+.btn-3d:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px #000; }
+.btn-3d.alt { background: var(--v-yellow); }
+
+/* Isometric Hero Setup */
+.v-hero { height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; perspective: 1000px; }
+
+.iso-container {
+    transform: rotateX(60deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+}
+
+.iso-grid {
+    position: relative; width: 600px; height: 600px;
+    /* Grid background to show the floor */
+    background: linear-gradient(rgba(255,255,255,0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.1) 2px, transparent 2px);
+    background-size: 100px 100px;
+}
+
+/* Base Block Styles */
+.block { position: absolute; border: 4px solid #000; background: var(--v-white); box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2), 20px 20px 0px rgba(0,0,0,0.5); transform-style: preserve-3d; transition: transform 0.2s, box-shadow 0.2s; }
+.block:active, .block.clicked { transform: translateZ(-10px); box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2), 5px 5px 0px rgba(0,0,0,0.5); }
+
+/* Title Block */
+.b-title { top: 100px; left: 100px; width: 400px; height: 200px; background: var(--v-yellow); padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+.b-title h1 { font-size: 2.5rem; color: #000; line-height: 1.5; margin-bottom: 20px; text-shadow: 2px 2px 0px var(--v-white); }
+.b-title p { font-size: 0.8rem; color: #000; line-height: 1.8; }
+
+/* Game Blocks */
+.b-game { width: 180px; height: 180px; padding: 10px; cursor: pointer; }
+.b-game img { width: 100%; height: 75%; object-fit: cover; border: 4px solid #000; margin-bottom: 10px; image-rendering: pixelated; }
+.b-game h3 { font-size: 0.6rem; color: #000; text-align: center; line-height: 1.4; }
+
+.b-blue { top: 350px; left: 100px; background: var(--v-blue); }
+.b-pink { top: 350px; left: 320px; background: var(--v-pink); }
+
+/* Sprite Block */
+.b-sprite { top: 20px; left: 400px; width: 80px; height: 80px; background: transparent; border: none; box-shadow: none; }
+/* Pure CSS Pixel Art Space Invader */
+.character-pixel {
+    width: 10px; height: 10px;
+    background: transparent;
+    box-shadow: 
+        30px 10px #00f0ff, 90px 10px #00f0ff,
+        40px 20px #00f0ff, 80px 20px #00f0ff,
+        30px 30px #00f0ff, 40px 30px #00f0ff, 50px 30px #00f0ff, 60px 30px #00f0ff, 70px 30px #00f0ff, 80px 30px #00f0ff, 90px 30px #00f0ff,
+        10px 40px #00f0ff, 20px 40px #00f0ff, 40px 40px #00f0ff, 50px 40px #00f0ff, 60px 40px #00f0ff, 80px 40px #00f0ff, 100px 40px #00f0ff, 110px 40px #00f0ff,
+        10px 50px #00f0ff, 20px 50px #00f0ff, 30px 50px #00f0ff, 40px 50px #00f0ff, 50px 50px #00f0ff, 60px 50px #00f0ff, 70px 50px #00f0ff, 80px 50px #00f0ff, 90px 50px #00f0ff, 100px 50px #00f0ff, 110px 50px #00f0ff,
+        10px 60px #00f0ff, 30px 60px #00f0ff, 90px 60px #00f0ff, 110px 60px #00f0ff,
+        40px 70px #00f0ff, 80px 70px #00f0ff;
+    transform: rotateX(-90deg) rotateY(45deg); /* Stand it up on the iso plane */
+}
+
+/* Animations */
+.block-float { animation: floatIso 4s ease-in-out infinite; }
+@keyframes floatIso { 0%, 100% { transform: translateZ(0px); box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2), 20px 20px 0px rgba(0,0,0,0.5); } 50% { transform: translateZ(40px); box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2), 40px 40px 0px rgba(0,0,0,0.3); } }
+
+.block-bounce { animation: bounceIso 1s steps(2, end) infinite; }
+@keyframes bounceIso { 0% { transform: translateZ(0px); } 50% { transform: translateZ(20px); } 100% { transform: translateZ(0px); } }
+
+/* Footer Marquee */
+.v-footer { position: fixed; bottom: 0; width: 100%; border-top: 4px solid #000; background: var(--v-pink); color: #000; z-index: 100; }
+.marquee-pixel { width: 100%; overflow: hidden; white-space: nowrap; padding: 15px 0; font-size: 1.2rem; }
+.mq-inner { display: inline-block; animation: scrollPixel 15s linear infinite; }
+@keyframes scrollPixel { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+.f-content { background: #000; color: var(--v-white); padding: 10px; text-align: center; font-size: 0.6rem; }
+
+@media (max-width: 800px) {
+    .iso-container { transform: rotateX(60deg) rotateZ(-45deg) scale(0.6); }
+    .v-nav { flex-direction: column; gap: 20px; }
+}

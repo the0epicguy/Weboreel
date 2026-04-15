@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FABLE | Magic in Every Page</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Star Trail Cursor Canvas is injected via JS -->
+    <canvas id="trail-canvas"></canvas>
+
+    <nav class="fb-nav">
+        <div class="logo">FABLE</div>
+        <div class="nav-links">
+            <a href="#">Books</a>
+            <a href="#">Authors</a>
+            <a href="#">For Parents</a>
+        </div>
+        <a href="#" class="btn-magic">Shop Now</a>
+    </nav>
+
+    <!-- Cloud Background Elements -->
+    <div class="clouds">
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+    </div>
+
+    <!-- The Storybook Layout (Pinned Scrolling) -->
+    <main class="storybook" id="storybook">
+        
+        <!-- Page 1 -->
+        <section class="story-page" id="page1">
+            <div class="page-content">
+                <div class="text-bubble pop-in">
+                    <h1>Once upon a time...</h1>
+                    <p>There was a magical place where stories came alive, ready to whisk curious minds into realms of pure imagination.</p>
+                </div>
+                <div class="illustration float-anim">
+                    <img src="https://images.unsplash.com/photo-1546961342-ea5f71b1ea8f?w=600&q=80" alt="Magical Book" class="rounded-img">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Page 2 -->
+        <section class="story-page bg-alt" id="page2">
+            <div class="page-content reverse">
+                <div class="text-bubble pop-in">
+                    <h2>Meet our Heroes</h2>
+                    <p>From brave talking animals to adventurous space explorers, our characters are designed to inspire courage and kindness.</p>
+                </div>
+                <div class="illustration float-anim alt-delay">
+                    <!-- CSS drawn balloon -->
+                    <div class="hot-air-balloon">
+                        <div class="balloon-envelope"></div>
+                        <div class="balloon-basket"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 3 -->
+        <section class="story-page" id="page3">
+            <div class="page-content center">
+                <div class="text-bubble wide pop-in">
+                    <h2>Start Your Adventure</h2>
+                    <p>Join the Fable book club and receive a curated, beautifully illustrated storybook every month.</p>
+                    <button class="btn-magic huge">Join the Club</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="fb-footer">
+        <div class="f-waves">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,115.17,189.5,89.5Z" class="shape-fill"></path>
+            </svg>
+        </div>
+        <div class="f-content">
+            <div class="logo">FABLE</div>
+            <p>&copy; 2026 Fable Publishing. Made with magic.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

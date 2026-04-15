@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERENE | Mindfulness & Spa</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Three.js (for ripple effect) & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="cursor-glow"></div>
+
+    <nav class="serene-nav">
+        <div class="logo">SERENE</div>
+        <div class="nav-links">
+            <a href="#philosophy">Philosophy</a>
+            <a href="#treatments">Treatments</a>
+            <a href="#space">The Space</a>
+        </div>
+        <button class="book-btn">Book Retreat</button>
+    </nav>
+
+    <!-- Fluid Ripple Hero -->
+    <header class="hero-fluid">
+        <!-- Abstract fluid WebGL canvas -->
+        <canvas id="fluid-canvas"></canvas>
+        <div class="hero-content">
+            <h1>A return to center.</h1>
+            <p>Silence the noise. Reconnect with the deepest parts of yourself through ancient rituals and modern holistic therapies.</p>
+        </div>
+    </header>
+
+    <!-- Philosophy -->
+    <section class="philosophy-section" id="philosophy">
+        <div class="phil-container">
+            <h2>The Space Between Breaths</h2>
+            <p class="lead">We believe that true healing begins when we stop moving. Serene is not just a spa, but a sanctuary designed to strip away the external world, leaving only the rhythm of your own pulse.</p>
+            <div class="phil-stats">
+                <div class="stat-item">
+                    <span class="val">01</span>
+                    <span class="lab">Stillness</span>
+                </div>
+                <div class="stat-item">
+                    <span class="val">02</span>
+                    <span class="lab">Touch</span>
+                </div>
+                <div class="stat-item">
+                    <span class="val">03</span>
+                    <span class="lab">Aromatics</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Treatments List -->
+    <section class="treatments-section" id="treatments">
+        <div class="t-wrapper">
+            <div class="t-header">
+                <h2>Curated Treatments</h2>
+            </div>
+            <div class="t-list">
+                <!-- Treatment 1 -->
+                <div class="t-row">
+                    <div class="t-left">
+                        <h3>Thermal Contrast Therapy</h3>
+                        <p>Alternating hot stone application with ice-plunge immersion to reset the nervous system.</p>
+                    </div>
+                    <div class="t-right">
+                        <span>90 MIN</span>
+                        <span>$180</span>
+                        <a href="#" class="btn-text">View details</a>
+                    </div>
+                </div>
+                <!-- Treatment 2 -->
+                <div class="t-row">
+                    <div class="t-left">
+                        <h3>Botanical Alchemy Facial</h3>
+                        <p>Custom-blended indigenous clays and cold-pressed botanical oils tuned to your skin's exact frequency.</p>
+                    </div>
+                    <div class="t-right">
+                        <span>60 MIN</span>
+                        <span>$140</span>
+                        <a href="#" class="btn-text">View details</a>
+                    </div>
+                </div>
+                <!-- Treatment 3 -->
+                <div class="t-row">
+                    <div class="t-left">
+                        <h3>Deep Frequency Massage</h3>
+                        <p>Sound wave attenuation combined with deep tissue manipulation to release chronic cellular tension.</p>
+                    </div>
+                    <div class="t-right">
+                        <span>120 MIN</span>
+                        <span>$240</span>
+                        <a href="#" class="btn-text">View details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Space (Image grid) -->
+    <section class="space-section" id="space">
+        <div class="space-grid">
+            <div class="space-img large">
+                <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1000&q=80" alt="Spa Room">
+            </div>
+            <div class="space-img small">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" alt="Oils">
+            </div>
+            <div class="space-img small">
+                <img src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800&q=80" alt="Stones">
+            </div>
+            <div class="space-text">
+                <h3>Minimalist Sanctuary</h3>
+                <p>Muted tones, raw linen, and heated stone floors. Every architectural detail is designed to calm the mind before the treatment even begins.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="serene-footer">
+        <div class="f-inner">
+            <div class="f-col">
+                <h2 class="logo">SERENE</h2>
+                <p>Awaken your peace.</p>
+            </div>
+            <div class="f-col">
+                <strong>Visit</strong>
+                <p>100 Mindfulness Lane<br>Sedona, AZ 86336</p>
+                <p>Mon - Sun: 8am - 8pm</p>
+            </div>
+            <div class="f-col">
+                <strong>Inquiries</strong>
+                <a href="#">reserve@serene.test</a>
+                <a href="#">+1 (555) 000-0000</a>
+            </div>
+        </div>
+        <div class="copy">
+            &copy; 2026 Serene Wellness. Neutral theme edition.
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

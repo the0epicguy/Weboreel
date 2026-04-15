@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NECTAR | Low-Intervention Wines</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- SVG Filter for Liquid Distortion -->
+    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <filter id="liquid">
+                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="1" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" id="displacement" />
+            </filter>
+        </defs>
+    </svg>
+
+    <nav class="n-nav">
+        <div class="logo">nectar.</div>
+        <div class="links">
+            <a href="#">Shop</a>
+            <a href="#">The Club</a>
+            <a href="#">Journal</a>
+        </div>
+        <div class="cart">
+            <button class="blob-btn">Cart (0)</button>
+        </div>
+    </nav>
+
+    <!-- Hero Flow -->
+    <header class="n-hero">
+        <div class="glow-bg"></div>
+        <div class="hero-inner">
+            <div class="text-blob">
+                <h1>Farmed with <br><span class="script">nature,</span> <br>not against it.</h1>
+                <p>Curated monthly boxes of low-intervention, biodynamic wines from independent growers.</p>
+                <button class="blob-btn primary">Join the Club</button>
+            </div>
+            <div class="img-blob distort-hover">
+                <img src="https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=800&q=80" alt="Pouring Wine">
+            </div>
+        </div>
+    </header>
+
+    <!-- Curation Section -->
+    <section class="curation-section">
+        <div class="c-title">
+            <h2 class="script">Monthly Selections</h2>
+        </div>
+        
+        <div class="c-grid">
+            <div class="bottle-card distort-hover">
+                <div class="b-img">
+                    <img src="https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=600&q=80" alt="Orange Wine">
+                </div>
+                <h3>Skin Contact Field Blend</h3>
+                <span class="region">Sicily, IT</span>
+            </div>
+            
+            <div class="bottle-card mt-down distort-hover">
+                <div class="b-img">
+                    <img src="https://images.unsplash.com/photo-1565551465241-11d51a66c4c0?w=600&q=80" alt="Pet Nat">
+                </div>
+                <h3>Pétillant Naturel</h3>
+                <span class="region">Loire Valley, FR</span>
+            </div>
+
+            <div class="bottle-card distort-hover">
+                <div class="b-img">
+                    <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=600&q=80" alt="Light Red">
+                </div>
+                <h3>Chilled Glou-Glou</h3>
+                <span class="region">Mendocino, CA</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Flow -->
+    <footer class="n-footer">
+        <div class="f-top">
+            <h2>Drink <span class="script">alive.</span></h2>
+        </div>
+        <div class="f-bot">
+            <div class="logo">nectar.</div>
+            <div class="f-links">
+                <a href="#">FAQ</a>
+                <a href="#">Shipping</a>
+                <a href="#">Instagram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

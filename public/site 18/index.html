@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis AI | Cybersecurity Command</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Base Variables & Reset */
+        :root {
+            --bg-color: #030305;
+            --neon-blue: #00e5ff;
+            --neon-blue-dim: rgba(0, 229, 255, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: none; /* Hide default cursor */ }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; }
+
+        /* Custom Aim Cursor */
+        #cursor {
+            position: fixed; top: 0; left: 0; width: 30px; height: 30px;
+            border: 2px solid var(--neon-blue); border-radius: 50%;
+            pointer-events: none; transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s; z-index: 9999;
+            box-shadow: 0 0 10px var(--neon-blue-dim);
+        }
+        #cursor::after, #cursor::before {
+            content: ''; position: absolute; background: var(--neon-blue);
+        }
+        #cursor::before { top: 50%; left: -10px; right: -10px; height: 2px; transform: translateY(-50%); }
+        #cursor::after { left: 50%; top: -10px; bottom: -10px; width: 2px; transform: translateX(-50%); }
+        
+        #cursor.hover-state { width: 50px; height: 50px; background-color: var(--neon-blue-dim); border-color: transparent; }
+        #cursor.hover-state::before, #cursor.hover-state::after { opacity: 0; }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(3, 3, 5, 0.8); backdrop-filter: blur(10px); z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .logo { font-family: 'Space Mono', monospace; font-weight: bold; font-size: 1.5rem; color: var(--neon-blue); letter-spacing: 2px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; margin-left: 30px; transition: color 0.3s; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;}
+        .nav-links a:hover { color: var(--text-main); }
+
+        /* General Section Styles */
+        section { padding: 100px 10vw; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        h2 { font-size: 3rem; margin-bottom: 20px; font-weight: 800; }
+        .subtitle { color: var(--neon-blue); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block; padding: 15px 40px; background: var(--neon-blue-dim);
+            color: var(--neon-blue); border: 1px solid var(--neon-blue); text-transform: uppercase;
+            letter-spacing: 2px; font-weight: 600; text-decoration: none; transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px rgba(0, 229, 255, 0.5); }
+
+        /* Hero Section */
+        .hero { text-align: center; align-items: center; background: radial-gradient(circle at center, #0a1128 0%, var(--bg-color) 70%); }
+        .hero h1 { font-size: clamp(4rem, 8vw, 7rem); font-weight: 800; line-height: 1.1; margin-bottom: 20px; text-shadow: 0 0 30px rgba(0, 229, 255, 0.3); }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin-bottom: 40px; }
+        
+        /* Simulated 3D Core Element */
+        .core-visual {
+            width: 300px; height: 300px; border-radius: 50%; margin: 0 auto 50px;
+            background: conic-gradient(from 0deg, transparent, var(--neon-blue), transparent);
+            animation: spin 4s linear infinite; position: absolute; z-index: -1; opacity: 0.2; filter: blur(20px);
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* About / Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 50px; }
+        .stat-card { border-left: 2px solid var(--neon-blue); padding-left: 20px; }
+        .stat-num { font-size: 3rem; font-family: 'Space Mono', monospace; font-weight: bold; color: var(--text-main); }
+        .stat-label { color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* Features Section */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 50px; }
+        .feature-card {
+            background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 10px; transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-10px); border-color: var(--neon-blue); }
+        .feature-card h3 { margin-bottom: 15px; font-size: 1.5rem; }
+        .feature-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Scroll Animation Classes */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+
+    <nav>
+        <div class="logo">AEGIS.AI</div>
+        <div class="nav-links">
+            <a href="#about" class="hover-target">Core</a>
+            <a href="#features" class="hover-target">Threat Intel</a>
+            <a href="#pricing" class="hover-target">Deploy</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="core-visual"></div>
+        <span class="subtitle reveal">System Online</span>
+        <h1 class="reveal">Predictive<br>Defense</h1>
+        <p class="reveal">Next-generation neural networks designed to neutralize cyber threats before execution. Welcome to the zero-trust era.</p>
+        <a href="#features" class="btn hover-target reveal">Initialize Sequence</a>
+    </section>
+
+    <section id="about">
+        <span class="subtitle reveal">The Sentinel Core</span>
+        <h2 class="reveal">Machine speed.<br>Human intelligence.</h2>
+        <p class="reveal" style="max-width: 800px; color: var(--text-muted); font-size: 1.1rem;">
+            Aegis AI operates continuously, analyzing millions of data points across your infrastructure in real-time. It doesn't just react to breaches; it predicts vulnerability vectors and hardens defenses autonomously.
+        </p>
+        
+        <div class="stats-grid reveal">
+            <div class="stat-card">
+                <div class="stat-num" data-target="99.9">0</div>
+                <div class="stat-label">% Threat Mitigation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" data-target="0.4">0</div>
+                <div class="stat-label">Ms Response Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" data-target="500">0</div>
+                <div class="stat-label">Enterprise Nodes Secured</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features">
+        <span class="subtitle reveal">Capabilities</span>
+        <h2 class="reveal">Tactical Advantage</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <h3>Predictive Analytics</h3>
+                <p>Harnessing deep learning algorithms to map out threat actor behavior and anticipate attacks before the first payload is delivered.</p>
+            </div>
+            <div class="feature-card reveal">
+                <h3>Zero-Trust Architecture</h3>
+                <p>Micro-segmentation and continuous identity verification ensure that a compromised endpoint remains an isolated incident, not a network-wide catastrophe.</p>
+            </div>
+            <div class="feature-card reveal">
+                <h3>Automated Response</h3>
+                <p>Execute pre-approved defensive playbooks in milliseconds. Isolate nodes, block IPs, and throttle traffic without human intervention.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" style="text-align: center; align-items: center;">
+        <h2 class="reveal">Ready to secure your perimeter?</h2>
+        <p class="reveal" style="margin-bottom: 40px; color: var(--text-muted);">Integrate Aegis AI into your current stack in under 24 hours.</p>
+        <a href="#" class="btn hover-target reveal">Request Enterprise Demo</a>
+    </section>
+
+    <script>
+        // 1. Custom Aim Cursor Logic
+        const cursor = document.getElementById('cursor');
+        const hoverTargets = document.querySelectorAll('.hover-target, button, a');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursor.classList.add('hover-state'));
+            target.addEventListener('mouseleave', () => cursor.classList.remove('hover-state'));
+        });
+
+        // 2. Scroll Reveal Animation
+        const reveals = document.querySelectorAll('.reveal');
+        
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 100;
+
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Trigger on load
+
+        // 3. Number Counter Animation (for Stats)
+        const statNums = document.querySelectorAll('.stat-num');
+        let animated = false;
+
+        const animateNumbers = () => {
+            statNums.forEach(stat => {
+                const target = parseFloat(stat.getAttribute('data-target'));
+                const duration = 2000; // 2 seconds
+                const increment = target / (duration / 16); // 60fps
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        stat.innerText = target % 1 === 0 ? Math.ceil(current) : current.toFixed(1);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.innerText = target + (target === 500 ? '+' : '');
+                    }
+                };
+                updateCounter();
+            });
+        };
+
+        // Trigger number animation when About section is reached
+        window.addEventListener('scroll', () => {
+            const aboutSection = document.getElementById('about');
+            if (aboutSection.getBoundingClientRect().top < window.innerHeight && !animated) {
+                animateNumbers();
+                animated = true;
+            }
+        });
+    </script>
+</body>
+</html>

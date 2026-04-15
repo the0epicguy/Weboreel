@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA ARCHITECTS | Concrete & Light</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+    <!-- Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="arch-cursor"></div>
+
+    <nav class="aura-nav">
+        <div class="logo">AURA</div>
+        <div class="nav-right">
+            <a href="#projects">Projects</a>
+            <a href="#studio">Studio</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Blueprint Hero -->
+    <header class="arch-hero">
+        <canvas id="arch-canvas"></canvas>
+        <div class="hero-overlay">
+            <h1>Architecture as an <br>Extension of Nature.</h1>
+            <p>Designing structures that listen to their environment. Based in Copenhagen.</p>
+        </div>
+        <div class="scroll-ind">
+            <span>Scroll</span>
+            <div class="bar"></div>
+        </div>
+    </header>
+
+    <!-- Horizontal Scroll Projects Gallery -->
+    <section class="projects-section" id="projects">
+        <div class="horizontal-scroll-container">
+            <div class="horizontal-track">
+                
+                <div class="project-panel intro-panel">
+                    <h2>Selected Projects</h2>
+                    <p>2020 &mdash; 2026</p>
+                </div>
+                
+                <div class="project-panel">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1000&q=80" alt="Villa Noir">
+                    <div class="p-info">
+                        <h3>Villa Noir</h3>
+                        <span>Residential / 2024</span>
+                    </div>
+                </div>
+                
+                <div class="project-panel">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1000&q=80" alt="The Glass Pavilion">
+                    <div class="p-info">
+                        <h3>The Glass Pavilion</h3>
+                        <span>Cultural / 2025</span>
+                    </div>
+                </div>
+                
+                <div class="project-panel">
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1000&q=80" alt="Apex Tower">
+                    <div class="p-info">
+                        <h3>Apex Tower</h3>
+                        <span>Commercial / 2026</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Studio / Philosophy -->
+    <section class="philosophy-section" id="studio">
+        <div class="phil-grid">
+            <div class="phil-text">
+                <h2>Our Philosophy</h2>
+                <div class="accordion">
+                    <div class="acc-item active">
+                        <div class="acc-head">Material Honesty <span>+</span></div>
+                        <div class="acc-body">
+                            <p>We do not hide structural concrete. We do not paint over raw steel. A building should express how it was built.</p>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-head">Light as Structure <span>+</span></div>
+                        <div class="acc-body">
+                            <p>Natural light is our primary building material. We sculpt spaces to catch the sun's trajectory throughout the day.</p>
+                        </div>
+                    </div>
+                    <div class="acc-item">
+                        <div class="acc-head">Contextual Harmony <span>+</span></div>
+                        <div class="acc-body">
+                            <p>A structure must not yell at its surroundings; it must converse with them.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="phil-img">
+                <img src="https://images.unsplash.com/photo-1498036882173-b41c28af5cb9?w=800&q=80" alt="Studio">
+            </div>
+        </div>
+    </section>
+
+    <!-- Abstract Footer -->
+    <footer class="aura-footer" id="contact">
+        <div class="f-headline">
+            <h2>Ready to build?</h2>
+            <a href="mailto:studio@aura-arch.test" class="inquiry-btn">Start a conversation &#8594;</a>
+        </div>
+        <div class="f-meta">
+            <div class="col">
+                <strong>AURA Studio</strong>
+                <p>Nørrebrogade 12<br>2200 København N<br>Denmark</p>
+            </div>
+            <div class="col">
+                <strong>Connect</strong>
+                <a href="#">Instagram</a>
+                <a href="#">LinkedIn</a>
+            </div>
+            <div class="col right">
+                <p>&copy; 2026 Aura Architects.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
