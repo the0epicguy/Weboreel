@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Weboreel — Scroll. Vibe. Repeat.</title>
+<meta name="description" content="Weboreel - The ultimate short-form content experience. Discover trending reels, connect with creators, and vibe with the world.">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-card: #12121a;
+  --bg-glass: rgba(18, 18, 26, 0.7);
+  --accent-pink: #FF006E;
+  --accent-purple: #8338EC;
+  --accent-cyan: #00F5FF;
+  --accent-orange: #FF6B35;
+  --accent-green: #00E676;
+  --accent-yellow: #FFD600;
+  --gradient-main: linear-gradient(135deg, #FF006E, #8338EC, #00F5FF);
+  --gradient-hot: linear-gradient(135deg, #FF006E, #FF6B35);
+  --gradient-cool: linear-gradient(135deg, #8338EC, #00F5FF);
+  --gradient-sunset: linear-gradient(135deg, #FF006E, #FFD600);
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255,255,255,0.7);
+  --text-muted: rgba(255,255,255,0.4);
+  --font-main: 'Inter', -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== SPLASH SCREEN ========== */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-primary);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#splash.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+.splash-logo {
+  font-family: var(--font-display);
+  font-size: 3rem; font-weight: 800;
+  background: var(--gradient-main);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: logoPulse 2s ease-in-out infinite;
+}
+.splash-tagline {
+  font-size: 0.9rem; color: var(--text-muted);
+  margin-top: 12px; letter-spacing: 3px; text-transform: uppercase;
+}
+.splash-loader {
+  margin-top: 40px; width: 120px; height: 3px;
+  background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;
+}
+.splash-loader::after {
+  content: ''; display: block; width: 50%; height: 100%;
+  background: var(--gradient-main); border-radius: 4px;
+  animation: loaderSlide 1.2s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%, 100% { filter: brightness(1); transform: scale(1); }
+  50% { filter: brightness(1.3); transform: scale(1.02); }
+}
+@keyframes loaderSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* ========== APP SHELL ========== */
+#app {
+  width: 100%; height: 100%;
+  position: relative; overflow: hidden;
+}
+
+/* ========== TOP BAR ========== */
+.top-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100; padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  pointer-events: none;
+}
+.top-bar > * { pointer-events: all; }
+.top-bar-logo {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 800;
+  background: var(--gradient-main);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.top-bar-tabs {
+  display: flex; gap: 16px;
+}
+.top-bar-tab {
+  font-size: 0.85rem; font-weight: 600;
+  color: var(--text-muted); cursor: pointer;
+  transition: all 0.3s ease; position: relative;
+  padding-bottom: 4px;
+}
+.top-bar-tab.active {
+  color: var(--text-primary);
+}
+.top-bar-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px; background: var(--accent-pink); border-radius: 2px;
+}
+.top-bar-actions {
+  display: flex; gap: 16px; align-items: center;
+}
+.top-bar-btn {
+  background: none; border: none; color: white;
+  cursor: pointer; font-size: 1.2rem; padding: 4px;
+  transition: transform 0.2s ease;
+}
+.top-bar-btn:active { transform: scale(0.85); }
+
+/* ========== REELS FEED ========== */
+.reels-container {
+  width: 100%; height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.reels-container::-webkit-scrollbar { display: none; }
+
+.reel {
+  width: 100%; height: 100vh; height: 100dvh;
+  scroll-snap-align: start;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ========== REEL VISUAL BACKGROUNDS ========== */
+.reel-visual {
+  position: absolute; inset: 0; z-index: 0;
+}
+.reel-visual canvas {
+  width: 100%; height: 100%;
+}
+
+/* ========== REEL OVERLAY GRADIENT ========== */
+.reel-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.3) 0%,
+    transparent 25%,
+    transparent 55%,
+    rgba(0,0,0,0.6) 85%,
+    rgba(0,0,0,0.85) 100%
+  );
+  pointer-events: none;
+}
+
+/* ========== REEL INFO (Bottom Left) ========== */
+.reel-info {
+  position: absolute; bottom: 80px; left: 16px; right: 70px;
+  z-index: 10;
+}
+.reel-creator {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.reel-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--accent-pink);
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 700;
+  color: white;
+}
+.reel-username {
+  font-size: 0.9rem; font-weight: 700; letter-spacing: 0.3px;
+}
+.reel-follow-btn {
+  font-size: 0.7rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 6px;
+  border: 1.5px solid var(--accent-pink);
+  background: transparent; color: var(--accent-pink);
+  cursor: pointer; transition: all 0.3s ease;
+  margin-left: 4px;
+}
+.reel-follow-btn.following {
+  background: var(--accent-pink); color: white; border-color: var(--accent-pink);
+}
+.reel-caption {
+  font-size: 0.82rem; line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+  cursor: pointer;
+}
+.reel-caption.expanded {
+  -webkit-line-clamp: unset;
+}
+.reel-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+.reel-tag {
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--accent-cyan); cursor: pointer;
+}
+.reel-music {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; color: var(--text-muted);
+}
+.reel-music-icon {
+  animation: musicSpin 3s linear infinite;
+  display: inline-flex;
+}
+@keyframes musicSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.reel-music-text {
+  max-width: 180px;
+  overflow: hidden; white-space: nowrap;
+}
+.reel-music-marquee {
+  display: inline-block;
+  animation: marquee 8s linear infinite;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ========== REEL ACTIONS (Right Side) ========== */
+.reel-actions {
+  position: absolute; right: 12px; bottom: 100px;
+  z-index: 10; display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+}
+.reel-action {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; cursor: pointer; transition: transform 0.2s ease;
+  background: none; border: none; color: white;
+}
+.reel-action:active { transform: scale(0.8); }
+.reel-action-icon {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; transition: all 0.3s ease;
+}
+.reel-action-icon.liked { color: var(--accent-pink); animation: likePopAction 0.4s ease; }
+.reel-action-count {
+  font-size: 0.65rem; font-weight: 600; color: var(--text-secondary);
+}
+@keyframes likePopAction {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ========== DOUBLE TAP HEART ========== */
+.double-tap-heart {
+  position: absolute; z-index: 50;
+  font-size: 6rem; color: var(--accent-pink);
+  pointer-events: none; opacity: 0;
+  filter: drop-shadow(0 0 30px rgba(255, 0, 110, 0.6));
+}
+.double-tap-heart.show {
+  animation: doubleTapHeart 0.9s ease forwards;
+}
+@keyframes doubleTapHeart {
+  0% { opacity: 0; transform: scale(0) rotate(-15deg); }
+  15% { opacity: 1; transform: scale(1.3) rotate(5deg); }
+  30% { transform: scale(0.95) rotate(-3deg); }
+  45% { transform: scale(1.05) rotate(1deg); }
+  60% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1) translateY(-40px); }
+}
+
+/* ========== REEL PROGRESS BAR ========== */
+.reel-progress {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 20;
+  background: rgba(255,255,255,0.15);
+}
+.reel-progress-bar {
+  height: 100%; width: 0%;
+  background: var(--gradient-main);
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ========== BOTTOM NAV ========== */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 100; height: 60px;
+  padding-bottom: var(--safe-bottom);
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%);
+  display: flex; align-items: center; justify-content: space-around;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; cursor: pointer; background: none; border: none;
+  color: var(--text-muted); transition: all 0.3s ease;
+  padding: 8px 12px;
+}
+.nav-item.active { color: white; }
+.nav-item-icon { font-size: 1.3rem; transition: transform 0.2s ease; }
+.nav-item:active .nav-item-icon { transform: scale(0.85); }
+.nav-item-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.5px; }
+.nav-create {
+  width: 40px; height: 28px; border-radius: 8px;
+  background: var(--gradient-main); border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: white; cursor: pointer;
+  box-shadow: 0 0 20px rgba(131, 56, 236, 0.4);
+  transition: all 0.3s ease;
+}
+.nav-create:active { transform: scale(0.9); }
+
+/* ========== COMMENTS PANEL ========== */
+.comments-panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 200; max-height: 70vh;
+  background: var(--bg-card);
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+}
+.comments-panel.open { transform: translateY(0); }
+.comments-backdrop {
+  position: fixed; inset: 0; z-index: 199;
+  background: rgba(0,0,0,0.5); opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.comments-backdrop.show { opacity: 1; pointer-events: all; }
+.comments-header {
+  padding: 16px 20px; display: flex;
+  align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.comments-title { font-size: 0.95rem; font-weight: 700; }
+.comments-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 1.2rem; cursor: pointer;
+}
+.comments-list {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  max-height: 50vh;
+}
+.comment {
+  display: flex; gap: 10px;
+}
+.comment-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700; color: white;
+}
+.comment-body { flex: 1; }
+.comment-user { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; }
+.comment-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+.comment-meta {
+  display: flex; gap: 12px; margin-top: 4px;
+  font-size: 0.65rem; color: var(--text-muted);
+}
+.comments-input-area {
+  padding: 12px 16px; display: flex; gap: 10px;
+  align-items: center;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+.comments-input {
+  flex: 1; padding: 10px 16px; border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: white; font-size: 0.85rem;
+  font-family: var(--font-main);
+  outline: none; transition: border-color 0.3s ease;
+}
+.comments-input:focus { border-color: var(--accent-purple); }
+.comments-input::placeholder { color: var(--text-muted); }
+.comments-send {
+  background: var(--gradient-cool); border: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1rem; cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.comments-send:active { transform: scale(0.85); }
+
+/* ========== SHARE SHEET ========== */
+.share-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 200; background: var(--bg-card);
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px 16px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+.share-sheet.open { transform: translateY(0); }
+.share-header {
+  text-align: center; font-size: 0.95rem;
+  font-weight: 700; margin-bottom: 20px;
+}
+.share-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.share-option {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  cursor: pointer; background: none; border: none; color: white;
+  transition: transform 0.2s ease;
+}
+.share-option:active { transform: scale(0.9); }
+.share-icon {
+  width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.share-label { font-size: 0.68rem; color: var(--text-secondary); }
+
+/* ========== DISCOVER PAGE ========== */
+.discover-page {
+  position: fixed; inset: 0; z-index: 150;
+  background: var(--bg-primary);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+.discover-page.open { transform: translateX(0); }
+.discover-header {
+  padding: 16px; position: sticky; top: 0;
+  background: var(--bg-primary); z-index: 10;
+}
+.discover-search {
+  width: 100%; padding: 12px 16px 12px 42px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: white; font-size: 0.9rem;
+  font-family: var(--font-main);
+  outline: none; transition: border-color 0.3s ease;
+}
+.discover-search:focus { border-color: var(--accent-purple); }
+.discover-search::placeholder { color: var(--text-muted); }
+.discover-search-icon {
+  position: absolute; left: 30px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted); font-size: 0.9rem;
+}
+.discover-section { padding: 0 16px 24px; }
+.discover-section-title {
+  font-size: 1rem; font-weight: 700;
+  margin-bottom: 14px;
+}
+.discover-stories {
+  display: flex; gap: 14px; overflow-x: auto;
+  padding-bottom: 8px; scrollbar-width: none;
+}
+.discover-stories::-webkit-scrollbar { display: none; }
+.discover-story {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px; flex-shrink: 0;
+  cursor: pointer;
+}
+.discover-story-ring {
+  width: 56px; height: 56px; border-radius: 50%;
+  padding: 2px; background: var(--gradient-main);
+}
+.discover-story-avatar {
+  width: 100%; height: 100%; border-radius: 50%;
+  border: 2px solid var(--bg-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 700; color: white;
+}
+.discover-story-name {
+  font-size: 0.65rem; color: var(--text-secondary);
+  max-width: 60px; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.trending-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.trending-tag {
+  padding: 8px 16px; border-radius: 20px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer;
+  transition: all 0.3s ease;
+}
+.trending-tag:active {
+  background: var(--accent-purple);
+  color: white; border-color: var(--accent-purple);
+}
+.discover-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+.discover-grid-item {
+  aspect-ratio: 9/16; position: relative;
+  overflow: hidden; cursor: pointer;
+  border-radius: 4px;
+}
+.discover-grid-item canvas {
+  width: 100%; height: 100%;
+}
+.discover-grid-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 8px 6px; font-size: 0.6rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  display: flex; align-items: center; gap: 4px;
+  color: white;
+}
+.discover-back {
+  position: absolute; top: 20px; right: 16px;
+  background: rgba(255,255,255,0.1); border: none;
+  color: white; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+
+/* ========== PROFILE PAGE ========== */
+.profile-page {
+  position: fixed; inset: 0; z-index: 150;
+  background: var(--bg-primary);
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+.profile-page.open { transform: translateX(0); }
+.profile-header {
+  padding: 60px 20px 20px;
+  text-align: center;
+}
+.profile-avatar-large {
+  width: 80px; height: 80px; border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; color: white;
+  border: 3px solid var(--accent-purple);
+}
+.profile-name { font-size: 1.2rem; font-weight: 800; }
+.profile-handle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.profile-bio {
+  font-size: 0.82rem; color: var(--text-secondary);
+  margin-top: 10px; line-height: 1.5; max-width: 280px;
+  margin-left: auto; margin-right: auto;
+}
+.profile-stats {
+  display: flex; justify-content: center; gap: 32px;
+  margin-top: 20px;
+}
+.profile-stat { text-align: center; }
+.profile-stat-num { font-size: 1.1rem; font-weight: 800; }
+.profile-stat-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+.profile-actions {
+  display: flex; justify-content: center; gap: 10px;
+  margin-top: 20px;
+}
+.profile-edit-btn {
+  padding: 8px 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  border: none; color: white;
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease;
+}
+.profile-edit-btn:active { background: rgba(255,255,255,0.2); }
+.profile-share-btn {
+  padding: 8px 16px; border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  border: none; color: white;
+  font-size: 0.82rem; cursor: pointer;
+}
+.profile-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px; padding: 2px; margin-top: 20px;
+}
+.profile-grid-item {
+  aspect-ratio: 9/16; position: relative;
+  overflow: hidden; background: var(--bg-card);
+  border-radius: 2px;
+}
+.profile-grid-item canvas { width: 100%; height: 100%; }
+.profile-close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.1); border: none;
+  color: white; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+
+/* ========== NOTIFICATIONS BADGE ========== */
+.notif-badge {
+  position: absolute; top: -2px; right: -4px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-pink);
+  box-shadow: 0 0 8px var(--accent-pink);
+}
+
+/* ========== SCROLL HINT ========== */
+.scroll-hint {
+  position: absolute; bottom: 90px; left: 50%;
+  transform: translateX(-50%); z-index: 15;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  animation: scrollHintFloat 2s ease-in-out infinite;
+  opacity: 0.6; pointer-events: none;
+}
+.scroll-hint-text {
+  font-size: 0.65rem; color: var(--text-muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.scroll-hint-arrow {
+  font-size: 1.2rem; color: var(--text-muted);
+}
+@keyframes scrollHintFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ========== PARTICLES ========== */
+.floating-particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+}
+
+/* ========== HAPTIC FEEDBACK (VISUAL) ========== */
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transform: scale(0); animation: rippleEffect 0.6s ease-out forwards;
+  pointer-events: none; z-index: 100;
+}
+@keyframes rippleEffect {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ========== TOAST NOTIFICATIONS ========== */
+.toast {
+  position: fixed; top: 60px; left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  z-index: 300; padding: 10px 20px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; font-size: 0.82rem;
+  font-weight: 600; color: white;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (min-width: 480px) {
+  .reels-container, .reel {
+    max-width: 420px; margin: 0 auto;
+  }
+  .top-bar, .bottom-nav {
+    max-width: 420px; margin: 0 auto;
+    left: 50%; transform: translateX(-50%);
+  }
+}
+
+/* ========== UTILITY ANIMATIONS ========== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeIn 0.5s ease forwards; }
+
+/* Paused state visual */
+.reel-paused-indicator {
+  position: absolute; z-index: 20;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: white;
+  opacity: 0; transition: opacity 0.3s ease;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+.reel-paused-indicator.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo">Weboreel</div>
+  <div class="splash-tagline">Scroll · Vibe · Repeat</div>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- APP -->
+<div id="app" style="opacity: 0;">
+
+  <!-- TOP BAR -->
+  <div class="top-bar" id="topBar">
+    <div class="top-bar-logo">Weboreel</div>
+    <div class="top-bar-tabs">
+      <div class="top-bar-tab active" data-tab="foryou">For You</div>
+      <div class="top-bar-tab" data-tab="following">Following</div>
+      <div class="top-bar-tab" data-tab="live">🔴 LIVE</div>
+    </div>
+    <div class="top-bar-actions">
+      <button class="top-bar-btn" id="searchBtn" title="Discover" style="position:relative;">
+        🔍
+      </button>
+    </div>
+  </div>
+
+  <!-- REELS FEED -->
+  <div class="reels-container" id="reelsFeed"></div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" data-page="home" id="navHome">
+      <span class="nav-item-icon">🏠</span>
+      <span class="nav-item-label">Home</span>
+    </button>
+    <button class="nav-item" data-page="discover" id="navDiscover">
+      <span class="nav-item-icon" style="position:relative;">🔍<span class="notif-badge"></span></span>
+      <span class="nav-item-label">Discover</span>
+    </button>
+    <button class="nav-item" data-page="create">
+      <span class="nav-create">＋</span>
+      <span class="nav-item-label"></span>
+    </button>
+    <button class="nav-item" data-page="inbox" id="navInbox">
+      <span class="nav-item-icon" style="position:relative;">💬<span class="notif-badge"></span></span>
+      <span class="nav-item-label">Inbox</span>
+    </button>
+    <button class="nav-item" data-page="profile" id="navProfile">
+      <span class="nav-item-icon">👤</span>
+      <span class="nav-item-label">Profile</span>
+    </button>
+  </div>
+
+  <!-- DOUBLE TAP HEART -->
+  <div class="double-tap-heart" id="doubleTapHeart">❤️</div>
+
+  <!-- COMMENTS PANEL -->
+  <div class="comments-backdrop" id="commentsBg"></div>
+  <div class="comments-panel" id="commentsPanel">
+    <div class="comments-header">
+      <span class="comments-title">Comments <span id="commentCount">0</span></span>
+      <button class="comments-close" id="commentsClose">✕</button>
+    </div>
+    <div class="comments-list" id="commentsList"></div>
+    <div class="comments-input-area">
+      <input type="text" class="comments-input" id="commentInput" placeholder="Add a comment..." maxlength="200">
+      <button class="comments-send" id="commentSend">➤</button>
+    </div>
+  </div>
+
+  <!-- SHARE SHEET -->
+  <div class="comments-backdrop" id="shareBg"></div>
+  <div class="share-sheet" id="shareSheet">
+    <div class="share-header">Share to</div>
+    <div class="share-grid">
+      <button class="share-option" data-platform="whatsapp">
+        <div class="share-icon" style="background:#25D366;">💬</div>
+        <span class="share-label">WhatsApp</span>
+      </button>
+      <button class="share-option" data-platform="instagram">
+        <div class="share-icon" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);">📷</div>
+        <span class="share-label">Instagram</span>
+      </button>
+      <button class="share-option" data-platform="twitter">
+        <div class="share-icon" style="background:#1DA1F2;">🐦</div>
+        <span class="share-label">Twitter</span>
+      </button>
+      <button class="share-option" data-platform="telegram">
+        <div class="share-icon" style="background:#0088cc;">✈️</div>
+        <span class="share-label">Telegram</span>
+      </button>
+      <button class="share-option" data-platform="copy">
+        <div class="share-icon" style="background:rgba(255,255,255,0.15);">🔗</div>
+        <span class="share-label">Copy Link</span>
+      </button>
+      <button class="share-option" data-platform="snapchat">
+        <div class="share-icon" style="background:#FFFC00; color: #000;">👻</div>
+        <span class="share-label">Snapchat</span>
+      </button>
+      <button class="share-option" data-platform="message">
+        <div class="share-icon" style="background:#34B7F1;">✉️</div>
+        <span class="share-label">Message</span>
+      </button>
+      <button class="share-option" data-platform="more">
+        <div class="share-icon" style="background:rgba(255,255,255,0.15);">⋯</div>
+        <span class="share-label">More</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- DISCOVER PAGE -->
+  <div class="discover-page" id="discoverPage">
+    <button class="discover-back" id="discoverClose">✕</button>
+    <div class="discover-header" style="position:relative;">
+      <span class="discover-search-icon">🔍</span>
+      <input type="text" class="discover-search" placeholder="Search creators, sounds, hashtags...">
+    </div>
+    <div class="discover-section">
+      <div class="discover-section-title">Stories</div>
+      <div class="discover-stories" id="discoverStories"></div>
+    </div>
+    <div class="discover-section">
+      <div class="discover-section-title">🔥 Trending</div>
+      <div class="trending-tags" id="trendingTags"></div>
+    </div>
+    <div class="discover-section">
+      <div class="discover-section-title">Explore</div>
+      <div class="discover-grid" id="discoverGrid"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE PAGE -->
+  <div class="profile-page" id="profilePage">
+    <button class="profile-close" id="profileClose">✕</button>
+    <div class="profile-header">
+      <div class="profile-avatar-large" style="background: linear-gradient(135deg, #8338EC, #FF006E);">Y</div>
+      <div class="profile-name">Your Name</div>
+      <div class="profile-handle">@yourname</div>
+      <div class="profile-bio">✨ Living my best life on Weboreel<br>🎵 Music lover | 🌍 Explorer</div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-num">247</div>
+          <div class="profile-stat-label">Following</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">12.4K</div>
+          <div class="profile-stat-label">Followers</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">89.2K</div>
+          <div class="profile-stat-label">Likes</div>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button class="profile-edit-btn">Edit Profile</button>
+        <button class="profile-share-btn">📤</button>
+      </div>
+    </div>
+    <div class="profile-grid" id="profileGrid"></div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ========== WEBOREEL APP ENGINE ==========
+
+// -- DATA --
+const CREATORS = [
+  { name: 'VibeCheck', handle: '@vibecheck', emoji: '🎵', color: '#FF006E', followers: '2.1M' },
+  { name: 'NeonDreams', handle: '@neondreams', emoji: '🌌', color: '#8338EC', followers: '890K' },
+  { name: 'PixelWave', handle: '@pixelwave', emoji: '🎮', color: '#00F5FF', followers: '1.5M' },
+  { name: 'SunsetVibes', handle: '@sunsetvibes', emoji: '🌅', color: '#FF6B35', followers: '3.2M' },
+  { name: 'CosmicDust', handle: '@cosmicdust', emoji: '🌟', color: '#FFD600', followers: '670K' },
+  { name: 'AquaFlow', handle: '@aquaflow', emoji: '🌊', color: '#0099FF', followers: '1.8M' },
+  { name: 'FireStorm', handle: '@firestorm', emoji: '🔥', color: '#FF4500', followers: '4.5M' },
+  { name: 'LunaLight', handle: '@lunalight', emoji: '🌙', color: '#C9B1FF', followers: '920K' },
+  { name: 'ElectroVibes', handle: '@electrovibes', emoji: '⚡', color: '#00E676', followers: '2.7M' },
+  { name: 'CrystalClear', handle: '@crystalclear', emoji: '💎', color: '#00BCD4', followers: '1.1M' },
+  { name: 'MidnightRun', handle: '@midnightrun', emoji: '🏃', color: '#3F51B5', followers: '560K' },
+  { name: 'GlowUp', handle: '@glowup', emoji: '✨', color: '#E040FB', followers: '5.1M' },
+];
+
+const CAPTIONS = [
+  "This hit different at 3am 🌙✨ #NightVibes #Aesthetic",
+  "POV: You discovered a whole new dimension 🔮 #MindBlown",
+  "The algorithm brought you here for a reason 👀 #ForYou",
+  "Wait for the drop... 🎵🔥 #Music #Vibes",
+  "Can't stop watching this 😍 #Satisfying #Loop",
+  "This is what perfection looks like ✨ #Art #Digital",
+  "Who else feels this energy? ⚡ #Mood #Energy",
+  "Lost in the sauce rn 🤤 #Vibe #Chill",
+  "Main character energy activated 💅 #MainCharacter",
+  "The universe said: here you go ✨ #Manifest",
+  "This transition tho 🔄🤯 #Transition #Smooth",
+  "Rent free in my head 🧠 #Viral #Trending",
+  "Tell me you're gen-z without telling me 💀 #GenZ",
+  "No thoughts, just vibes 🫧 #JustVibes",
+  "Obsessed with this aesthetic 🎨 #Aesthetic #Core",
+];
+
+const MUSIC_TRACKS = [
+  "Blinding Lights - The Weeknd",
+  "Levitating - Dua Lipa",
+  "Sunflower - Post Malone",
+  "Starboy - The Weeknd",
+  "STAY - Kid Laroi & Justin Bieber",
+  "Circles - Post Malone",
+  "Peaches - Justin Bieber",
+  "Heat Waves - Glass Animals",
+  "Bad Guy - Billie Eilish",
+  "Watermelon Sugar - Harry Styles",
+  "Save Your Tears - The Weeknd",
+  "Montero - Lil Nas X",
+];
+
+const TAGS = [
+  '#fyp', '#viral', '#trending', '#aesthetic', '#vibe',
+  '#foryou', '#art', '#satisfying', '#music', '#edits',
+  '#nightvibes', '#genzcontent', '#moodboard', '#dreamcore',
+];
+
+const COMMENT_USERS = [
+  'dreamchaser99', 'vibes.only', 'nocap.fr', 'aesthetic.era',
+  'main.character', 'slay.daily', 'no.filter', 'chaos.mode',
+  'rent.free', 'its.giving', 'lowkey.fire', 'valid.af',
+  'periodt.sis', 'elite.taste', 'vibe.catcher',
+];
+
+const COMMENT_TEXTS = [
+  "bro this is insane 🔥🔥",
+  "the way I can't stop watching 😭",
+  "this is so satisfying omg",
+  "rent free in my head fr",
+  "no because WHY is this so good",
+  "the vibes are immaculate ✨",
+  "obsessed with this 😍",
+  "someone explain how this is so perfect",
+  "this hits different at 2am",
+  "sending this to everyone I know 💀",
+  "the algorithm really said: this one 👆",
+  "I've watched this 47 times help",
+  "POV: you found peak content",
+  "this person is NOT real 🤯",
+  "main character energy fr fr",
+  "how is this not viral yet??",
+  "crying, screaming, throwing up (in a good way)",
+  "this unlocked a core memory",
+  "the talent jumped OUT",
+  "no thoughts just pure vibes 🫧",
+];
+
+// -- VISUAL GENERATORS (Canvas Animations) --
+const VISUAL_TYPES = [
+  'aurora', 'particles', 'waves', 'geometric', 'nebula',
+  'matrix', 'fireflies', 'gradientBlob', 'starfield', 'plasma',
+  'crystals', 'neonGrid'
+];
+
+class VisualEngine {
+  constructor(canvas, type, colorScheme) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.type = type;
+    this.colors = colorScheme;
+    this.time = Math.random() * 1000;
+    this.particles = [];
+    this.running = false;
+    this.rafId = null;
+    this.resize();
+    this.init();
+  }
+
+  resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = this.canvas.getBoundingClientRect();
+    this.w = rect.width || window.innerWidth;
+    this.h = rect.height || window.innerHeight;
+    this.canvas.width = this.w * dpr;
+    this.canvas.height = this.h * dpr;
+    this.ctx.scale(dpr, dpr);
+  }
+
+  init() {
+    switch(this.type) {
+      case 'particles': this.initParticles(); break;
+      case 'fireflies': this.initFireflies(); break;
+      case 'starfield': this.initStarfield(); break;
+      case 'crystals': this.initCrystals(); break;
+      default: break;
+    }
+  }
+
+  initParticles() {
+    this.particles = Array.from({ length: 60 }, () => ({
+      x: Math.random() * this.w,
+      y: Math.random() * this.h,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.8,
+      r: Math.random() * 3 + 1,
+      color: this.colors[Math.floor(Math.random() * this.colors.length)],
+    }));
+  }
+
+  initFireflies() {
+    this.particles = Array.from({ length: 35 }, () => ({
+      x: Math.random() * this.w,
+      y: Math.random() * this.h,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 4 + 2,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.02 + 0.01,
+      color: this.colors[Math.floor(Math.random() * this.colors.length)],
+    }));
+  }
+
+  initStarfield() {
+    this.particles = Array.from({ length: 150 }, () => ({
+      x: Math.random() * this.w,
+      y: Math.random() * this.h,
+      z: Math.random() * 1000,
+      speed: Math.random() * 2 + 0.5,
+    }));
+  }
+
+  initCrystals() {
+    this.particles = Array.from({ length: 12 }, () => ({
+      x: Math.random() * this.w,
+      y: Math.random() * this.h,
+      size: Math.random() * 60 + 30,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.01,
+      vy: -(Math.random() * 0.3 + 0.1),
+      color: this.colors[Math.floor(Math.random() * this.colors.length)],
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.loop();
+  }
+
+  stop() {
+    this.running = false;
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+  }
+
+  loop() {
+    if (!this.running) return;
+    this.time += 0.016;
+    this.draw();
+    this.rafId = requestAnimationFrame(() => this.loop());
+  }
+
+  draw() {
+    const ctx = this.ctx;
+    switch(this.type) {
+      case 'aurora': this.drawAurora(ctx); break;
+      case 'particles': this.drawParticles(ctx); break;
+      case 'waves': this.drawWaves(ctx); break;
+      case 'geometric': this.drawGeometric(ctx); break;
+      case 'nebula': this.drawNebula(ctx); break;
+      case 'matrix': this.drawMatrix(ctx); break;
+      case 'fireflies': this.drawFireflies(ctx); break;
+      case 'gradientBlob': this.drawGradientBlob(ctx); break;
+      case 'starfield': this.drawStarfield(ctx); break;
+      case 'plasma': this.drawPlasma(ctx); break;
+      case 'crystals': this.drawCrystals(ctx); break;
+      case 'neonGrid': this.drawNeonGrid(ctx); break;
+    }
+  }
+
+  drawAurora(ctx) {
+    ctx.fillStyle = '#0a0014';
+    ctx.fillRect(0, 0, this.w, this.h);
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      const y = this.h * 0.3 + Math.sin(this.time * 0.5 + i) * 60;
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= this.w; x += 5) {
+        const cy = y + Math.sin(x * 0.005 + this.time * (0.3 + i * 0.1)) * (40 + i * 15)
+                     + Math.sin(x * 0.01 + this.time * 0.2) * 20;
+        ctx.lineTo(x, cy);
+      }
+      ctx.lineTo(this.w, this.h);
+      ctx.lineTo(0, this.h);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, y - 100, 0, this.h);
+      grad.addColorStop(0, this.colors[i % this.colors.length] + '40');
+      grad.addColorStop(0.5, this.colors[(i + 1) % this.colors.length] + '20');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+    // Stars
+    for (let i = 0; i < 50; i++) {
+      const sx = (Math.sin(i * 127.1) * 0.5 + 0.5) * this.w;
+      const sy = (Math.sin(i * 311.7) * 0.5 + 0.5) * this.h * 0.5;
+      const twinkle = Math.sin(this.time * 2 + i) * 0.5 + 0.5;
+      ctx.fillStyle = `rgba(255,255,255,${twinkle * 0.8})`;
+      ctx.fillRect(sx, sy, 1.5, 1.5);
+    }
+  }
+
+  drawParticles(ctx) {
+    ctx.fillStyle = '#08080f';
+    ctx.fillRect(0, 0, this.w, this.h);
+    // Connections
+    for (let i = 0; i < this.particles.length; i++) {
+      const p = this.particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > this.w) p.vx *= -1;
+      if (p.y < 0 || p.y > this.h) p.vy *= -1;
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const q = this.particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = `rgba(131,56,236,${(1 - dist / 120) * 0.3})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    }
+  }
+
+  drawWaves(ctx) {
+    const grad = ctx.createLinearGradient(0, 0, 0, this.h);
+    grad.addColorStop(0, '#0a0020');
+    grad.addColorStop(1, '#1a0030');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, this.w, this.h);
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, this.h);
+      for (let x = 0; x <= this.w; x += 3) {
+        const y = this.h * (0.5 + i * 0.08)
+          + Math.sin(x * 0.008 + this.time * (0.5 + i * 0.15) + i * 0.8) * (30 + i * 10)
+          + Math.sin(x * 0.015 + this.time * 0.3) * 15;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(this.w, this.h);
+      ctx.closePath();
+      ctx.fillStyle = this.colors[i % this.colors.length] + (i < 3 ? '25' : '15');
+      ctx.fill();
+    }
+  }
+
+  drawGeometric(ctx) {
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(0, 0, this.w, this.h);
+    const cx = this.w / 2, cy = this.h / 2;
+    for (let i = 0; i < 8; i++) {
+      const angle = this.time * 0.3 + (i * Math.PI * 2 / 8);
+      const radius = 80 + i * 25 + Math.sin(this.time + i) * 20;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      const sides = 3 + (i % 4);
+      for (let s = 0; s <= sides; s++) {
+        const a = (s / sides) * Math.PI * 2;
+        const x = Math.cos(a) * radius;
+        const y = Math.sin(a) * radius;
+        s === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = this.colors[i % this.colors.length] + '80';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+    // Center glow
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
+    grd.addColorStop(0, this.colors[0] + '30');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, this.w, this.h);
+  }
+
+  drawNebula(ctx) {
+    ctx.fillStyle = 'rgba(5,0,15,0.15)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    for (let i = 0; i < 3; i++) {
+      const x = this.w * (0.3 + 0.2 * i) + Math.sin(this.time * 0.2 + i * 2) * 80;
+      const y = this.h * (0.3 + 0.15 * i) + Math.cos(this.time * 0.15 + i) * 60;
+      const r = 150 + Math.sin(this.time * 0.3 + i) * 50;
+      const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grd.addColorStop(0, this.colors[i % this.colors.length] + '40');
+      grd.addColorStop(0.5, this.colors[(i + 1) % this.colors.length] + '15');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, this.w, this.h);
+    }
+    // Sparkles
+    for (let i = 0; i < 30; i++) {
+      const sx = (Math.sin(i * 127 + this.time * 0.1) * 0.5 + 0.5) * this.w;
+      const sy = (Math.cos(i * 311 + this.time * 0.08) * 0.5 + 0.5) * this.h;
+      const bright = Math.sin(this.time * 3 + i * 0.7) * 0.5 + 0.5;
+      ctx.fillStyle = `rgba(255,255,255,${bright * 0.6})`;
+      ctx.fillRect(sx, sy, 1.5, 1.5);
+    }
+  }
+
+  drawMatrix(ctx) {
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    if (!this._matrixDrops) {
+      const cols = Math.floor(this.w / 14);
+      this._matrixDrops = Array.from({ length: cols }, () => Math.random() * this.h);
+    }
+    ctx.fillStyle = this.colors[0] || '#00E676';
+    ctx.font = '12px monospace';
+    for (let i = 0; i < this._matrixDrops.length; i++) {
+      const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+      const x = i * 14;
+      const y = this._matrixDrops[i];
+      ctx.globalAlpha = 0.9;
+      ctx.fillText(char, x, y);
+      ctx.globalAlpha = 0.3;
+      ctx.fillText(char, x, y - 14);
+      if (y > this.h && Math.random() > 0.975) {
+        this._matrixDrops[i] = 0;
+      }
+      this._matrixDrops[i] += 14;
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  drawFireflies(ctx) {
+    ctx.fillStyle = 'rgba(5,5,20,0.12)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    // Background gradient
+    if (Math.floor(this.time * 60) % 300 === 0) {
+      const grad = ctx.createRadialGradient(this.w/2, this.h/2, 0, this.w/2, this.h/2, this.h*0.6);
+      grad.addColorStop(0, 'rgba(10,0,30,0.3)');
+      grad.addColorStop(1, 'rgba(5,5,15,0.3)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, this.w, this.h);
+    }
+    for (const p of this.particles) {
+      p.phase += p.speed;
+      p.x += p.vx + Math.sin(p.phase) * 0.3;
+      p.y += p.vy + Math.cos(p.phase) * 0.3;
+      if (p.x < 0) p.x = this.w;
+      if (p.x > this.w) p.x = 0;
+      if (p.y < 0) p.y = this.h;
+      if (p.y > this.h) p.y = 0;
+      const glow = Math.sin(p.phase) * 0.5 + 0.5;
+      const r = p.r * (0.5 + glow * 0.5);
+      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+      grd.addColorStop(0, p.color + Math.floor(glow * 200).toString(16).padStart(2, '0'));
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.fillRect(p.x - r * 4, p.y - r * 4, r * 8, r * 8);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${glow * 0.8})`;
+      ctx.fill();
+    }
+  }
+
+  drawGradientBlob(ctx) {
+    ctx.fillStyle = '#08080f';
+    ctx.fillRect(0, 0, this.w, this.h);
+    for (let i = 0; i < 4; i++) {
+      const x = this.w * 0.5 + Math.sin(this.time * 0.3 + i * 1.5) * this.w * 0.3;
+      const y = this.h * 0.5 + Math.cos(this.time * 0.25 + i * 2) * this.h * 0.25;
+      const r = 120 + Math.sin(this.time * 0.4 + i) * 40;
+      const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grd.addColorStop(0, this.colors[i % this.colors.length] + '50');
+      grd.addColorStop(0.6, this.colors[(i + 1) % this.colors.length] + '20');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      // Blob shape
+      for (let a = 0; a < Math.PI * 2; a += 0.1) {
+        const br = r + Math.sin(a * 3 + this.time + i) * 30 + Math.cos(a * 5 - this.time * 0.5) * 15;
+        const bx = x + Math.cos(a) * br;
+        const by = y + Math.sin(a) * br;
+        a === 0 ? ctx.moveTo(bx, by) : ctx.lineTo(bx, by);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  drawStarfield(ctx) {
+    ctx.fillStyle = 'rgba(0,0,10,0.25)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    const cx = this.w / 2, cy = this.h / 2;
+    for (const p of this.particles) {
+      p.z -= p.speed * 3;
+      if (p.z <= 0) {
+        p.z = 1000;
+        p.x = Math.random() * this.w;
+        p.y = Math.random() * this.h;
+      }
+      const sx = (p.x - cx) * (800 / p.z) + cx;
+      const sy = (p.y - cy) * (800 / p.z) + cy;
+      const r = Math.max(0, (1 - p.z / 1000) * 2.5);
+      const brightness = 1 - p.z / 1000;
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${brightness})`;
+      ctx.fill();
+    }
+  }
+
+  drawPlasma(ctx) {
+    const t = this.time;
+    const imgData = ctx.createImageData(Math.ceil(this.w / 4), Math.ceil(this.h / 4));
+    const c1 = this.hexToRgb(this.colors[0]);
+    const c2 = this.hexToRgb(this.colors[1] || this.colors[0]);
+    const c3 = this.hexToRgb(this.colors[2] || this.colors[0]);
+    for (let y = 0; y < imgData.height; y++) {
+      for (let x = 0; x < imgData.width; x++) {
+        const px = x * 4, py = y * 4;
+        const v1 = Math.sin(px * 0.02 + t);
+        const v2 = Math.sin(py * 0.02 + t * 0.7);
+        const v3 = Math.sin((px + py) * 0.015 + t * 0.5);
+        const v4 = Math.sin(Math.sqrt(px * px + py * py) * 0.01 + t * 0.8);
+        const v = (v1 + v2 + v3 + v4) / 4;
+        const idx = (y * imgData.width + x) * 4;
+        const mix = v * 0.5 + 0.5;
+        const mix2 = (v + 1) * 0.25;
+        imgData.data[idx] = c1.r * mix + c2.r * (1 - mix);
+        imgData.data[idx + 1] = c1.g * mix2 + c3.g * (1 - mix2);
+        imgData.data[idx + 2] = c2.b * mix + c3.b * (1 - mix);
+        imgData.data[idx + 3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    ctx.drawImage(this.canvas, 0, 0, imgData.width, imgData.height, 0, 0, this.w, this.h);
+  }
+
+  drawCrystals(ctx) {
+    ctx.fillStyle = 'rgba(5,5,15,0.06)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    // Background base repaint
+    if (Math.floor(this.time * 60) % 600 === 0) {
+      const g = ctx.createLinearGradient(0, 0, 0, this.h);
+      g.addColorStop(0, '#050515');
+      g.addColorStop(1, '#0a0a20');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, this.w, this.h);
+    }
+    for (const p of this.particles) {
+      p.rotation += p.rotSpeed;
+      p.y += p.vy;
+      if (p.y + p.size < 0) {
+        p.y = this.h + p.size;
+        p.x = Math.random() * this.w;
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.beginPath();
+      // Diamond shape
+      ctx.moveTo(0, -p.size);
+      ctx.lineTo(p.size * 0.4, 0);
+      ctx.lineTo(0, p.size);
+      ctx.lineTo(-p.size * 0.4, 0);
+      ctx.closePath();
+      ctx.fillStyle = p.color + Math.floor(p.opacity * 255).toString(16).padStart(2, '0');
+      ctx.fill();
+      ctx.strokeStyle = p.color + '40';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  drawNeonGrid(ctx) {
+    ctx.fillStyle = 'rgba(5,0,15,0.15)';
+    ctx.fillRect(0, 0, this.w, this.h);
+    const gridSize = 40;
+    const offsetX = (this.time * 10) % gridSize;
+    const offsetY = (this.time * 15) % gridSize;
+    // Perspective grid
+    ctx.strokeStyle = this.colors[0] + '25';
+    ctx.lineWidth = 0.5;
+    // Horizontal lines
+    for (let y = 0; y < this.h; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y + offsetY);
+      ctx.lineTo(this.w, y + offsetY);
+      ctx.stroke();
+    }
+    // Vertical lines
+    for (let x = 0; x < this.w; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x + offsetX, 0);
+      ctx.lineTo(x + offsetX, this.h);
+      ctx.stroke();
+    }
+    // Glowing sun/sphere
+    const sunY = this.h * 0.35 + Math.sin(this.time * 0.3) * 20;
+    for (let i = 3; i >= 0; i--) {
+      const r = 60 + i * 30;
+      const grd = ctx.createRadialGradient(this.w / 2, sunY, 0, this.w / 2, sunY, r);
+      grd.addColorStop(0, this.colors[1] + '60');
+      grd.addColorStop(0.5, this.colors[0] + '20');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, this.w, this.h);
+    }
+    // Horizontal glow lines
+    for (let i = 0; i < 5; i++) {
+      const ly = sunY + 80 + i * 25;
+      ctx.beginPath();
+      ctx.moveTo(0, ly);
+      ctx.lineTo(this.w, ly);
+      ctx.strokeStyle = this.colors[i % this.colors.length] + '40';
+      ctx.lineWidth = 1 + Math.sin(this.time + i) * 0.5;
+      ctx.stroke();
+    }
+  }
+
+  hexToRgb(hex) {
+    if (!hex) return { r: 128, g: 0, b: 255 };
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    } : { r: 128, g: 0, b: 255 };
+  }
+}
+
+// -- COLOR SCHEMES --
+const COLOR_SCHEMES = [
+  ['#FF006E', '#8338EC', '#00F5FF'],
+  ['#FF6B35', '#FFD600', '#FF006E'],
+  ['#00F5FF', '#8338EC', '#00E676'],
+  ['#FF006E', '#FF6B35', '#FFD600'],
+  ['#8338EC', '#C9B1FF', '#00F5FF'],
+  ['#00E676', '#00F5FF', '#8338EC'],
+  ['#FF4500', '#FF006E', '#FFD600'],
+  ['#0099FF', '#00F5FF', '#8338EC'],
+  ['#E040FB', '#FF006E', '#8338EC'],
+  ['#FFD600', '#FF6B35', '#FF006E'],
+  ['#00BCD4', '#00E676', '#8338EC'],
+  ['#3F51B5', '#00F5FF', '#E040FB'],
+];
+
+// -- APP STATE --
+const state = {
+  reels: [],
+  currentReel: 0,
+  lastTap: 0,
+  commentsOpen: false,
+  shareOpen: false,
+  discoverOpen: false,
+  profileOpen: false,
+  visuals: new Map(),
+  progressIntervals: new Map(),
+};
+
+// -- GENERATE REELS DATA --
+function generateReels(count) {
+  const reels = [];
+  for (let i = 0; i < count; i++) {
+    const creator = CREATORS[i % CREATORS.length];
+    const visualType = VISUAL_TYPES[i % VISUAL_TYPES.length];
+    const colorScheme = COLOR_SCHEMES[i % COLOR_SCHEMES.length];
+    reels.push({
+      id: i,
+      creator,
+      caption: CAPTIONS[i % CAPTIONS.length],
+      tags: TAGS.sort(() => Math.random() - 0.5).slice(0, 3),
+      music: MUSIC_TRACKS[i % MUSIC_TRACKS.length],
+      likes: Math.floor(Math.random() * 500000) + 10000,
+      comments: Math.floor(Math.random() * 5000) + 100,
+      shares: Math.floor(Math.random() * 10000) + 500,
+      bookmarks: Math.floor(Math.random() * 20000) + 200,
+      liked: false,
+      bookmarked: false,
+      following: false,
+      visualType,
+      colorScheme,
+    });
+  }
+  return reels;
+}
+
+function formatCount(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function generateComments() {
+  const count = Math.floor(Math.random() * 8) + 4;
+  const comments = [];
+  const shuffled = COMMENT_USERS.sort(() => Math.random() - 0.5);
+  const texts = COMMENT_TEXTS.sort(() => Math.random() - 0.5);
+  const times = ['2m', '5m', '12m', '23m', '1h', '2h', '4h', '8h', '12h', '1d', '2d', '3d'];
+  for (let i = 0; i < count; i++) {
+    const colors = ['#FF006E', '#8338EC', '#00F5FF', '#FF6B35', '#00E676', '#FFD600', '#E040FB'];
+    comments.push({
+      user: shuffled[i % shuffled.length],
+      text: texts[i % texts.length],
+      time: times[i % times.length],
+      likes: Math.floor(Math.random() * 500),
+      color: colors[i % colors.length],
+    });
+  }
+  return comments;
+}
+
+// -- RENDER REEL HTML --
+function createReelHTML(reel, index) {
+  const el = document.createElement('div');
+  el.className = 'reel';
+  el.dataset.index = index;
+  el.innerHTML = `
+    <div class="reel-visual"><canvas id="reelCanvas${index}"></canvas></div>
+    <div class="reel-overlay"></div>
+    <div class="reel-progress"><div class="reel-progress-bar" id="progress${index}"></div></div>
+    <div class="reel-paused-indicator" id="pauseInd${index}">▶</div>
+
+    <div class="reel-info">
+      <div class="reel-creator">
+        <div class="reel-avatar" style="background:${reel.creator.color};">${reel.creator.emoji}</div>
+        <span class="reel-username">${reel.creator.name}</span>
+        <button class="reel-follow-btn ${reel.following ? 'following' : ''}" data-reel="${index}">
+          ${reel.following ? 'Following' : 'Follow'}
+        </button>
+      </div>
+      <div class="reel-caption" data-expanded="false">${reel.caption}</div>
+      <div class="reel-tags">${reel.tags.map(t => `<span class="reel-tag">${t}</span>`).join(' ')}</div>
+      <div class="reel-music">
+        <span class="reel-music-icon">🎵</span>
+        <span class="reel-music-text">
+          <span class="reel-music-marquee">${reel.music} · ${reel.music}</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="reel-actions">
+      <button class="reel-action" id="likeBtn${index}" data-action="like" data-reel="${index}">
+        <span class="reel-action-icon" id="likeIcon${index}">${reel.liked ? '❤️' : '🤍'}</span>
+        <span class="reel-action-count" id="likeCount${index}">${formatCount(reel.likes)}</span>
+      </button>
+      <button class="reel-action" data-action="comment" data-reel="${index}">
+        <span class="reel-action-icon">💬</span>
+        <span class="reel-action-count">${formatCount(reel.comments)}</span>
+      </button>
+      <button class="reel-action" data-action="share" data-reel="${index}">
+        <span class="reel-action-icon">📤</span>
+        <span class="reel-action-count">${formatCount(reel.shares)}</span>
+      </button>
+      <button class="reel-action" id="bookmarkBtn${index}" data-action="bookmark" data-reel="${index}">
+        <span class="reel-action-icon" id="bookmarkIcon${index}">${reel.bookmarked ? '🔖' : '🏷️'}</span>
+        <span class="reel-action-count" id="bookmarkCount${index}">${formatCount(reel.bookmarks)}</span>
+      </button>
+      <div class="reel-action" style="cursor:default;">
+        <div class="reel-avatar" style="background:${reel.creator.color}; width:28px; height:28px; font-size:0.7rem; border-width:1.5px;">
+          ${reel.creator.emoji}
+        </div>
+      </div>
+    </div>
+
+    ${index === 0 ? `
+    <div class="scroll-hint" id="scrollHint">
+      <span class="scroll-hint-text">Swipe up</span>
+      <span class="scroll-hint-arrow">⌄</span>
+    </div>` : ''}
+  `;
+  return el;
+}
+
+// -- INIT VISUAL FOR A REEL --
+function initVisual(index) {
+  const reel = state.reels[index];
+  if (state.visuals.has(index)) return;
+  const canvas = document.getElementById(`reelCanvas${index}`);
+  if (!canvas) return;
+  const engine = new VisualEngine(canvas, reel.visualType, reel.colorScheme);
+  state.visuals.set(index, engine);
+}
+
+function startVisual(index) {
+  const engine = state.visuals.get(index);
+  if (engine) engine.start();
+}
+
+function stopVisual(index) {
+  const engine = state.visuals.get(index);
+  if (engine) engine.stop();
+}
+
+// -- PROGRESS BAR --
+function startProgress(index) {
+  stopProgress(index);
+  const bar = document.getElementById(`progress${index}`);
+  if (!bar) return;
+  bar.style.width = '0%';
+  let start = Date.now();
+  const duration = 15000; // 15s per reel
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.min((elapsed / duration) * 100, 100);
+    bar.style.width = pct + '%';
+    if (pct >= 100) {
+      bar.style.width = '0%';
+      start = Date.now(); // Loop
+    }
+  }, 50);
+  state.progressIntervals.set(index, interval);
+}
+
+function stopProgress(index) {
+  const interval = state.progressIntervals.get(index);
+  if (interval) {
+    clearInterval(interval);
+    state.progressIntervals.delete(index);
+  }
+}
+
+// -- SCROLL HANDLING --
+function handleScroll() {
+  const container = document.getElementById('reelsFeed');
+  const viewH = window.innerHeight;
+  const scrollTop = container.scrollTop;
+  const newIndex = Math.round(scrollTop / viewH);
+
+  if (newIndex !== state.currentReel) {
+    stopVisual(state.currentReel);
+    stopProgress(state.currentReel);
+    state.currentReel = newIndex;
+    initVisual(newIndex);
+    startVisual(newIndex);
+    startProgress(newIndex);
+
+    // Pre-load neighbors
+    if (newIndex > 0) initVisual(newIndex - 1);
+    if (newIndex < state.reels.length - 1) initVisual(newIndex + 1);
+
+    // Hide scroll hint
+    const hint = document.getElementById('scrollHint');
+    if (hint) hint.style.display = 'none';
+
+    // Infinite scroll: add more reels when near end
+    if (newIndex >= state.reels.length - 3) {
+      loadMoreReels();
+    }
+  }
+}
+
+function loadMoreReels() {
+  const container = document.getElementById('reelsFeed');
+  const start = state.reels.length;
+  const newReels = generateReels(5);
+  newReels.forEach((r, i) => {
+    r.id = start + i;
+    state.reels.push(r);
+    const el = createReelHTML(r, start + i);
+    container.appendChild(el);
+  });
+}
+
+// -- DOUBLE TAP TO LIKE --
+function handleDoubleTap(e, reelEl) {
+  const now = Date.now();
+  if (now - state.lastTap < 300) {
+    const index = parseInt(reelEl.dataset.index);
+    const reel = state.reels[index];
+    if (!reel.liked) {
+      reel.liked = true;
+      reel.likes++;
+      updateLikeUI(index);
+    }
+    // Show heart animation
+    const heart = document.getElementById('doubleTapHeart');
+    const rect = reelEl.getBoundingClientRect();
+    heart.style.left = (e.clientX || e.touches?.[0]?.clientX || rect.width / 2) - 40 + 'px';
+    heart.style.top = (e.clientY || e.touches?.[0]?.clientY || rect.height / 2) - 40 + 'px';
+    heart.classList.remove('show');
+    void heart.offsetWidth;
+    heart.classList.add('show');
+    setTimeout(() => heart.classList.remove('show'), 1000);
+  }
+  state.lastTap = now;
+}
+
+function updateLikeUI(index) {
+  const reel = state.reels[index];
+  const icon = document.getElementById(`likeIcon${index}`);
+  const count = document.getElementById(`likeCount${index}`);
+  if (icon) {
+    icon.textContent = reel.liked ? '❤️' : '🤍';
+    if (reel.liked) icon.classList.add('liked');
+    else icon.classList.remove('liked');
+  }
+  if (count) count.textContent = formatCount(reel.likes);
+}
+
+// -- ACTION HANDLERS --
+function handleAction(action, reelIndex) {
+  const reel = state.reels[reelIndex];
+  switch(action) {
+    case 'like':
+      reel.liked = !reel.liked;
+      reel.likes += reel.liked ? 1 : -1;
+      updateLikeUI(reelIndex);
+      if (reel.liked) showToast('❤️ Liked!');
+      break;
+    case 'comment':
+      openComments(reelIndex);
+      break;
+    case 'share':
+      openShare();
+      break;
+    case 'bookmark':
+      reel.bookmarked = !reel.bookmarked;
+      reel.bookmarks += reel.bookmarked ? 1 : -1;
+      const bIcon = document.getElementById(`bookmarkIcon${reelIndex}`);
+      const bCount = document.getElementById(`bookmarkCount${reelIndex}`);
+      if (bIcon) bIcon.textContent = reel.bookmarked ? '🔖' : '🏷️';
+      if (bCount) bCount.textContent = formatCount(reel.bookmarks);
+      showToast(reel.bookmarked ? '🔖 Saved!' : 'Removed from saved');
+      break;
+  }
+}
+
+// -- COMMENTS --
+function openComments(reelIndex) {
+  state.commentsOpen = true;
+  const panel = document.getElementById('commentsPanel');
+  const bg = document.getElementById('commentsBg');
+  const list = document.getElementById('commentsList');
+  const countEl = document.getElementById('commentCount');
+
+  const comments = generateComments();
+  countEl.textContent = comments.length;
+  list.innerHTML = comments.map(c => `
+    <div class="comment">
+      <div class="comment-avatar" style="background:${c.color};">${c.user[0].toUpperCase()}</div>
+      <div class="comment-body">
+        <div class="comment-user">${c.user}</div>
+        <div class="comment-text">${c.text}</div>
+        <div class="comment-meta">
+          <span>${c.time}</span>
+          <span style="cursor:pointer;">Reply</span>
+          <span style="cursor:pointer;">❤️ ${c.likes}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  panel.classList.add('open');
+  bg.classList.add('show');
+}
+
+function closeComments() {
+  state.commentsOpen = false;
+  document.getElementById('commentsPanel').classList.remove('open');
+  document.getElementById('commentsBg').classList.remove('show');
+}
+
+// -- SHARE --
+function openShare() {
+  state.shareOpen = true;
+  document.getElementById('shareSheet').classList.add('open');
+  document.getElementById('shareBg').classList.add('show');
+}
+
+function closeShare() {
+  state.shareOpen = false;
+  document.getElementById('shareSheet').classList.remove('open');
+  document.getElementById('shareBg').classList.remove('show');
+}
+
+// -- TOAST --
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// -- DISCOVER PAGE --
+function openDiscover() {
+  state.discoverOpen = true;
+  document.getElementById('discoverPage').classList.add('open');
+  populateDiscover();
+}
+
+function closeDiscover() {
+  state.discoverOpen = false;
+  document.getElementById('discoverPage').classList.remove('open');
+}
+
+function populateDiscover() {
+  // Stories
+  const storiesContainer = document.getElementById('discoverStories');
+  if (storiesContainer.children.length === 0) {
+    const storyColors = ['#FF006E', '#8338EC', '#00F5FF', '#FF6B35', '#FFD600', '#00E676', '#E040FB', '#0099FF'];
+    const storyNames = ['your_story', 'vibecheck', 'neondreams', 'pixelwave', 'sunsetvibes', 'cosmicdust', 'aquaflow', 'firestorm'];
+    const storyEmojis = ['✚', '🎵', '🌌', '🎮', '🌅', '🌟', '🌊', '🔥'];
+    storyNames.forEach((name, i) => {
+      const story = document.createElement('div');
+      story.className = 'discover-story';
+      story.innerHTML = `
+        <div class="discover-story-ring" ${i === 0 ? 'style="background:rgba(255,255,255,0.2);"' : ''}>
+          <div class="discover-story-avatar" style="background:${storyColors[i]};">${storyEmojis[i]}</div>
+        </div>
+        <span class="discover-story-name">${name}</span>
+      `;
+      storiesContainer.appendChild(story);
+    });
+  }
+
+  // Trending tags
+  const tagsContainer = document.getElementById('trendingTags');
+  if (tagsContainer.children.length === 0) {
+    const trendingList = ['#DreamCore', '#NeonVibes', '#Y2K', '#Cottagecore', '#DarkAcademia',
+      '#Liminalspaces', '#Synthwave', '#LoFi', '#Retro', '#Cyberpunk',
+      '#Aesthetic', '#GlowUp', '#GRWM', '#Transition'];
+    trendingList.forEach(tag => {
+      const el = document.createElement('div');
+      el.className = 'trending-tag';
+      el.textContent = tag;
+      tagsContainer.appendChild(el);
+    });
+  }
+
+  // Grid
+  const grid = document.getElementById('discoverGrid');
+  if (grid.children.length === 0) {
+    for (let i = 0; i < 12; i++) {
+      const item = document.createElement('div');
+      item.className = 'discover-grid-item';
+      const canvas = document.createElement('canvas');
+      item.appendChild(canvas);
+      const views = formatCount(Math.floor(Math.random() * 1000000) + 5000);
+      const overlay = document.createElement('div');
+      overlay.className = 'discover-grid-overlay';
+      overlay.innerHTML = `▶ ${views}`;
+      item.appendChild(overlay);
+      grid.appendChild(item);
+      // Mini visual
+      setTimeout(() => {
+        const type = VISUAL_TYPES[i % VISUAL_TYPES.length];
+        const colors = COLOR_SCHEMES[i % COLOR_SCHEMES.length];
+        const engine = new VisualEngine(canvas, type, colors);
+        engine.start();
+        // Only run for a frame to save perf, then stop
+        setTimeout(() => engine.stop(), 100);
+      }, i * 50);
+    }
+  }
+}
+
+// -- PROFILE PAGE --
+function openProfile() {
+  state.profileOpen = true;
+  document.getElementById('profilePage').classList.add('open');
+  populateProfile();
+}
+
+function closeProfile() {
+  state.profileOpen = false;
+  document.getElementById('profilePage').classList.remove('open');
+}
+
+function populateProfile() {
+  const grid = document.getElementById('profileGrid');
+  if (grid.children.length > 0) return;
+  for (let i = 0; i < 9; i++) {
+    const item = document.createElement('div');
+    item.className = 'profile-grid-item';
+    const canvas = document.createElement('canvas');
+    item.appendChild(canvas);
+    grid.appendChild(item);
+    setTimeout(() => {
+      const type = VISUAL_TYPES[(i + 3) % VISUAL_TYPES.length];
+      const colors = COLOR_SCHEMES[(i + 2) % COLOR_SCHEMES.length];
+      const engine = new VisualEngine(canvas, type, colors);
+      engine.start();
+      setTimeout(() => engine.stop(), 100);
+    }, i * 50);
+  }
+}
+
+// -- FOLLOW --
+function handleFollow(reelIndex) {
+  const reel = state.reels[reelIndex];
+  reel.following = !reel.following;
+  const btn = document.querySelector(`.reel-follow-btn[data-reel="${reelIndex}"]`);
+  if (btn) {
+    btn.classList.toggle('following', reel.following);
+    btn.textContent = reel.following ? 'Following' : 'Follow';
+  }
+  showToast(reel.following ? `Following ${reel.creator.name} ✨` : `Unfollowed ${reel.creator.name}`);
+}
+
+// -- INIT APP --
+function initApp() {
+  state.reels = generateReels(12);
+  const container = document.getElementById('reelsFeed');
+
+  state.reels.forEach((reel, i) => {
+    const el = createReelHTML(reel, i);
+    container.appendChild(el);
+  });
+
+  // Scroll listener
+  let scrollTimeout;
+  container.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(handleScroll, 50);
+  }, { passive: true });
+
+  // Double tap & tap events on reels
+  container.addEventListener('click', (e) => {
+    const reel = e.target.closest('.reel');
+    if (!reel) return;
+
+    // If tapping on action buttons or follow, ignore double tap
+    if (e.target.closest('.reel-action') || e.target.closest('.reel-follow-btn') || e.target.closest('.reel-caption')) return;
+
+    handleDoubleTap(e, reel);
+  });
+
+  // Action button clicks
+  container.addEventListener('click', (e) => {
+    const actionBtn = e.target.closest('.reel-action');
+    if (actionBtn) {
+      const action = actionBtn.dataset.action;
+      const reelIndex = parseInt(actionBtn.dataset.reel);
+      if (action && !isNaN(reelIndex)) handleAction(action, reelIndex);
+    }
+
+    const followBtn = e.target.closest('.reel-follow-btn');
+    if (followBtn) {
+      handleFollow(parseInt(followBtn.dataset.reel));
+    }
+
+    // Caption expand
+    const caption = e.target.closest('.reel-caption');
+    if (caption) {
+      caption.classList.toggle('expanded');
+    }
+  });
+
+  // Comments
+  document.getElementById('commentsClose').addEventListener('click', closeComments);
+  document.getElementById('commentsBg').addEventListener('click', closeComments);
+  document.getElementById('commentSend').addEventListener('click', () => {
+    const input = document.getElementById('commentInput');
+    if (input.value.trim()) {
+      const list = document.getElementById('commentsList');
+      const newComment = document.createElement('div');
+      newComment.className = 'comment';
+      newComment.style.animation = 'fadeIn 0.3s ease';
+      newComment.innerHTML = `
+        <div class="comment-avatar" style="background:linear-gradient(135deg,#8338EC,#FF006E);">Y</div>
+        <div class="comment-body">
+          <div class="comment-user">you</div>
+          <div class="comment-text">${input.value}</div>
+          <div class="comment-meta"><span>now</span></div>
+        </div>
+      `;
+      list.insertBefore(newComment, list.firstChild);
+      input.value = '';
+      showToast('💬 Comment posted!');
+    }
+  });
+  document.getElementById('commentInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('commentSend').click();
+  });
+
+  // Share
+  document.getElementById('shareBg').addEventListener('click', closeShare);
+  document.querySelectorAll('.share-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const platform = btn.dataset.platform;
+      closeShare();
+      showToast(`📤 Shared to ${platform}!`);
+    });
+  });
+
+  // Nav
+  document.getElementById('searchBtn').addEventListener('click', openDiscover);
+  document.getElementById('navDiscover').addEventListener('click', openDiscover);
+  document.getElementById('discoverClose').addEventListener('click', closeDiscover);
+  document.getElementById('navProfile').addEventListener('click', openProfile);
+  document.getElementById('profileClose').addEventListener('click', closeProfile);
+  document.getElementById('navHome').addEventListener('click', () => {
+    closeDiscover();
+    closeProfile();
+  });
+  document.getElementById('navInbox').addEventListener('click', () => {
+    showToast('📬 No new messages');
+  });
+
+  // Tab switching
+  document.querySelectorAll('.top-bar-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.top-bar-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (tab.dataset.tab === 'live') showToast('🔴 No live streams right now');
+    });
+  });
+
+  // Start first reel
+  setTimeout(() => {
+    initVisual(0);
+    initVisual(1);
+    startVisual(0);
+    startProgress(0);
+  }, 100);
+
+  // Window resize
+  window.addEventListener('resize', () => {
+    state.visuals.forEach((engine) => {
+      engine.resize();
+    });
+  });
+}
+
+// -- SPLASH & BOOT --
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    document.getElementById('app').style.opacity = '1';
+    document.getElementById('app').style.transition = 'opacity 0.5s ease';
+    initApp();
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+    }, 700);
+  }, 2200);
+});
+
+// Prevent pull-to-refresh on mobile
+document.body.addEventListener('touchmove', (e) => {
+  if (state.commentsOpen || state.shareOpen) return;
+}, { passive: true });
+</script>
+</body>
+</html>

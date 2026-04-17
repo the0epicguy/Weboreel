@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site 142 - Retro Terminal Glitch</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="scanlines"></div>
+
+    <main class="terminal">
+        <header>
+            <div class="sys-info">SYS.ADMIN // ROOT // CONNECTION: SECURE</div>
+            <div class="time" id="clock">00:00:00</div>
+        </header>
+
+        <div class="terminal-content" id="output">
+            <div class="line"><span class="prompt">></span> <span class="typing" data-text="INITIALIZING KERNEL..." data-delay="100"></span></div>
+            <div class="line hidden"><span class="prompt">></span> <span class="typing" data-text="LOADING MODULES [██████████] 100%" data-delay="800"></span></div>
+            <div class="line hidden"><span class="prompt">></span> <span class="typing" data-text="ESTABLISHING NEURAL LINK..." data-delay="1600"></span></div>
+            <div class="line hidden"><span class="success">LINK ESTABLISHED.</span></div>
+            <div class="line hidden"><br></div>
+            
+            <div class="menu hidden">
+                <div class="line glitch" data-text="AVAILABLE PROTOCOLS:">AVAILABLE PROTOCOLS:</div>
+                <div class="interactive-option" data-target="data1">[01] EXTRACT_DATA</div>
+                <div class="interactive-option" data-target="data2">[02] INITIATE_OVERRIDE</div>
+                <div class="interactive-option" data-target="data3">[03] SYSTEM_PURGE</div>
+            </div>
+        </div>
+        
+        <div class="info-panel hidden" id="info-panel">
+            <div class="border-box">
+                <div class="box-title">DATA_STREAM</div>
+                <div id="dynamic-content">
+                    AWAITING INPUT...
+                </div>
+            </div>
+        </div>
+
+        <div class="input-line hidden">
+            <span class="prompt">root@system:~#</span>
+            <span class="cursor-blink">_</span>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

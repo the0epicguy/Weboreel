@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.scene {
+    width: 300px;
+    height: 300px;
+    /* Orthographic projection: NO perspective! This breaks depth perception and creates the Necker illusion */
+    perspective: none; 
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: spin 8s infinite linear;
+}
+
+/* Because there is no perspective, objects in the back render exactly the same size as the front */
+@keyframes spin {
+    0% { transform: rotateX(45deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(45deg) rotateY(360deg) rotateZ(0deg); }
+}
+
+.face {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 4px solid #000;
+    box-sizing: border-box;
+    /* Transparent faces so we only see the wireframe */
+    background: transparent;
+    /* Ensure lines drawn "behind" others don't have size difference */
+}
+
+/* 300px cube means translateZ by half = 150px */
+.front  { transform: translateZ(150px); }
+.back   { transform: rotateY(180deg) translateZ(150px); }
+.left   { transform: rotateY(-90deg) translateZ(150px); }
+.right  { transform: rotateY(90deg) translateZ(150px); }
+.top    { transform: rotateX(90deg) translateZ(150px); }
+.bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+.hint {
+    position: absolute;
+    bottom: 50px;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    color: #555;
+    text-align: center;
+}

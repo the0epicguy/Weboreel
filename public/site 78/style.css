@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #39ff14; /* Neon green */
+    font-family: 'Courier Prime', monospace;
+    overflow: hidden;
+}
+
+.marquee-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    opacity: 0.3;
+    pointer-events: none;
+    font-size: 2rem;
+    line-height: 1;
+    word-break: break-all;
+    overflow: hidden;
+}
+
+.drag-zone {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+
+.window {
+    position: absolute;
+    border: 3px solid #ff00ff; /* Hot pink */
+    background: #000;
+    box-shadow: 10px 10px 0px #39ff14;
+    min-width: 200px;
+    cursor: grab;
+}
+
+.window:active {
+    cursor: grabbing;
+}
+
+.window.active {
+    z-index: 100 !important;
+    border-color: #fff;
+    box-shadow: 10px 10px 0px #ff00ff;
+}
+
+.window-header {
+    background: #ff00ff;
+    color: #000;
+    padding: 5px 10px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.window.active .window-header {
+    background: #fff;
+}
+
+.window-content {
+    padding: 20px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+.w1 { top: 20%; left: 20%; }
+.w2 { top: 50%; left: 60%; transform: scale(1.5); border-color: #39ff14; box-shadow: -15px 15px 0px #ff00ff;}
+.w2 .window-header { background: #39ff14; }
+
+.w3 { top: 10%; right: 10%; }
+.img-noise { width: 150px; height: 150px; background: repeating-radial-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 0/2500px 2500px, repeating-conic-gradient(#000 0 0.0001%, #fff 0 0.0002%) 50% 50%/2500px 2500px; background-blend-mode: difference; }
+
+::selection {
+    background: #ff00ff;
+    color: #fff;
+}

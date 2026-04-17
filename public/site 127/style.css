@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b;
+    font-family: 'Syncopate', sans-serif;
+    color: #e6b800; /* brass */
+}
+
+/* Hide scrollbar */
+body::-webkit-scrollbar { display: none; }
+
+.fixed-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.title {
+    position: absolute;
+    font-size: 5rem;
+    z-index: 10;
+    letter-spacing: 15px;
+    text-shadow: 0 5px 20px rgba(0,0,0,0.8);
+    mix-blend-mode: overlay;
+}
+
+.gear {
+    position: absolute;
+    background: radial-gradient(circle at center, transparent 20%, #e6b800 21%, #ccaa00 100%);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.8);
+    border-radius: 50%;
+    /* clip path creates teeth */
+    clip-path: polygon(
+        50% 0%, 55% 5%, 65% 5%, 70% 15%, 80% 15%, 85% 25%, 95% 30%, 95% 40%, 100% 50%, 
+        95% 60%, 95% 70%, 85% 75%, 80% 85%, 70% 85%, 65% 95%, 55% 95%, 50% 100%, 
+        45% 95%, 35% 95%, 30% 85%, 20% 85%, 15% 75%, 5% 70%, 5% 60%, 0% 50%, 
+        5% 40%, 5% 30%, 15% 25%, 20% 15%, 30% 15%, 35% 5%, 45% 5%
+    );
+}
+
+/* Inner hole */
+.gear::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30%; height: 30%;
+    border-radius: 50%;
+    background: #2b2b2b;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.g1 {
+    width: 400px; height: 400px;
+    left: 20%; top: 20%;
+}
+
+.g2 {
+    width: 300px; height: 300px;
+    left: calc(20% + 310px); /* Positioned to lock teeth */
+    top: calc(20% + 150px);
+}
+
+.g3 {
+    width: 500px; height: 500px;
+    left: calc(20% + 10px); 
+    top: calc(20% + 350px);
+}

@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    overflow: hidden;
+    font-family: 'Teko', sans-serif;
+    transition: background-color 0.1s;
+}
+
+#grid-container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}
+
+.laser-h {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: #ff0000;
+    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+    opacity: 0.8;
+    transition: top 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.laser-v {
+    position: absolute;
+    height: 100%;
+    width: 4px;
+    background: #ff0000;
+    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
+    opacity: 0.8;
+    transition: left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.laser-hover {
+    pointer-events: auto;
+}
+
+body.alarm {
+    background-color: #500;
+}
+
+.alarm-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff0000;
+    font-size: 8rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    text-shadow: 0 0 20px #ff0000;
+}
+
+body.alarm .alarm-text {
+    opacity: 1;
+    animation: pulse 0.2s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-50%, -50%) scale(1.05); }
+}

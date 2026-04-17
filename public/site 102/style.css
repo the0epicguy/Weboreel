@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+    cursor: none;
+    font-family: 'Space Mono', monospace;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    position: relative;
+}
+
+.cell {
+    border: 1px solid transparent;
+    transition: border-color 0.1s;
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.text-cell {
+    color: #fff;
+    font-size: 3rem;
+    opacity: 0; /* hidden until glow reaches it */
+    transition: opacity 0.1s;
+    letter-spacing: 10px;
+}
+
+.cursor-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    /* Subtle grey radial glow that will reveal the transparent borders */
+    background: radial-gradient(circle at center, rgba(100, 100, 100, 0.4) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+/* We reveal things by letting the glow shine "behind" them, but since border is transparent, it won't work.
+   Instead, we apply border explicitly on JS proximity, or just use mix-blend-mode to let glow act as border?
+   Actually, if the cell border is rgba(255,255,255,0.1), it will only be visible when illuminated or stark.
+   Wait, if bg is black, border is #222, it's visible. Vantablack means NO visibility.
+   Let's do this: glow is the only light source.
+*/

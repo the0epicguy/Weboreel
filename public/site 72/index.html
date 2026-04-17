@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereal Bloom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="blob-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    
+    <div class="content-layer">
+        <nav class="bloom-nav">
+            <a href="#">Essence</a>
+            <a href="#">Form</a>
+            <a href="#">Aura</a>
+        </nav>
+
+        <div class="hero-text">
+            <h1>BREATHE</h1>
+            <p>Interactive fluid typography</p>
+        </div>
+    </div>
+    
+    <svg>
+        <filter id="gooey">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -10" result="gooey" />
+            <feComposite in="SourceGraphic" in2="gooey" operator="atop"/>
+        </filter>
+    </svg>
+    <script src="script.js"></script>
+</body>
+</html>

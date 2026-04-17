@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site 147 - Organic Blob</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@1,6..96,400&family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="blob-cursor"></div>
+    
+    <div class="content-wrapper">
+        <header>
+            <div class="brand">AMORPHOUS</div>
+            <nav>
+                <a href="#" class="hover-target">WORK</a>
+                <a href="#" class="hover-target">ABOUT</a>
+            </nav>
+        </header>
+
+        <main>
+            <h1 class="hover-target">Fluid<br><i>Dynamics</i></h1>
+            <p class="hover-target">We explore the boundary where rigidity meets organic motion.</p>
+        </main>
+        
+        <footer>
+            <span>SCROLL DOWN</span>
+        </footer>
+    </div>
+
+    <!-- Hidden SVG Filter for gooey effect on the blob -->
+    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+:root {
+    --bg: #ececeb;
+    --text: #050505;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Canvas needs to receive clicks */
+}
+
+/* Shape styles added dynamically via JS */
+.shape {
+    position: absolute;
+    border: 2px solid var(--text);
+    /* For triangles */
+    border-color: transparent transparent var(--text) transparent; 
+}
+
+.content-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1; /* Behind the canvas container */
+    pointer-events: none; /* Text shouldn't block clicks */
+}
+
+.main-title {
+    font-size: 8vw;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}

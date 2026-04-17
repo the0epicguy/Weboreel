@@ -1,0 +1,40 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #020205;
+    overflow: hidden;
+}
+
+.core-orb {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #fff, #9d00ff);
+    border-radius: 50%;
+    box-shadow: 0 0 50px #9d00ff, 0 0 100px #aa00ff;
+    z-index: 10;
+}
+
+#plasma-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5;
+    pointer-events: none;
+    /* Glow effect on the lines */
+    filter: drop-shadow(0 0 5px #ff00ff) drop-shadow(0 0 15px #00ffff);
+}
+
+path {
+    fill: none;
+    stroke: #e0b0ff;
+    stroke-width: 3;
+    stroke-linecap: round;
+}

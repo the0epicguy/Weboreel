@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site 143 - Network Canvas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="network-canvas"></canvas>
+
+    <div class="overlay">
+        <header>
+            <div class="logo">NODE.X</div>
+            <div class="status">STATUS: Live</div>
+        </header>
+
+        <main>
+            <div class="data-panel">
+                <h1>Neural <br>Mapping</h1>
+                <p>Interactive visualization of continuous data flows and latent node connections relative to cursor proximity.</p>
+                <div class="metrics">
+                    <div class="metric">
+                        <span class="label">ACTIVE NODES</span>
+                        <span class="value" id="node-count">000</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">CONNECTIONS</span>
+                        <span class="value" id="link-count">0000</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <span>SCROLL OR HOVER TO INTERACT</span>
+            <span>DATA V.3.1.4</span>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

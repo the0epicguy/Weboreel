@@ -1,0 +1,25 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0f0a14;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+svg {
+    transform-origin: center;
+}
+
+path {
+    fill: none;
+    stroke: #ff9900;
+    stroke-width: 1;
+    opacity: 0.6;
+    mix-blend-mode: screen;
+    transform-origin: center;
+    transition: stroke 0.3s;
+}

@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #005082; /* Blueprint blue */
+    font-family: 'Roboto Mono', monospace;
+    overflow: hidden;
+    color: #ffffff;
+}
+
+.blueprint-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    z-index: 1;
+}
+
+.mechanical-drawing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.ui-panel {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 80, 130, 0.8);
+    padding: 20px;
+    z-index: 10;
+    width: 300px;
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px dotted rgba(255,255,255,0.3);
+    padding-bottom: 5px;
+}
+
+.label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.value {
+    font-weight: 400;
+}
+
+.center-module {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.8);
+    padding: 40px;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.05) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.center-module:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.crosshair {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+}
+
+h1 {
+    font-size: 2rem;
+    letter-spacing: 4px;
+    margin: 0 0 10px 0;
+}
+
+p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}

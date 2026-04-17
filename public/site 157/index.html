@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Drag - Interactive Cosmos</title>
+    <style>
+        :root {
+            --bg-color: #030a16;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-color: #e2e8f0;
+            --accent: #a78bfa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.2), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(14, 116, 144, 0.2), transparent 50%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text-color);
+            cursor: grab;
+        }
+
+        body:active {
+            cursor: grabbing;
+        }
+
+        #container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Let body handle mouse events for the whole screen */
+        }
+
+        .floating-card {
+            position: absolute;
+            width: 300px;
+            padding: 30px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            pointer-events: auto; /* Re-enable pointer events for the cards */
+            user-select: none;
+            transition: transform 0.1s ease-out;
+            will-change: transform, left, top;
+        }
+
+        /* Initial positions (these will be set and overridden by JS, but give a fallback) */
+        #card-1 { left: 10%; top: 20%; }
+        #card-2 { left: 40%; top: 50%; }
+        #card-3 { left: 70%; top: 15%; }
+        #card-4 { left: 25%; top: 70%; }
+        #card-5 { left: 80%; top: 65%; }
+
+        .floating-card:hover {
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(167, 139, 250, 0.15);
+        }
+
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: -webkit-linear-gradient(45deg, #a78bfa, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #94a3b8;
+        }
+
+        /* Subtle floating animation */
+        @keyframes subtleFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .ambient-float {
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        /* Floating stars background */
+        #stars {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            color: #ccc;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="stars"></canvas>
+    
+    <div class="instruction">Click and drag anywhere</div>
+
+    <div id="container">
+        <div class="floating-card ambient-float" id="card-1" style="animation-delay: 0s;">
+            <div class="icon">🌌</div>
+            <h2>The Milky Way</h2>
+            <p>Our home galaxy is a barred spiral containing an estimated 100 to 400 billion stars. It spans over 100,000 light-years across.</p>
+        </div>
+
+        <div class="floating-card ambient-float" id="card-2" style="animation-delay: -1.2s;">
+            <div class="icon">⚫</div>
+            <h2>Supermassive Black Holes</h2>
+            <p>At the center of almost every large galaxy lies a supermassive black hole. Ours, Sagittarius A*, has a mass equal to 4 million suns.</p>
+        </div>
+
+        <div class="floating-card ambient-float" id="card-3" style="animation-delay: -2.4s;">
+            <div class="icon">✨</div>
+            <h2>Nebulae</h2>
+            <p>Vast, luminous clouds of dust and gas where new stars are born. The Orion Nebula is one of the brightest and can be seen with the naked eye.</p>
+        </div>
+
+        <div class="floating-card ambient-float" id="card-4" style="animation-delay: -3.6s;">
+            <div class="icon">🪐</div>
+            <h2>Exoplanets</h2>
+            <p>Planets that orbit stars outside our solar system. Thousands have been discovered, some uniquely rocky and potentially capable of hosting life.</p>
+        </div>
+
+        <div class="floating-card ambient-float" id="card-5" style="animation-delay: -4.8s;">
+            <div class="icon">☄️</div>
+            <h2>Dark Matter</h2>
+            <p>An invisible form of matter making up about 27% of the universe. We can't see it, but we know it's there due to its gravitational effects on galaxies.</p>
+        </div>
+    </div>
+
+    <script>
+        // Draw some background stars
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            drawStars();
+        }
+        window.addEventListener('resize', resize);
+
+        const stars = [];
+        for(let i=0; i<150; i++) {
+            stars.push({
+                x: Math.random(), // percentage 0-1
+                y: Math.random(),
+                size: Math.random() * 2,
+                opacity: Math.random()
+            });
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, width, height);
+            for(let star of stars) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.beginPath();
+                ctx.arc(star.x * width, star.y * height, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        resize();
+
+        // Dragging Logic
+        const cards = document.querySelectorAll('.floating-card');
+        
+        // Convert CSS percentages to absolute px for smooth dragging
+        // This makes sure dragging adds exact pixel values to their position
+        const cardPositions = [];
+        
+        cards.forEach((card, index) => {
+            const rect = card.getBoundingClientRect();
+            cardPositions[index] = {
+                x: rect.left,
+                y: rect.top
+            };
+            // Apply initial px positions
+            card.style.left = cardPositions[index].x + 'px';
+            card.style.top = cardPositions[index].y + 'px';
+        });
+
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        function startDrag(e) {
+            isDragging = true;
+            if(e.type.includes('mouse')) {
+                startX = e.clientX;
+                startY = e.clientY;
+            } else {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            let currentX = 0;
+            let currentY = 0;
+
+            if(e.type.includes('mouse')) {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            } else {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            }
+
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+
+            // Move ALL cards by the precise pixel distance the mouse was dragged
+            cards.forEach((card, index) => {
+                cardPositions[index].x += dx;
+                cardPositions[index].y += dy;
+                
+                // Allow "infinite" dragging wrapping around screen (Optional, but fun for cosmos theme)
+                if (cardPositions[index].x > width + 100) cardPositions[index].x = -350;
+                if (cardPositions[index].x < -400) cardPositions[index].x = width + 50;
+                if (cardPositions[index].y > height + 100) cardPositions[index].y = -200;
+                if (cardPositions[index].y < -250) cardPositions[index].y = height + 50;
+
+                card.style.left = cardPositions[index].x + 'px';
+                card.style.top = cardPositions[index].y + 'px';
+            });
+
+            // Update start coordinates for the next move frame
+            startX = currentX;
+            startY = currentY;
+        }
+
+        // Attach events to the whole document so dragging anywhere moves everything
+        document.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('mouseleave', endDrag);
+
+        document.addEventListener('touchstart', startDrag, {passive: false});
+        document.addEventListener('touchmove', onDrag, {passive: false});
+        document.addEventListener('touchend', endDrag);
+
+    </script>
+</body>
+</html>

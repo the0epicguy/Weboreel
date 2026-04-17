@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@1,800&family=Montserrat:wght@200&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a2a;
+}
+
+.sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    background: linear-gradient(180deg, #12032e 0%, #ff00cc 100%);
+    z-index: 1;
+}
+
+.sun {
+    position: absolute;
+    bottom: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(180deg, #ffeb3b 0%, #ff00cc 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 100px #ff00cc;
+    z-index: 2;
+    /* Sun lines via clip-path */
+    -webkit-mask-image: repeating-linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 6%,
+        transparent 6%,
+        transparent 10%
+    );
+}
+
+.grid-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    perspective: 400px;
+    z-index: 3;
+}
+
+.grid {
+    position: absolute;
+    bottom: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        linear-gradient(90deg, #00ffff 1px, transparent 0),
+        linear-gradient(180deg, #00ffff 1px, transparent 0);
+    background-size: 50px 50px;
+    transform: rotateX(75deg);
+    transform-origin: top;
+    animation: moveGrid 2s linear infinite;
+}
+
+@keyframes moveGrid {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 50px; }
+}
+
+.center-content {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 6rem;
+    color: #00ffff;
+    margin: 0;
+    text-shadow: 4px 4px 0px #ff00cc, -2px -2px 0px #fff;
+    position: relative;
+    display: inline-block;
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2rem;
+    color: #fff;
+    letter-spacing: 20px;
+    margin-top: -10px;
+    text-shadow: 0 0 10px #ff00cc;
+}
+
+.vhs-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.1) 2px,
+        rgba(0,0,0,0.1) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.5;
+}

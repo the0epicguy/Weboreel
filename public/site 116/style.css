@@ -1,0 +1,50 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #444, #111);
+    overflow: hidden;
+    cursor: none;
+}
+
+.chrome-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    filter: url(#gooey);
+}
+
+.blob {
+    position: absolute;
+    background: linear-gradient(135deg, #fff 0%, #aaa 50%, #555 100%);
+    border-radius: 50%;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5), inset 0 0 10px #fff;
+}
+
+.b1 { width: 300px; height: 300px; top: 40%; left: 40%; animation: drift 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+.b2 { width: 250px; height: 250px; top: 30%; left: 60%; animation: drift 15s infinite alternate-reverse cubic-bezier(0.4, 0, 0.2, 1); }
+.b3 { width: 400px; height: 400px; top: 60%; left: 30%; animation: drift 12s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+
+.cursor-blob {
+    width: 150px;
+    height: 150px;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes drift {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(100px, -50px) scale(1.1); }
+}
+
+svg {
+    position: absolute;
+    width: 0;
+    height: 0;
+}

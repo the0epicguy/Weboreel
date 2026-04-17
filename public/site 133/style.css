@@ -1,0 +1,40 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fceabb;
+    overflow: hidden;
+}
+
+#tess-grid {
+    display: flex;
+    flex-wrap: wrap;
+    width: 110vw;
+    height: 110vh;
+    margin-top: -5vh;
+    margin-left: -5vw;
+}
+
+/* We create triangles by bordering a square div and letting it flip */
+.tess-cell {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tess-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    /* Two triangles forming a square */
+    background: linear-gradient(135deg, #f8b500 50%, #1e1f26 50%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); /* subtle grid line */
+}
+
+/* Different initial rotations to tessellate properly */
+.rot-90 { transform: rotate(90deg); }
+.rot-180 { transform: rotate(180deg); }
+.rot-270 { transform: rotate(270deg); }

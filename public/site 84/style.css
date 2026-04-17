@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #051005;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    color: #0f0;
+    user-select: none;
+}
+
+.scanner-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle at center, rgba(0,255,0,0.1) 0%, transparent 60%);
+    opacity: 0.5;
+}
+
+.laser {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #0f0;
+    box-shadow: 0 0 20px #0f0, 0 0 40px #0f0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0,255,0,0.2) 50%, transparent 100%);
+    background-size: 100% 200%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ui {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 20;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 2rem;
+    letter-spacing: 5px;
+    margin-bottom: 50px;
+}
+
+.status {
+    font-size: 1.5rem;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.progress-bar {
+    width: 300px;
+    height: 10px;
+    border: 1px solid #0f0;
+    margin: 20px auto;
+    position: relative;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #0f0;
+    box-shadow: 0 0 10px #0f0;
+}
+
+.access-granted {
+    display: none;
+    font-size: 4rem;
+    color: #fff;
+    text-shadow: 0 0 20px #0f0;
+    margin-top: 40px;
+}
+
+.fingerprint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 300px;
+    border: 2px dashed rgba(0, 255, 0, 0.3);
+    border-radius: 100px;
+    pointer-events: auto;
+    cursor: crosshair;
+}
+
+.fingerprint:active {
+    border: 2px solid rgba(0, 255, 0, 0.8);
+    background: rgba(0, 255, 0, 0.05);
+}

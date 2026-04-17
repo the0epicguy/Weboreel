@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL - Understanding AI & ML</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00ffaa;    /* Neural Green */
+            --secondary: #9d00ff;  /* Deep Purple */
+            --bg-color: #0b0510;   /* Very dark purple */
+            --glass-bg: rgba(15, 10, 25, 0.5);
+            --glass-border: rgba(157, 0, 255, 0.3);
+            --text-main: #f0f0ff;
+            --text-muted: #aab;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: transparent; /* VERY IMPORTANT: Let 3D canvas show */
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 3D Canvas Background */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            z-index: -1; 
+        }
+
+        /* Typography */
+        h1, h2, h3, .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text-main);
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .mono {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(11, 5, 16, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        nav .logo {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav .logo::before {
+            content: '';
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 8px var(--primary);
+        }
+
+        /* Utility Components */
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+            box-shadow: 0 0 25px rgba(0, 255, 170, 0.6);
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            padding: 8rem 5% 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Hero Section */
+        .hero {
+            align-items: flex-start;
+            max-width: 800px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 650px;
+        }
+
+        /* Info Grid Section */
+        .info {
+            align-items: center;
+            background: linear-gradient(to bottom, transparent, rgba(157,0,255,0.05), transparent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(157, 0, 255, 0.3);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            align-items: center;
+            min-height: auto;
+            padding-bottom: 6rem;
+        }
+
+        .quiz-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--primary);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(0, 255, 170, 0.1);
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 255, 170, 0.1);
+        }
+
+        .option-btn.selected {
+            background: var(--primary);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        .option-btn.correct { background: #00ff55; color: #000; border-color:#00ff55; }
+        .option-btn.wrong { background: #ff3366; color: #fff; border-color:#ff3366; }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress {
+            font-family: 'Roboto Mono', monospace;
+            color: var(--text-muted);
+        }
+
+        /* Form for submitting score */
+        #score-form-container {
+            display: none;
+            text-align: center;
+        }
+
+        #score-form-container h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .score-input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Roboto Mono', monospace;
+            outline: none;
+        }
+
+        .score-input:focus {
+            border-color: var(--primary);
+        }
+
+        #submit-msg {
+            margin-top: 1rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Scroll Animations */
+        .hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+
+        .show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .delay-1 { transition-delay: 0.2s; }
+        .delay-2 { transition-delay: 0.4s; }
+
+        /* Timeline Section */
+        .timeline-section {
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .timeline-container {
+            max-width: 900px;
+            width: 100%;
+            border-left: 2px solid var(--primary);
+            padding-left: 2rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        .timeline-item {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.65rem;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--bg-color);
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        
+        .timeline-content {
+            background: var(--glass-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .timeline-content h3 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            align-items: center;
+            background: linear-gradient(to top, rgba(0,255,170,0.05), transparent);
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+            width: 100%;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 2.5rem;
+            background: rgba(15, 10, 25, 0.7);
+            border-bottom: 3px solid var(--primary);
+            border-radius: 12px;
+            width: 250px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--primary);
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0,255,170,0.4);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem 5%;
+            text-align: center;
+            border-top: 1px solid #222;
+            background: #000;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .quiz-container { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Canvas Container -->
+    <div id="webgl-container"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">NEURAL.sys</a>
+        <div class="nav-links">
+            <a href="#impact">Modern Impact</a>
+            <a href="#quiz">Knowledge Check</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero hidden">
+        <h1 class="mono">Initialize<br>Intelligence</h1>
+        <p>Artificial Intelligence and Machine Learning are no longer concepts of tomorrow. They are the invisible engines powering our modern existence. As the world becomes increasingly complex, relying on conventional computing is no longer sufficient. We need adaptive systems capable of learning, reasoning, and evolving in real-time.</p>
+        <p style="margin-top: -1rem; margin-bottom: 2rem;">From revolutionizing how we approach terminal illnesses to seamlessly optimizing global supply chains, AI acts as an extension of human cognition—processing the impossible, and illuminating pathways we never knew existed.</p>
+        <div style="margin-top: 1rem;">
+            <a href="#impact" class="btn">Discover More</a>
+            <a href="#quiz" class="btn" style="margin-left: 1rem; border-color: var(--secondary); color: var(--secondary);">Take the Test</a>
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section id="impact" class="info">
+        <h2 class="hidden">The Core Necessity</h2>
+        <p class="hidden delay-1" style="text-align: center; max-width: 800px; margin: 0 auto 3rem auto;">The sheer volume of human output has surpassed our biological capacity to comprehend it. Without Artificial Intelligence, we are drowning in noise. Machine Learning transforms this immense ocean of chaotic data into structured, actionable intelligence.</p>
+        
+        <div class="grid">
+            <div class="card hidden delay-1">
+                <h3>Data Domination</h3>
+                <p>Humanity generates over 2.5 quintillion bytes of data every single day. This covers everything from global stock market ticks and climate sensor readings to personal smartwatch telemetry.</p>
+                <p>Machine Learning algorithms are uniquely capable of parsing this unbelievable amount of noise. By identifying underlying patterns, AI can extract life-saving insights, predict economic shifts, and offer actionable analytics that the human brain would take centuries to process manually.</p>
+            </div>
+            <div class="card hidden delay-2">
+                <h3>Healthcare Revolution</h3>
+                <p>Modern medicine has hit a ceiling where the complexity of the human genome outpaces traditional diagnosis. Neural networks are shifting this paradigm by analyzing medical imagery with hyper-precision.</p>
+                <p>AI models can detect micro-anomalies—such as early-stage tumors or neurological degradation—years before customary diagnoses. Beyond imaging, AI conducts predictive modeling to synthesize customized, personalized medical therapies, literally saving lives while vastly reducing research and development timelines for new cures.</p>
+            </div>
+            <div class="card hidden delay-1">
+                <h3>Autonomous Systems</h3>
+                <p>Human latency is the greatest structural bottleneck in modern logistics and safety operations. Whether it is responding to a traffic anomaly at 70mph or adjusting a power grid during a hurricane, human reaction times are too slow.</p>
+                <p>From smart supply chains dynamically adjusting to global disruptions, to self-driving logistics ensuring rapid delivery, AI operates at the speed of light. It anticipates failures before they occur, automates dangerous industrial tasks, and keeps our modern infrastructure resilient and entirely uninterrupted.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Blocks -->
+    <section class="timeline-section" id="timeline">
+        <h2 class="hidden">Evolution of the Machine</h2>
+        <p class="hidden delay-1" style="text-align: center; max-width: 700px; margin: 0 auto;">From conceptual theories to omnipresent systems, observe the rapid trajectory of artificial neural capabilities over the last few decades.</p>
+        
+        <div class="timeline-container">
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <h3>1950s: The Foundation</h3>
+                    <p>Alan Turing proposes the "Turing Test," laying the philosophical groundwork for evaluating machine intelligence. The first artificial neural networks, such as the Perceptron, are designed to mimic biological neurons.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-2">
+                <div class="timeline-content">
+                    <h3>1997: Strategic Supremacy</h3>
+                    <p>IBM's Deep Blue defeats world chess champion Garry Kasparov, proving algorithms could dominate complex, strategy-based human domains through sheer computational brute force and probabilistic analysis.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <h3>2012: The Deep Learning Boom</h3>
+                    <p>A neural network called AlexNet shatters records in visual recognition tasks via deep convolutional layers. This milestone, fueled by GPU computing, ignites the modern Deep Learning renaissance.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-2">
+                <div class="timeline-content">
+                    <h3>Present: Generative Era</h3>
+                    <p>Large Language Models and Generative Adversarial Networks (GANs) now operate with near-human linguistic fluency and creative capacity, fundamentally shifting the economy and automating massive intellectual workflows.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section" id="stats">
+        <h2 class="hidden">Global Impact Metrics</h2>
+        <div class="stats-grid">
+            <div class="stat-box hidden delay-1">
+                <div class="stat-number" data-target="15">0</div>
+                <div class="mono" style="color:var(--text-muted);">Trillion USD projected global GDP boost by 2030 due to AI.</div>
+            </div>
+            <div class="stat-box hidden delay-2">
+                <div class="stat-number" data-target="95">0</div>
+                <div class="mono" style="color:var(--text-muted);">Percent accuracy achieved by AI in deep medical image detection.</div>
+            </div>
+            <div class="stat-box hidden delay-1">
+                <div class="stat-number" data-target="80">0</div>
+                <div class="mono" style="color:var(--text-muted);">Percentage of tech-based enterprises adopting Machine Learning protocols.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="quiz-section">
+        <h2>Knowledge Assessment</h2>
+        
+        <div class="quiz-container">
+            <!-- Questions UI -->
+            <div id="quiz-ui">
+                <div class="question" id="question-text">Loading intelligence protocol...</div>
+                <div class="options" id="options-container">
+                    <!-- Options injected via JS -->
+                </div>
+                <div class="quiz-footer">
+                    <div class="progress mono">System: <span id="current-q">1</span>/<span id="total-q">4</span></div>
+                    <button class="btn" id="next-btn" style="display:none; padding: 0.8rem 1.5rem; font-size: 0.9rem;">Next Protocol →</button>
+                </div>
+            </div>
+
+            <!-- Score Submision UI -->
+            <div id="score-form-container">
+                <h3>Assessment Complete</h3>
+                <p class="mono">Final Accuracy: <span id="final-score">0</span>/<span id="total-score">4</span></p>
+                <form id="scoreForm">
+                    <input type="text" id="username" class="score-input" placeholder="Enter your User ID" required autocomplete="off">
+                    <button type="submit" class="btn" style="width: 100%; border-color: var(--secondary); color: var(--secondary);">Transmit Data</button>
+                </form>
+                <div id="submit-msg"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p class="mono">&copy; 2026 NEURAL.sys. Data is power.</p>
+    </footer>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script>
+        // --- SCROLL ANIMATIONS (Intersection Observer) ---
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    
+                    // Trigger number counter if it's a stat box
+                    if(entry.target.classList.contains('stat-box')) {
+                        const numDisplay = entry.target.querySelector('.stat-number');
+                        const target = parseInt(numDisplay.getAttribute('data-target'));
+                        if (numDisplay.innerText === "0") {
+                            animateValue(numDisplay, 0, target, 2000);
+                        }
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+
+        // Number Counter Animation
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // ease out quad
+                const easeProgress = progress * (2 - progress); 
+                obj.innerHTML = Math.floor(easeProgress * (end - start) + start) + (end === 95 || end === 80 ? '%' : '');
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- QUIZ LOGIC ---
+        const questions = [
+            {
+                q: "What is the primary function of a Machine Learning algorithm?",
+                opts: [
+                    "To rigidly execute a predefined sequence of steps",
+                    "To identify patterns in data and improve automatically through experience",
+                    "To manually organize databases",
+                    "To replace all human computing hardware"
+                ],
+                ans: 1
+            },
+            {
+                q: "Which concept involves an algorithm learning from labeled training data?",
+                opts: ["Unsupervised Learning", "Neural Networking", "Supervised Learning", "Reinforcement Learning"],
+                ans: 2
+            },
+            {
+                q: "Why is 'Deep Learning' called 'Deep'?",
+                opts: [
+                    "Because it requires deep thinking to code",
+                    "Because it analyzes deep space phenomena",
+                    "Because the data is hidden deep in the server",
+                    "Because it utilizes artificial neural networks with multiple (deep) layers"
+                ],
+                ans: 3
+            },
+            {
+                q: "Which area heavily relies on Machine Learning today?",
+                opts: ["Spam Email Filtering", "Medical Image Analysis", "Recommendation Systems (like Netflix)", "All of the above"],
+                ans: 3
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const qText = document.getElementById('question-text');
+        const optionsBox = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+        const currentQSpan = document.getElementById('current-q');
+        const totalQSpan = document.getElementById('total-q');
+        
+        const quizUI = document.getElementById('quiz-ui');
+        const scoreUI = document.getElementById('score-form-container');
+        const finalScoreSpan = document.getElementById('final-score');
+        const totalScoreSpan = document.getElementById('total-score');
+
+        totalQSpan.textContent = questions.length;
+        totalScoreSpan.textContent = questions.length;
+
+        function loadQuestion() {
+            nextBtn.style.display = 'none';
+            const currentObj = questions[currentQuestionIndex];
+            currentQSpan.textContent = currentQuestionIndex + 1;
+            qText.textContent = currentObj.q;
+            optionsBox.innerHTML = '';
+
+            currentObj.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(btn, index, currentObj.ans);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectOption(btn, selectedIndex, correctIndex) {
+            // Disable all buttons
+            const allBtns = optionsBox.querySelectorAll('.option-btn');
+            allBtns.forEach(b => {
+                b.style.pointerEvents = 'none';
+                if(b.textContent === questions[currentQuestionIndex].opts[correctIndex]) {
+                    b.classList.add('correct'); // Highlight correct answer
+                }
+            });
+
+            if (selectedIndex === correctIndex) {
+                score++;
+            } else {
+                btn.classList.add('wrong');
+            }
+
+            nextBtn.style.display = 'inline-block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                // Finish Quiz
+                quizUI.style.display = 'none';
+                scoreUI.style.display = 'block';
+                finalScoreSpan.textContent = score;
+            }
+        });
+
+        // Initialize quiz
+        loadQuestion();
+
+        // --- API Integration for Score ---
+        const API_URL = 'http://localhost:5002/api/submit_score';
+        
+        document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const submitMsg = document.getElementById('submit-msg');
+            const submitBtn = e.target.querySelector('button');
+
+            submitBtn.textContent = 'Transmitting...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, score: score, total: questions.length })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    submitMsg.textContent = data.message;
+                    submitMsg.style.color = 'var(--primary)';
+                    e.target.reset();
+                    submitBtn.style.display = 'none'; // Hide button after success
+                } else {
+                    submitMsg.textContent = data.error || 'Transmission failed.';
+                    submitMsg.style.color = '#ff3366';
+                    submitBtn.textContent = 'Retry Transmission';
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                submitMsg.textContent = 'Server offline. Cannot transmit to mainframe.';
+                submitMsg.style.color = '#ff3366';
+                submitBtn.textContent = 'Retry Transmission';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // --- Three.js Neural Network Background ---
+        const container = document.getElementById('webgl-container');
+        
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0b0510, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.z = 200;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Nodes & Connections (Neural Net setup)
+        const particleCount = 400; // Increased amount of nodes
+        const r = 400; // Radius limits
+        const particlesData = [];
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesPositions = new Float32Array(particleCount * 3);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        for (let i = 0; i < particleCount; i++) {
+            const x = (Math.random() * r) - r / 2;
+            const y = (Math.random() * r) - r / 2;
+            const z = (Math.random() * r) - r / 2;
+
+            particlesPositions[i * 3]     = x;
+            particlesPositions[i * 3 + 1] = y;
+            particlesPositions[i * 3 + 2] = z;
+
+            particlesData.push({
+                velocity: new THREE.Vector3(-0.5 + Math.random(), -0.5 + Math.random(), -0.5 + Math.random()),
+                numConnections: 0
+            });
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+
+        const pMaterial = new THREE.PointsMaterial({
+            color: 0x00ffaa,
+            size: 2,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            sizeAttenuation: true
+        });
+
+        const particles = new THREE.Points(particlesGeometry, pMaterial);
+        group.add(particles);
+
+        // Lines Geometry
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x9d00ff,
+            transparent: true,
+            opacity: 0.15
+        });
+
+        // Maximum possible lines = amount of particles squared / 2
+        const linesGeometry = new THREE.BufferGeometry();
+        const segments = particleCount * particleCount; 
+        const positions = new Float32Array(segments * 3);
+        const colors = new Float32Array(segments * 3);
+        
+        linesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
+        linesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage));
+        linesGeometry.computeBoundingSphere();
+
+        const linesMesh = new THREE.LineSegments(linesGeometry, lineMaterial);
+        linesMesh.geometry.attributes.position.needsUpdate = true;
+        group.add(linesMesh);
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let scrollY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - window.innerWidth / 2) * 0.1;
+            mouseY = (event.clientY - window.innerHeight / 2) * 0.1;
+        });
+
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const effectController = {
+            minDistance: 50
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            let vertexpos = 0;
+            let colorpos = 0;
+            let numConnected = 0;
+
+            for (let i = 0; i < particleCount; i++)
+                particlesData[i].numConnections = 0;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particleData = particlesData[i];
+                
+                // update positions
+                particlesPositions[i * 3] += particleData.velocity.x;
+                particlesPositions[i * 3 + 1] += particleData.velocity.y;
+                particlesPositions[i * 3 + 2] += particleData.velocity.z;
+
+                // Bounce off boundaries
+                if (Math.abs(particlesPositions[i * 3]) > r / 2) particleData.velocity.x = -particleData.velocity.x;
+                if (Math.abs(particlesPositions[i * 3 + 1]) > r / 2) particleData.velocity.y = -particleData.velocity.y;
+                if (Math.abs(particlesPositions[i * 3 + 2]) > r / 2) particleData.velocity.z = -particleData.velocity.z;
+
+                // Check collisions 
+                for (let j = i + 1; j < particleCount; j++) {
+                    const particleDataB = particlesData[j];
+                    
+                    const dx = particlesPositions[i * 3] - particlesPositions[j * 3];
+                    const dy = particlesPositions[i * 3 + 1] - particlesPositions[j * 3 + 1];
+                    const dz = particlesPositions[i * 3 + 2] - particlesPositions[j * 3 + 2];
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                    if (dist < effectController.minDistance) {
+                        particleData.numConnections++;
+                        particleDataB.numConnections++;
+
+                        const alpha = 1.0 - dist / effectController.minDistance;
+
+                        positions[vertexpos++] = particlesPositions[i * 3];
+                        positions[vertexpos++] = particlesPositions[i * 3 + 1];
+                        positions[vertexpos++] = particlesPositions[i * 3 + 2];
+
+                        positions[vertexpos++] = particlesPositions[j * 3];
+                        positions[vertexpos++] = particlesPositions[j * 3 + 1];
+                        positions[vertexpos++] = particlesPositions[j * 3 + 2];
+
+                        colorpos += 6;
+                        numConnected++;
+                    }
+                }
+            }
+
+            linesMesh.geometry.setDrawRange(0, numConnected * 2);
+            linesMesh.geometry.attributes.position.needsUpdate = true;
+            linesMesh.geometry.attributes.color.needsUpdate = true;
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Parallax interactions
+            group.rotation.y += (mouseX * 0.01 - group.rotation.y) * 0.05;
+            group.rotation.x += (mouseY * 0.01 - group.rotation.x) * 0.05;
+            group.position.y = -scrollY * 0.1;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

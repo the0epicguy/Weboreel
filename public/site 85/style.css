@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+#tunnel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%);
+    perspective: 1000px;
+}
+
+.frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80vw;
+    height: 80vh;
+    border: 2px solid #000;
+    box-shadow: 0 0 50px rgba(0,0,0,0.1);
+    transform-origin: center center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+/* Give alternating frames slightly different background to show depth better */
+.frame:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Abril Fatface', serif;
+    font-size: 6rem;
+    color: #000;
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: difference;
+    color: #fff; /* renders as black against white */
+}

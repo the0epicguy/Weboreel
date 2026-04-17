@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.cradle {
+    display: flex;
+    border-top: 10px solid #555;
+    padding-top: 200px;
+    position: relative;
+}
+
+.bob {
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at 30% 30%, #fff, #888, #333);
+    border-radius: 50%;
+    margin: 0;
+    position: relative;
+    transform-origin: 50% -200px;
+    box-shadow: 0 10px 10px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.8);
+}
+
+.bob::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 49%;
+    width: 2px;
+    height: 200px;
+    background: #999;
+}
+
+/* Animations */
+.b1 { animation: swingLeft 1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); }
+.b5 { animation: swingRight 1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1); animation-delay: 1s; }
+
+@keyframes swingLeft {
+    0% { transform: rotate(30deg); }
+    50%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes swingRight {
+    0% { transform: rotate(-30deg); }
+    50%, 100% { transform: rotate(0deg); }
+}
+
+.title {
+    position: absolute;
+    bottom: 50px;
+    font-size: 3rem;
+    letter-spacing: 20px;
+    color: #999;
+}

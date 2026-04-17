@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMOS - The Final Frontier</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00f0ff;    /* Neon Cyan */
+            --secondary: #ff0055;  /* Neon Pink/Red */
+            --tertiary: #a200ff;   /* Neon Violet */
+            --bg-color: #010008;   /* Vantablack/Void */
+            --glass-bg: rgba(5, 5, 15, 0.4);
+            --glass-border: rgba(0, 240, 255, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 3D Canvas Background */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            filter: contrast(1.2) saturate(1.3);
+        }
+
+        /* Typography */
+        h1, h2, h3, .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--tertiary), var(--primary));
+            background-size: 300% 100%;
+            animation: gradientMove 5s ease infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            letter-spacing: 2px;
+            filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.5));
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h2 {
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            color: var(--text-main);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        p {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .mono {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(1, 0, 8, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            color: var(--bg-color);
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem 2.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 2px solid var(--primary);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-decoration: none;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0, 240, 255, 0.1);
+            overflow: hidden;
+            z-index: 1;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::after {
+            left: 150%;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+            box-shadow: 0 0 40px var(--primary), inset 0 0 10px #fff;
+            transform: scale(1.05);
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            padding: 8rem 5% 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Hero Section */
+        .hero {
+            align-items: center;
+            text-align: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            text-shadow: 0 4px 10px rgba(0,0,0,1);
+            color: #dbeafe;
+        }
+
+        /* Cards / Grid Section */
+        .cards-section {
+            align-items: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+            width: 100%;
+            max-width: 1300px;
+            margin-top: 3rem;
+        }
+
+        .card-wrapper {
+            position: relative;
+            padding: 3px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--tertiary));
+            background-size: 200% 200%;
+            animation: gradientMove 4s ease infinite;
+            transition: transform 0.4s ease;
+        }
+
+        .card-wrapper:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 20px 50px rgba(255, 0, 85, 0.4), 0 0 30px rgba(0, 240, 255, 0.4);
+        }
+
+        .card {
+            background: rgba(5, 5, 12, 0.95);
+            height: 100%;
+            padding: 3rem 2rem;
+            border-radius: 13px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .icon-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 0, 85, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.2rem;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+            animation: pulseIcon 2s infinite alternate;
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255,0,85,0.4); }
+            100% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,0,85,0.8); }
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            align-items: center;
+            padding-bottom: 8rem;
+        }
+
+        .timeline-container {
+            max-width: 900px;
+            width: 100%;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--tertiary));
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 5rem;
+            position: relative;
+            width: 50%;
+            padding-right: 3rem;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 50%;
+            padding-right: 0;
+            padding-left: 3rem;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: 20px;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-color);
+            border: 4px solid var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary);
+            z-index: 2;
+        }
+
+        .timeline-item:nth-child(even)::after {
+            left: -12px;
+        }
+        
+        .timeline-content {
+            background: rgba(10, 10, 25, 0.8);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .timeline-item:hover .timeline-content {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(0, 240, 255, 0.2);
+        }
+
+        .timeline-year {
+            display: inline-block;
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 4rem;
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: radial-gradient(circle at center, rgba(30, 10, 40, 0.8) 0%, rgba(5, 5, 10, 0.9) 100%);
+            border: 1px solid rgba(162, 0, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(162, 0, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 4px;
+            background: var(--tertiary);
+            box-shadow: 0 -5px 20px var(--tertiary);
+        }
+
+        .stat-number {
+            font-size: clamp(4rem, 8vw, 6rem);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--tertiary);
+            margin-bottom: 1rem;
+            line-height: 1;
+            position: relative;
+            display: inline-block;
+        }
+
+        .stat-number::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            color: var(--text-main);
+            -webkit-text-stroke: 0px;
+            opacity: 0.8;
+            filter: blur(8px);
+            z-index: -1;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            align-items: center;
+            padding-bottom: 10rem;
+        }
+
+        .quiz-container {
+            background: rgba(5, 5, 15, 0.85);
+            border: 2px solid rgba(255, 0, 85, 0.4);
+            padding: clamp(3rem, 5vw, 5rem);
+            border-radius: 30px;
+            backdrop-filter: blur(25px);
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 0, 85, 0.15);
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .question {
+            font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            margin-bottom: 2.5rem;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            padding: 1.8rem;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background: rgba(0, 240, 255, 0.1);
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .option-btn.correct { 
+            background: #00ff88; color: #000; border-color:#00ff88; 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+        .option-btn.wrong { 
+            background: var(--secondary); color: #fff; border-color:var(--secondary); 
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.5);
+        }
+
+        .quiz-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+        }
+
+        .progress {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Score UI */
+        #score-form-container {
+            display: none;
+            text-align: center;
+        }
+
+        #score-form-container h3 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px var(--secondary);
+        }
+
+        .score-input {
+            width: 100%;
+            max-width: 450px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .score-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            outline: none;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: #000;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Animations */
+        .hidden {
+            opacity: 0;
+            transform: translateY(80px) scale(0.95);
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+        /* Mobile specific adjustments */
+        .mobile-menu-btn { display: none; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
+        
+        @media (max-width: 768px) {
+            .nav-links { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: rgba(0,0,0,0.95); flex-direction: column; padding: 2rem 0; border-bottom: 2px solid var(--primary); }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .hero { padding-top: 8rem;}
+            .timeline-container::before { left: 20px; }
+            .timeline-item { width: 100%; padding-left: 60px !important; padding-right: 0; }
+            .timeline-item:nth-child(even) { left: 0; }
+            .timeline-item::after { left: 8px !important; }
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Canvas Container -->
+    <div id="webgl-container"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">COSMOS</a>
+        <button class="mobile-menu-btn">☰</button>
+        <div class="nav-links">
+            <a href="#discover">Phenomena</a>
+            <a href="#timeline">Chronicle</a>
+            <a href="#metrics">Scale</a>
+            <a href="#quiz">Terminal</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero hidden">
+        <h1>THE FINAL FRONTIER</h1>
+        <p>A staggering visual journey through spacetime. Immerse yourself in the majesty of cosmic forces and the infinite void of the unknown universe.</p>
+        <div style="margin-top: 2rem;">
+            <a href="#discover" class="btn">Initiate Sequence</a>
+        </div>
+    </section>
+
+    <!-- Cards/Discover Section -->
+    <section id="discover" class="cards-section">
+        <h2 class="hidden">Celestial Wonders</h2>
+        
+        <div class="grid">
+            <div class="card-wrapper hidden delay-1">
+                <div class="card">
+                    <div class="icon-container">⚛️</div>
+                    <h3>EXOPLANETS</h3>
+                    <p>Worlds orbiting distant suns. Some are molten rock, others gas giants, holding the ultimate secret to potential alien life.</p>
+                </div>
+            </div>
+            <div class="card-wrapper hidden delay-2">
+                <div class="card">
+                    <div class="icon-container">🌀</div>
+                    <h3>SINGULARITY</h3>
+                    <p>Regions of spacetime where gravity is absolute. Formed from dead hypergiants, nothing escapes the event horizon.</p>
+                </div>
+            </div>
+            <div class="card-wrapper hidden delay-3">
+                <div class="card">
+                    <div class="icon-container">🌌</div>
+                    <h3>DARK MATTER</h3>
+                    <p>The invisible skeleton of galaxies. It emits no light, yet it accounts for the vast majority of all mass in existence.</p>
+                </div>
+            </div>
+            <div class="card-wrapper hidden delay-1">
+                <div class="card">
+                    <div class="icon-container">💥</div>
+                    <h3>SUPERNOVA</h3>
+                    <p>The stellar detonation of a dying massive star, briefly outshining entire galaxies and seeding the cosmos with heavy elements.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section" id="timeline">
+        <h2 class="hidden">Astral Chronicle</h2>
+        
+        <div class="timeline-container">
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <span class="timeline-year">1957</span>
+                    <h3 style="color:#fff; margin-bottom:1rem; font-size:1.6rem;">SPUTNIK I</h3>
+                    <p>The Soviet Union launches the first artificial Earth satellite, piercing the atmosphere and initiating the Space Age.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-2">
+                <div class="timeline-content">
+                    <span class="timeline-year">1969</span>
+                    <h3 style="color:#fff; margin-bottom:1rem; font-size:1.6rem;">APOLLO 11</h3>
+                    <p>Armstrong and Aldrin step onto the lunar surface, marking the absolute pinnacle of human daring and engineering.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-1">
+                <div class="timeline-content">
+                    <span class="timeline-year">1990</span>
+                    <h3 style="color:#fff; margin-bottom:1rem; font-size:1.6rem;">HUBBLE OBSERVER</h3>
+                    <p>Operating in low Earth orbit, Hubble captures breathtaking imagery, redefining our grasp on the universe's sheer scale.</p>
+                </div>
+            </div>
+            <div class="timeline-item hidden delay-2">
+                <div class="timeline-content">
+                    <span class="timeline-year">2021</span>
+                    <h3 style="color:#fff; margin-bottom:1rem; font-size:1.6rem;">JAMES WEBB</h3>
+                    <p>The premier space observatory peers deep into the infrared spectrum, witnessing the primordial light of the very first galaxies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section" id="metrics">
+        <h2 class="hidden">UNIVERSAL METRICS</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-box hidden delay-1">
+                <div class="stat-number" data-target="13.8" data-text="13.8">0</div>
+                <h3 style="color:var(--primary); font-size:1.5rem; margin-bottom:0.8rem;">BILLION YEARS</h3>
+                <p>The estimated age of the cosmos.</p>
+            </div>
+            <div class="stat-box hidden delay-2">
+                <div class="stat-number" data-target="200" data-text="200">0</div>
+                <h3 style="color:var(--tertiary); font-size:1.5rem; margin-bottom:0.8rem;">BILLION GALAXIES</h3>
+                <p>Observable structures in reality.</p>
+            </div>
+            <div class="stat-box hidden delay-3">
+                <div class="stat-number" data-target="300" data-text="300">0</div>
+                <h3 style="color:var(--secondary); font-size:1.5rem; margin-bottom:0.8rem;">THOUSAND KM/S</h3>
+                <p>The absolute speed limit of light.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="quiz-section">
+        <h2 class="hidden">NEURAL OVERRIDE</h2>
+        
+        <div class="quiz-container hidden delay-1">
+            <div id="quiz-ui">
+                <div class="question" id="question-text">Syncing...</div>
+                <div class="options" id="options-container"></div>
+                <div class="quiz-footer">
+                    <div class="progress">SEQ: <span id="current-q">1</span>/<span id="total-q">5</span></div>
+                    <button class="btn" id="next-btn" style="display:none; padding: 0.8rem 2rem;">PROCEED</button>
+                </div>
+            </div>
+
+            <div id="score-form-container">
+                <h3>SIMULATION COMPLETE</h3>
+                <div style="font-size: 5rem; font-family: 'Orbitron', monospace; color: var(--primary); font-weight: 900; margin: 2rem 0; text-shadow: 0 0 30px var(--primary);">
+                    <span id="final-score">0</span><span style="color:rgba(255,255,255,0.2)">/</span><span id="total-score" style="color:rgba(255,255,255,0.5)">5</span>
+                </div>
+                <p>INPUT DESIGNATION LOG</p>
+                <form id="scoreForm">
+                    <input type="text" id="username" class="score-input" placeholder="User ID" required autocomplete="off">
+                    <button type="submit" class="btn" style="width: 100%; max-width:450px;">ENGAGE UPLINK</button>
+                </form>
+                <div id="submit-msg" style="color:#00ff88; margin-top:1.5rem; font-family:'Orbitron', sans-serif; font-size:1.2rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h2 style="font-size:2.5rem; margin-bottom:1rem; color:var(--text-muted); text-shadow:none;">COSMOS</h2>
+        <p class="mono" style="margin-bottom:0;">SYSTEM OPERATIONAL.</p>
+    </footer>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script>
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        menuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    if(entry.target.classList.contains('stat-box')) {
+                        const numDisplay = entry.target.querySelector('.stat-number');
+                        const target = parseFloat(numDisplay.getAttribute('data-target'));
+                        if (numDisplay.innerText === "0") {
+                            animateValue(numDisplay, 0, target, 2500, target % 1 !== 0);
+                        }
+                    }
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+        document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+
+        function animateValue(obj, start, end, duration, isDecimal) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress); 
+                let currentVal = easeProgress * (end - start) + start;
+                obj.innerHTML = isDecimal ? currentVal.toFixed(1) : Math.floor(currentVal);
+                
+                if (progress < 1) window.requestAnimationFrame(step);
+                else {
+                    obj.innerHTML = isDecimal ? end.toFixed(1) : end;
+                    obj.setAttribute('data-text', obj.innerHTML);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        const questions = [
+            { q: "What is the most abundant element in the universe?", opts: ["Oxygen", "Carbon", "Helium", "Hydrogen"], ans: 3 },
+            { q: "Which force prevents light from escaping a Black Hole?", opts: ["Electromagnetism", "Gravity", "Strong Nuclear Force", "Dark Energy"], ans: 1 },
+            { q: "What galaxy is colliding with our Milky Way?", opts: ["Andromeda", "Triangulum", "Sombrero", "Cartwheel"], ans: 0 },
+            { q: "What is the closest star system to us?", opts: ["Sirius", "Alpha Centauri", "Betelgeuse", "Vega"], ans: 1 },
+            { q: "What is the boundary around a black hole called?", opts: ["Schwarzschild Radius", "Event Horizon", "Accretion Disk", "Singularity"], ans: 1 }
+        ];
+
+        let currentQuestionIndex = 0; let score = 0;
+        const qText = document.getElementById('question-text');
+        const optionsBox = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+        
+        document.getElementById('total-q').textContent = questions.length;
+        document.getElementById('total-score').textContent = questions.length;
+
+        function loadQuestion() {
+            nextBtn.style.display = 'none';
+            const cur = questions[currentQuestionIndex];
+            document.getElementById('current-q').textContent = currentQuestionIndex + 1;
+            qText.textContent = cur.q;
+            optionsBox.innerHTML = '';
+            cur.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(btn, idx, cur.ans);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectOption(btn, selIdx, corIdx) {
+            const btns = optionsBox.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                b.style.pointerEvents = 'none';
+                if(b.textContent === questions[currentQuestionIndex].opts[corIdx]) b.classList.add('correct');
+            });
+            if (selIdx === corIdx) score++;
+            else btn.classList.add('wrong');
+            nextBtn.style.display = 'inline-block';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) loadQuestion();
+            else {
+                document.getElementById('quiz-ui').style.display = 'none';
+                document.getElementById('score-form-container').style.display = 'block';
+                document.getElementById('final-score').textContent = score;
+            }
+        });
+
+        document.getElementById('scoreForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'UPLOADING...'; btn.style.pointerEvents = 'none';
+            setTimeout(() => {
+                document.getElementById('submit-msg').textContent = "LINK ESTABLISHED. DATA SAVED.";
+                btn.style.display = 'none';
+            }, 1500);
+        });
+
+        loadQuestion();
+
+
+        // --- ADVANCED THREE.JS VISUALS ---
+        const canvasContainer = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x010008, 0.001);
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.z = 60;
+        camera.position.y = 10;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        canvasContainer.appendChild(renderer.domElement);
+
+        // 1. Hyperspace Star particles
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 5000;
+        const starPos = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+
+        const color1 = new THREE.Color(0x00f0ff);
+        const color2 = new THREE.Color(0xff0055);
+        const color3 = new THREE.Color(0xa200ff);
+
+        for(let i=0; i<starCount*3; i+=3) {
+            const r = 50 + Math.random() * 800;
+            const theta = 2 * Math.PI * Math.random();
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            starPos[i] = r * Math.sin(phi) * Math.cos(theta);
+            starPos[i+1] = r * Math.sin(phi) * Math.sin(theta);
+            starPos[i+2] = r * Math.cos(phi);
+            
+            // Randomly assign one of the 3 neon colors
+            const randColor = Math.random();
+            let c = color1;
+            if(randColor > 0.66) c = color2;
+            else if(randColor > 0.33) c = color3;
+
+            starColors[i] = c.r; starColors[i+1] = c.g; starColors[i+2] = c.b;
+        }
+
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+        const starMat = new THREE.PointsMaterial({
+            size: 0.8,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.9,
+            sizeAttenuation: true,
+            blending: THREE.AdditiveBlending
+        });
+
+        const starSystem = new THREE.Points(starGeo, starMat);
+        scene.add(starSystem);
+
+        // 2. Central Mega Structure (Torus Knot)
+        const torusGeo = new THREE.TorusKnotGeometry(18, 5, 200, 32, 3, 5);
+        
+        // Multi-material approach: Base Solid + Wireframe Envelope
+        const torusMatSolid = new THREE.MeshStandardMaterial({
+            color: 0x110033,
+            roughness: 0.2,
+            metalness: 0.8,
+            emissive: 0x1a0033
+        });
+        const torusWireMat = new THREE.MeshBasicMaterial({
+            color: 0x00f0ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.08,
+            blending: THREE.AdditiveBlending
+        });
+
+        const torusSolid = new THREE.Mesh(torusGeo, torusMatSolid);
+        const torusWire = new THREE.Mesh(torusGeo, torusWireMat);
+        torusWire.scale.setScalar(1.02);
+
+        const centralGroup = new THREE.Group();
+        centralGroup.add(torusSolid);
+        centralGroup.add(torusWire);
+        scene.add(centralGroup);
+
+        // Core Energy Sphere inside the Torus Knot
+        const coreGeo = new THREE.SphereGeometry(10, 32, 32);
+        const coreMat = new THREE.MeshBasicMaterial({
+            color: 0xff0055,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            wireframe:true
+        });
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        centralGroup.add(coreMesh);
+        
+        // Inner intense core
+        const coreSolidGeo = new THREE.SphereGeometry(6, 32, 32);
+        const coreSolidMat = new THREE.MeshBasicMaterial({color: 0xffffff});
+        const coreSolid = new THREE.Mesh(coreSolidGeo, coreSolidMat);
+        centralGroup.add(coreSolid);
+
+        // 3. Grid Floor (Retro-wave feel)
+        const gridGeo = new THREE.PlaneGeometry(1000, 1000, 50, 50);
+        const gridMat = new THREE.MeshBasicMaterial({
+            color: 0xa200ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.15,
+            blending: THREE.AdditiveBlending
+        });
+        const gridFloor = new THREE.Mesh(gridGeo, gridMat);
+        gridFloor.rotation.x = -Math.PI / 2;
+        gridFloor.position.y = -30;
+        scene.add(gridFloor);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const spotLight1 = new THREE.PointLight(0x00f0ff, 3, 200);
+        spotLight1.position.set(30, 20, 20);
+        scene.add(spotLight1);
+
+        const spotLight2 = new THREE.PointLight(0xff0055, 3, 200);
+        spotLight2.position.set(-30, -20, 30);
+        scene.add(spotLight2);
+
+        // Interactions
+        let mouseX = 0; let mouseY = 0;
+        let scrollY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+        });
+        window.addEventListener('scroll', () => scrollY = window.scrollY);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Rotations
+            centralGroup.rotation.x = Math.sin(time * 0.3) * 0.5;
+            centralGroup.rotation.y += 0.005;
+            centralGroup.rotation.z += 0.002;
+            
+            coreMesh.rotation.y -= 0.02;
+            coreMesh.scale.setScalar(1 + Math.sin(time * 5) * 0.05);
+
+            starSystem.rotation.y += 0.001;
+            gridFloor.position.z = (time * 10) % 20; // moving grid illusion
+
+            // Scroll Logic
+            const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
+            const scrollNorm = scrollY / maxScroll;
+            
+            // Dramatic Camera sweep down and into the structure
+            camera.position.z = 60 - (scrollNorm * 30);
+            camera.position.y = 10 - (scrollNorm * 40);
+            camera.rotation.x = scrollNorm * Math.PI * 0.25;
+
+            // Mouse parallax applied organically
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.lookAt(centralGroup.position);
+
+            // Orbiting Lights
+            spotLight1.position.x = Math.cos(time) * 40;
+            spotLight1.position.z = Math.sin(time) * 40;
+            spotLight2.position.x = Math.cos(time + Math.PI) * 40;
+            spotLight2.position.z = Math.sin(time + Math.PI) * 40;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Synthesis</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="synth-panel">
+        <div class="module">
+            <h2>VCO 1</h2>
+            <div class="knobs">
+                <div class="knob" data-val="0"></div>
+                <div class="knob" data-val="50"></div>
+                <div class="knob" data-val="100"></div>
+            </div>
+            <div class="led-meter">
+                <!-- LEDs injected -->
+            </div>
+        </div>
+        
+        <div class="module">
+            <h2>VCF</h2>
+            <div class="knobs">
+                <div class="knob" data-val="25"></div>
+                <div class="knob" data-val="75"></div>
+            </div>
+            <div class="switch"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

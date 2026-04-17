@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e8e6df; /* old paper */
+    font-family: 'Special Elite', cursive;
+    overflow: hidden;
+}
+
+#document {
+    padding: 50px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 2rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+p {
+    margin-bottom: 30px;
+}
+
+/* 
+  To make characters fall independently, we wrap each in a span.
+  Normally they sit statically. 
+  When 'decay' class is added, they get absolute positioning.
+*/
+.char {
+    display: inline-block;
+}
+
+.char.decaying {
+    position: absolute; /* detaches from flow */
+    transition: top 3s cubic-bezier(0.5, 0, 1, 1), transform 3s linear;
+}
+
+/* We will set the initial fixed position in JS right before triggering physics */

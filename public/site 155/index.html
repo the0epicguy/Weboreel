@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber-Sweep: Network Intrusion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --bg-color: #050a15;
+            --grid-line: rgba(0, 255, 255, 0.15);
+            --cell-bg: rgba(0, 20, 40, 0.5);
+            --cell-hover: rgba(0, 255, 255, 0.2);
+            --cell-revealed: rgba(0, 40, 80, 0.6);
+            --text-main: #00ffff;
+            --text-dim: #008888;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --success: #00ffaa;
+            --shield: #8800ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 100, 200, 0.1) 0%, transparent 60%);
+        }
+
+        /* CRT Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Vignette */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--text-main);
+            z-index: 10;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            width: 600px;
+            padding: 15px 25px;
+            background: rgba(0, 20, 40, 0.7);
+            border: 1px solid var(--text-main);
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        .stat-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .btn-ping {
+            background: rgba(0, 40, 80, 0.8);
+            border: 1px solid var(--text-main);
+            color: var(--text-main);
+            padding: 5px 15px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-radius: 3px;
+            transition: all 0.2s;
+            margin-top: 5px;
+        }
+
+        .btn-ping:hover:not(:disabled) {
+            background: var(--text-main);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--text-main);
+        }
+        
+        .btn-ping:disabled {
+            border-color: var(--text-dim);
+            color: var(--text-dim);
+            cursor: not-allowed;
+        }
+
+        .btn-ping.active {
+            background: var(--success);
+            color: black;
+            border-color: var(--success);
+            box-shadow: 0 0 15px var(--success);
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(16, 35px);
+            grid-template-rows: repeat(16, 35px);
+            gap: 2px;
+            background: var(--grid-line);
+            border: 2px solid var(--text-main);
+            padding: 2px;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+            z-index: 10;
+        }
+
+        .cell {
+            background: var(--cell-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover:not(.revealed) {
+            background: var(--cell-hover);
+        }
+
+        .cell.revealed {
+            background: var(--cell-revealed);
+            cursor: default;
+        }
+
+        .cell.flagged::before {
+            content: "⚠";
+            color: var(--warning);
+            text-shadow: 0 0 5px var(--warning);
+        }
+
+        .cell.malware::before {
+            content: "☠";
+            color: var(--danger);
+            text-shadow: 0 0 10px var(--danger);
+        }
+
+        .cell.neutralized::before {
+            content: "✖";
+            color: var(--shield);
+            text-shadow: 0 0 5px var(--shield);
+        }
+
+        /* Number Colors */
+        .n1 { color: #00ffff; text-shadow: 0 0 4px #00ffff; }
+        .n2 { color: #00ff00; text-shadow: 0 0 4px #00ff00; }
+        .n3 { color: #ffff00; text-shadow: 0 0 4px #ffff00; }
+        .n4 { color: #ff8800; text-shadow: 0 0 4px #ff8800; }
+        .n5 { color: #ff0000; text-shadow: 0 0 4px #ff0000; }
+        .n6 { color: #ff00ff; text-shadow: 0 0 4px #ff00ff; }
+        .n7 { color: #ffffff; text-shadow: 0 0 4px #ffffff; }
+        .n8 { color: #888888; text-shadow: 0 0 4px #888888; }
+
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            backdrop-filter: blur(5px);
+        }
+
+        #overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #status-msg {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-align: center;
+        }
+
+        .win { color: var(--success); text-shadow: 0 0 20px var(--success); }
+        .lose { color: var(--danger); text-shadow: 0 0 20px var(--danger); }
+
+        .btn-restart {
+            background: none;
+            border: 2px solid var(--text-main);
+            color: var(--text-main);
+            padding: 10px 30px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .btn-restart:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--text-main);
+        }
+
+        /* Glitch effect for game over */
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        .glitching {
+            animation: glitch 0.2s linear infinite;
+            filter: hue-rotate(90deg) contrast(200%);
+        }
+
+        /* Float text animation for item pickups */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+        .float-text {
+            position: absolute;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 0.8rem;
+            pointer-events: none;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 0 0 5px var(--success);
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cyber-Sweep</h1>
+    <div class="subtitle">SYSTEM INTRUSION PROTOCOL</div>
+
+    <div class="dashboard">
+        <div class="stat-group">
+            <span class="stat-label">Malware Flags</span>
+            <span class="stat-value" id="ui-flags" style="color: var(--warning);">40</span>
+        </div>
+        <div class="stat-group">
+            <span class="stat-label">Energy Shield</span>
+            <span class="stat-value" id="ui-shield" style="color: var(--shield);">ACTIVE</span>
+        </div>
+        <div class="stat-group">
+            <span class="stat-label">Quantum Ping</span>
+            <span class="stat-value" id="ui-ping" style="color: var(--success);">2</span>
+            <button class="btn-ping" id="btn-ping-activate">ACTIVATE</button>
+        </div>
+        <div class="stat-group">
+            <span class="stat-label">Time Elapsed</span>
+            <span class="stat-value" id="ui-time">000</span>
+        </div>
+    </div>
+
+    <div id="grid-container"></div>
+
+    <div id="overlay">
+        <div id="status-msg"></div>
+        <button class="btn-restart" id="btn-restart">REBOOT SYSTEM</button>
+    </div>
+
+    <script>
+        const ROWS = 16;
+        const COLS = 16;
+        const MINES = 40;
+
+        let grid = [];
+        let flagsLeft = MINES;
+        let pingsLeft = 2;
+        let shieldActive = true;
+        let firstClick = true;
+        let gameOver = false;
+        let pingModeActive = false;
+        let cellsRevealed = 0;
+        
+        let timer = 0;
+        let timerInterval = null;
+
+        const container = document.getElementById('grid-container');
+        const uiFlags = document.getElementById('ui-flags');
+        const uiShield = document.getElementById('ui-shield');
+        const uiPing = document.getElementById('ui-ping');
+        const uiTime = document.getElementById('ui-time');
+        const btnPing = document.getElementById('btn-ping-activate');
+        const overlay = document.getElementById('overlay');
+        const statusMsg = document.getElementById('status-msg');
+        const btnRestart = document.getElementById('btn-restart');
+
+        // Sounds (simulated using Web Audio API for a futuristic feel)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq, type, duration) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function initGame() {
+            grid = [];
+            flagsLeft = MINES;
+            pingsLeft = 2;
+            shieldActive = true;
+            firstClick = true;
+            gameOver = false;
+            pingModeActive = false;
+            cellsRevealed = 0;
+            timer = 0;
+            clearInterval(timerInterval);
+            
+            uiTime.textContent = '000';
+            document.body.classList.remove('glitching');
+            overlay.classList.remove('active');
+            updateUI();
+
+            container.innerHTML = '';
+
+            for (let r = 0; r < ROWS; r++) {
+                grid[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    const cellEl = document.createElement('div');
+                    cellEl.classList.add('cell');
+                    cellEl.dataset.r = r;
+                    cellEl.dataset.c = c;
+                    
+                    cellEl.addEventListener('click', (e) => handleLeftClick(r, c));
+                    cellEl.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        handleRightClick(r, c);
+                    });
+
+                    container.appendChild(cellEl);
+
+                    grid[r][c] = {
+                        r: r, c: c,
+                        isMine: false,
+                        isRevealed: false,
+                        isFlagged: false,
+                        neighborMines: 0,
+                        item: null, // 'shield' or 'ping'
+                        el: cellEl
+                    };
+                }
+            }
+        }
+
+        function placeMinesAndItems(safeR, safeC) {
+            let minesPlaced = 0;
+            while(minesPlaced < MINES) {
+                let r = Math.floor(Math.random() * ROWS);
+                let c = Math.floor(Math.random() * COLS);
+                // Ensure safe starting zone (3x3 area around first click)
+                if(!grid[r][c].isMine && Math.abs(r - safeR) > 1 && Math.abs(c - safeC) > 1) {
+                    grid[r][c].isMine = true;
+                    minesPlaced++;
+                }
+            }
+
+            // Calculate numbers
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (!grid[r][c].isMine) {
+                        let count = countNeighborMines(r, c);
+                        grid[r][c].neighborMines = count;
+                    }
+                }
+            }
+
+            // Place Hidden items in random safe cells (0-mines prefered but any safe is fine)
+            let safeCells = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (!grid[r][c].isMine && grid[r][c].neighborMines === 0 && Math.abs(r - safeR) > 2) {
+                        safeCells.push(grid[r][c]);
+                    }
+                }
+            }
+            
+            // Shuffle
+            safeCells.sort(() => Math.random() - 0.5);
+            
+            if(safeCells.length > 0) safeCells[0].item = 'shield';
+            if(safeCells.length > 1) safeCells[1].item = 'ping';
+            if(safeCells.length > 2) safeCells[2].item = 'ping';
+
+            timerInterval = setInterval(() => {
+                timer++;
+                uiTime.textContent = timer.toString().padStart(3, '0');
+            }, 1000);
+        }
+
+        function countNeighborMines(r, c) {
+            let count = 0;
+            for(let dr = -1; dr <= 1; dr++) {
+                for(let dc = -1; dc <= 1; dc++) {
+                    let nr = r + dr, nc = c + dc;
+                    if(nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc].isMine) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function handleLeftClick(r, c) {
+            if (gameOver || grid[r][c].isFlagged || grid[r][c].isRevealed) return;
+
+            if (pingModeActive) {
+                executePing(r, c);
+                return;
+            }
+
+            if (firstClick) {
+                placeMinesAndItems(r, c);
+                firstClick = false;
+            }
+
+            if (grid[r][c].isMine) {
+                if (shieldActive) {
+                    // Shield pop
+                    shieldActive = false;
+                    grid[r][c].isRevealed = true;
+                    grid[r][c].el.classList.add('revealed', 'neutralized');
+                    playBeep(800, 'square', 0.5);
+                    createFloatText(grid[r][c].el, 'SHIELD BROKEN', 'var(--warning)');
+                    updateUI();
+                } else {
+                    // Game Over
+                    playBeep(100, 'sawtooth', 1.0);
+                    grid[r][c].isRevealed = true;
+                    grid[r][c].el.classList.add('revealed', 'malware');
+                    triggerGameOver(false);
+                }
+            } else {
+                revealCell(r, c);
+                checkWin();
+            }
+            playBeep(400, 'sine', 0.05);
+        }
+
+        function handleRightClick(r, c) {
+            if (gameOver || grid[r][c].isRevealed) return;
+
+            let cell = grid[r][c];
+            if (!cell.isFlagged && flagsLeft > 0) {
+                cell.isFlagged = true;
+                cell.el.classList.add('flagged');
+                flagsLeft--;
+                playBeep(600, 'sine', 0.05);
+            } else if (cell.isFlagged) {
+                cell.isFlagged = false;
+                cell.el.classList.remove('flagged');
+                flagsLeft++;
+                playBeep(500, 'sine', 0.05);
+            }
+            updateUI();
+        }
+
+        function revealCell(r, c) {
+            let cell = grid[r][c];
+            if (cell.isRevealed || cell.isFlagged) return;
+
+            cell.isRevealed = true;
+            cell.el.classList.add('revealed');
+            cellsRevealed++;
+
+            if (cell.item) {
+                if (cell.item === 'shield') {
+                    shieldActive = true;
+                    createFloatText(cell.el, '+SHIELD', 'var(--shield)');
+                    playBeep(1200, 'sine', 0.3);
+                } else if (cell.item === 'ping') {
+                    pingsLeft++;
+                    createFloatText(cell.el, '+PING', 'var(--success)');
+                    playBeep(1000, 'sine', 0.2);
+                }
+                updateUI();
+            }
+
+            if (cell.neighborMines > 0) {
+                cell.el.textContent = cell.neighborMines;
+                cell.el.classList.add('n' + cell.neighborMines);
+            } else {
+                // Flood Fill
+                for(let dr = -1; dr <= 1; dr++) {
+                    for(let dc = -1; dc <= 1; dc++) {
+                        let nr = r + dr, nc = c + dc;
+                        if(nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                            revealCell(nr, nc);
+                        }
+                    }
+                }
+            }
+        }
+
+        function createFloatText(parentEl, text, color) {
+            let ft = document.createElement('div');
+            ft.classList.add('float-text');
+            ft.textContent = text;
+            ft.style.color = color;
+            ft.style.textShadow = `0 0 5px ${color}`;
+            parentEl.appendChild(ft);
+            setTimeout(() => ft.remove(), 1500);
+        }
+
+        btnPing.addEventListener('click', () => {
+            if (pingsLeft > 0 && !gameOver && !firstClick) {
+                pingModeActive = !pingModeActive;
+                btnPing.classList.toggle('active', pingModeActive);
+            }
+        });
+
+        function executePing(r, c) {
+            if (pingsLeft <= 0) return;
+            pingsLeft--;
+            pingModeActive = false;
+            btnPing.classList.remove('active');
+            updateUI();
+            playBeep(1500, 'sine', 0.4);
+
+            for(let dr = -1; dr <= 1; dr++) {
+                for(let dc = -1; dc <= 1; dc++) {
+                    let nr = r + dr, nc = c + dc;
+                    if(nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                        let targetCell = grid[nr][nc];
+                        if (targetCell.isRevealed) continue;
+                        
+                        if (targetCell.isMine && !targetCell.isFlagged) {
+                            // Auto flag
+                            targetCell.isFlagged = true;
+                            targetCell.el.classList.add('flagged');
+                            flagsLeft--;
+                        } else if (!targetCell.isMine && !targetCell.isFlagged) {
+                            revealCell(nr, nc);
+                        }
+                    }
+                }
+            }
+            updateUI();
+            checkWin();
+        }
+
+        function checkWin() {
+            if (cellsRevealed === (ROWS * COLS) - MINES) {
+                triggerGameOver(true);
+            }
+        }
+
+        function triggerGameOver(isWin) {
+            gameOver = true;
+            clearInterval(timerInterval);
+            
+            // Reveal all mines if loss
+            if (!isWin) {
+                document.body.classList.add('glitching');
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        let cell = grid[r][c];
+                        if (cell.isMine && !cell.isFlagged && !cell.isRevealed) {
+                            cell.el.classList.add('revealed', 'malware');
+                        } else if (!cell.isMine && cell.isFlagged) {
+                            // False flag indication
+                            cell.el.style.background = 'var(--danger)';
+                            cell.el.textContent = 'X';
+                        }
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                overlay.classList.add('active');
+                if (isWin) {
+                    statusMsg.textContent = "SYSTEM PURGED";
+                    statusMsg.className = "win";
+                    playBeep(600, 'square', 0.1);
+                    setTimeout(() => playBeep(800, 'square', 0.1), 150);
+                    setTimeout(() => playBeep(1200, 'square', 0.4), 300);
+                } else {
+                    statusMsg.textContent = "SYSTEM COMPROMISED";
+                    statusMsg.className = "lose";
+                }
+            }, isWin ? 500 : 1200);
+        }
+
+        function updateUI() {
+            uiFlags.textContent = flagsLeft;
+            uiShield.textContent = shieldActive ? "ACTIVE" : "OFFLINE";
+            uiShield.style.color = shieldActive ? "var(--shield)" : "var(--danger)";
+            
+            uiPing.textContent = pingsLeft;
+            btnPing.disabled = pingsLeft === 0 || firstClick || gameOver;
+            
+            if(pingsLeft === 0) {
+                btnPing.classList.remove('active');
+                pingModeActive = false;
+            }
+        }
+
+        btnRestart.addEventListener('click', initGame);
+
+        // Start
+        initGame();
+
+    </script>
+</body>
+</html>

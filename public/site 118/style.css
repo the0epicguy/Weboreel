@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Jura:wght@700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Jura', sans-serif;
+    transition: background-color 0.1s;
+}
+
+.metronome-container {
+    position: relative;
+    width: 100px;
+    height: 300px;
+}
+
+.base {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 50px;
+    background: #222;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+    z-index: 2;
+}
+
+.arm {
+    position: absolute;
+    bottom: 25px; /* pivot point */
+    left: 50%;
+    transform-origin: bottom center;
+    width: 10px;
+    height: 250px;
+    background: #fff;
+    margin-left: -5px;
+    z-index: 1;
+    animation: swing 2s infinite alternate ease-in-out;
+    box-shadow: 0 0 20px #fff;
+}
+
+.weight {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 20px #fff;
+}
+
+@keyframes swing {
+    0% { transform: rotate(-45deg); }
+    100% { transform: rotate(45deg); }
+}
+
+.tempo-display {
+    position: absolute;
+    top: 20%;
+    font-size: 5rem;
+    color: #fff;
+    letter-spacing: 20px;
+    opacity: 0.5;
+}

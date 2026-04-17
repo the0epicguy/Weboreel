@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier Prime', monospace;
+}
+
+.portrait-container {
+    position: relative;
+    width: 600px;
+    height: 800px;
+    filter: grayscale(100%) contrast(150%);
+}
+
+.base-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slice {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://picsum.photos/id/1025/600/800');
+    background-size: cover;
+    pointer-events: none;
+    transition: transform 0.1s;
+}
+
+.ui {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    color: #f00;
+}
+
+h1 {
+    font-size: 3rem;
+    margin: 0;
+    text-transform: uppercase;
+    background: #000;
+    display: inline-block;
+    padding: 10px;
+}
+
+p {
+    margin: 0;
+    background: #000;
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 1.2rem;
+}

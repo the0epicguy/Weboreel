@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    overflow: hidden;
+}
+
+#hex-grid {
+    display: flex;
+    flex-wrap: wrap;
+    width: 110vw;
+    height: 110vh;
+    margin-top: -5vh;
+    margin-left: -5vw;
+}
+
+/* Base Hexagon shape */
+.hex {
+    width: 100px;
+    height: 115.47px; /* width * sqrt(3) / 2 approx, wait standard is height = width * 1.1547 for pointy top */
+    background: #111;
+    margin: 2px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    transition: background 0.3s, box-shadow 0.3s, transform 0.1s;
+    cursor: crosshair;
+}
+
+/* Offset every other row for honeycomb effect */
+.hex-row {
+    display: flex;
+    margin-bottom: -28.86px; /* offset for interlocking */
+}
+
+.hex-row:nth-child(even) {
+    margin-left: 52px; /* half width + margin */
+}
+
+/* Interactive States */
+.hex.glow {
+    background: #ff00ff;
+    box-shadow: 0 0 20px #ff00ff;
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8rem;
+    color: #fff;
+    pointer-events: none;
+    text-shadow: 0 0 20px #00ffff;
+    z-index: 100;
+}

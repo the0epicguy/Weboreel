@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    font-family: 'Anton', sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 800px;
+}
+
+#text-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    width: 110vw;
+    height: 110vh;
+    transform: rotateX(20deg) rotateY(-10deg);
+}
+
+.word {
+    font-size: 2rem;
+    color: #ccc;
+    margin: 5px;
+    text-transform: uppercase;
+    transition: transform 0.2s, color 0.2s, text-shadow 0.2s;
+    user-select: none;
+    transform-style: preserve-3d;
+}

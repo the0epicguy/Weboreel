@@ -1,0 +1,56 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#kaleido-container {
+    position: relative;
+    width: 100vmin;
+    height: 100vmin;
+    border-radius: 50%;
+    overflow: hidden;
+    animation: slowSpin 30s linear infinite;
+}
+
+@keyframes slowSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.slice {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    transform-origin: 0 100%;
+    overflow: hidden;
+    /* clip to a pie slice: 45 degrees for 8 slices */
+    clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+
+.slice-inner {
+    position: absolute;
+    bottom: -100%;
+    right: -100%;
+    width: 200%;
+    height: 200%;
+    transform-origin: 50% 50%;
+    background: repeating-conic-gradient(
+        from 0deg,
+        #ff0055 0deg,
+        #00ccff 20deg,
+        #ffff00 40deg,
+        #00ff00 60deg,
+        #ff0055 80deg
+    );
+    background-size: 200% 200%;
+    transition: transform 0.1s linear;
+}

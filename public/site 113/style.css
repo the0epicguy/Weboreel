@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+    font-family: 'Courier Prime', monospace;
+}
+
+#tunnel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    perspective: 800px;
+}
+
+.droplet {
+    position: absolute;
+    color: #0f0;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #0f0;
+    transform-style: preserve-3d;
+    pointer-events: none;
+    white-space: pre;
+    line-height: 1;
+}
+
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 4rem;
+    letter-spacing: 15px;
+    z-index: 100;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+}

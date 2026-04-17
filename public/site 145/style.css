@@ -1,0 +1,56 @@
+:root {
+    --bg-color: #000;
+    --text-color: #fff;
+    --font-main: 'Montserrat', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    overflow: hidden;
+    height: 100vh;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.ui-layer {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass to canvas */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+}
+
+.logo {
+    font-weight: 100;
+    letter-spacing: 1em;
+    font-size: 1.5rem;
+    align-self: center;
+    margin-top: 2rem;
+    opacity: 0.8;
+}
+
+.instructions {
+    align-self: center;
+    font-size: 0.8rem;
+    letter-spacing: 0.5em;
+    opacity: 0.5;
+    margin-bottom: 2rem;
+}

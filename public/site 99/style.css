@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;900&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+    cursor: none; /* Hide default cursor */
+}
+
+/* Everything is white on white, so it's invisible by default */
+.content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    z-index: 1;
+}
+
+h1 {
+    font-weight: 900;
+    font-size: 8rem;
+    margin: 0;
+    letter-spacing: 10px;
+}
+
+p {
+    font-weight: 100;
+    font-size: 2rem;
+    letter-spacing: 5px;
+    margin-bottom: 100px;
+}
+
+.shape {
+    position: absolute;
+    background: #ffffff;
+}
+
+.circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    top: 20%;
+    left: 20%;
+}
+
+.square {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    right: 20%;
+}
+
+.triangle {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-left: 100px solid transparent;
+    border-right: 100px solid transparent;
+    border-bottom: 200px solid #ffffff;
+    top: 30%;
+    right: 30%;
+}
+
+/* The magic spotlight */
+.spotlight {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+    background: radial-gradient(circle 150px at center, transparent 0%, #000000 100%);
+    mix-blend-mode: difference;
+    transition: background 0.1s;
+}

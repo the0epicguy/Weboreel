@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0a0a1a;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+.nucleus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #fff, #ff0055);
+    border-radius: 50%;
+    box-shadow: 0 0 50px #ff0055;
+    z-index: 10;
+}
+
+.electron {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #00ffff;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #00ffff;
+    z-index: 5;
+    /* Transformation logic handled by JS for smooth orbit vs quantum tunneling */
+}
+
+.prompt {
+    position: absolute;
+    bottom: 50px;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 5px;
+    opacity: 0.5;
+    pointer-events: none;
+}
