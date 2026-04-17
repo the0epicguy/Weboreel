@@ -17,7 +17,6 @@ let depth = 0;
 document.addEventListener('wheel', (e) => {
     depth += e.deltaY * 0.005;
     if(depth < 0) depth = 0;
-    updateFrames();
 });
 
 let targetDepth = depth;

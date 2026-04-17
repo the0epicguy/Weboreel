@@ -1,7 +1,7 @@
 const grid = document.getElementById('hex-grid');
 
-const hexWidth = 104; // 100 + margins
-const hexHeight = 86; // approx row height increment
+const hexWidth = 104; 
+const hexHeight = 86; 
 
 const cols = Math.ceil(window.innerWidth / hexWidth) + 1;
 const rows = Math.ceil(window.innerHeight / hexHeight) + 2;
@@ -20,17 +20,18 @@ const hexes = document.querySelectorAll('.hex');
 
 hexes.forEach(hex => {
     hex.addEventListener('mouseenter', () => {
+        if (hex.classList.contains('glow')) return;
+        
         hex.classList.add('glow');
-        // Random neon color
         const colors = ['#ff00ff', '#00ffff', '#ffff00', '#00ff00'];
         const c = colors[Math.floor(Math.random() * colors.length)];
         hex.style.background = c;
-        // box-shadow doesn't work perfectly with clip-path sometimes but CSS drop-shadow filter would. 
-        // We'll just stick to background change for now.
+        hex.style.filter = `drop-shadow(0 0 10px ${c})`;
         
         setTimeout(() => {
             hex.classList.remove('glow');
             hex.style.background = '#111';
+            hex.style.filter = 'none';
         }, 1000);
     });
 });

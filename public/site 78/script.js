@@ -34,9 +34,11 @@ windows.forEach(win => {
 
         startX = e.clientX;
         startY = e.clientY;
-        const rect = win.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
+        startLeft = win.offsetLeft;
+        startTop = win.offsetTop;
+        
+        // Prevent text selection
+        e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -44,9 +46,10 @@ windows.forEach(win => {
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
         
-        // Disable pure CSS top/left to use transform or just update top/left
-        win.style.top = \`\${startTop + dy}px\`;
-        win.style.left = \`\${startLeft + dx}px\`;
+        win.style.top = `${startTop + dy}px`;
+        win.style.left = `${startLeft + dx}px`;
+        win.style.bottom = 'auto'; // ensure no conflicts
+        win.style.right = 'auto';
     });
 
     document.addEventListener('mouseup', () => {

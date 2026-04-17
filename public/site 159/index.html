@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic Chronos</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #f0f0f0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            color: #111;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 2.5rem;
+            font-weight: 600;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: #111;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 150px;
+            margin-left: -4px;
+        }
+
+        .min-hand {
+            width: 4px;
+            height: 220px;
+            margin-left: -2px;
+        }
+
+        .sec-hand {
+            width: 2px;
+            height: 250px;
+            margin-left: -1px;
+            background: #ff3b30;
+        }
+
+        .center-dot {
+            width: 12px;
+            height: 12px;
+            background: #111;
+            border-radius: 50%;
+            z-index: 11;
+        }
+
+        .info {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h3>DECONSTRUCTED<br>TIME</h3>
+        <p>Disturbed by Proximity</p>
+    </div>
+
+    <div class="clock-container" id="clock">
+        <div class="center-dot"></div>
+        <div class="hand hour-hand" id="hour"></div>
+        <div class="hand min-hand" id="min"></div>
+        <div class="hand sec-hand" id="sec"></div>
+    </div>
+
+    <script>
+        const clock = document.getElementById('clock');
+        const hourHand = document.getElementById('hour');
+        const minHand = document.getElementById('min');
+        const secHand = document.getElementById('sec');
+        
+        const numbers = [];
+        const radius = 240;
+
+        // Create numbers
+        for(let i=1; i<=12; i++) {
+            const num = document.createElement('div');
+            num.className = 'number';
+            num.innerText = i;
+            
+            const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            
+            num.style.left = `calc(50% + ${x}px - 15px)`;
+            num.style.top = `calc(50% + ${y}px - 25px)`;
+            
+            clock.appendChild(num);
+            numbers.push({ el: num, ox: x, oy: y });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const s = now.getSeconds();
+            const m = now.getMinutes();
+            const h = now.getHours();
+
+            const sDeg = (s / 60) * 360;
+            const mDeg = (m / 60) * 360 + (s / 60) * 6;
+            const hDeg = (h / 12) * 360 + (m / 60) * 30;
+
+            secHand.style.transform = `rotate(${sDeg}deg)`;
+            minHand.style.transform = `rotate(${mDeg}deg)`;
+            hourHand.style.transform = `rotate(${hDeg}deg)`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Mouse interaction
+        document.addEventListener('mousemove', (e) => {
+            const rect = clock.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const mx = e.clientX;
+            const my = e.clientY;
+
+            numbers.forEach(num => {
+                // Position relative to clock center
+                const nx = cx + num.ox;
+                const ny = cy + num.oy;
+                
+                const dx = mx - nx;
+                const dy = my - ny;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < 150) {
+                    const force = (150 - dist) / 150;
+                    const shiftX = (dx / dist) * -50 * force;
+                    const shiftY = (dy / dist) * -50 * force;
+                    num.el.style.transform = `translate(${shiftX}px, ${shiftY}px) scale(${1 + force * 0.5})`;
+                    num.el.style.color = '#ff3b30';
+                } else {
+                    num.el.style.transform = 'translate(0, 0) scale(1)';
+                    num.el.style.color = '#111';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

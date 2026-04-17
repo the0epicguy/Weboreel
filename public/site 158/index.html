@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Möbius Paradox</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #050510;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1500px;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #00f3ff;
+        }
+
+        .scene {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .mobius-container {
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: rotateScene 20s infinite linear;
+        }
+
+        .tile {
+            position: absolute;
+            width: 40px;
+            height: 120px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            backface-visibility: visible;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            user-select: none;
+        }
+
+        @keyframes rotateScene {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .ui {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 15px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene" id="scene">
+        <div class="mobius-container" id="ring"></div>
+    </div>
+
+    <div class="ui">
+        <h1>Möbius Strip</h1>
+        <p>A surface with only one side.</p>
+    </div>
+
+    <script>
+        const ring = document.getElementById('ring');
+        const count = 60; // Total tiles
+        const radius = 300;
+        
+        for(let i=0; i<count; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            
+            const angle = (i / count) * Math.PI * 2;
+            const twist = (i / count) * Math.PI; // Full Möbius twist is half rotation over full circle
+            
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            
+            // Transform: Move to position on circle, then rotate to face center, then application Möbius twist
+            tile.style.transform = `
+                translate3d(${x}px, 0, ${z}px) 
+                rotateY(${-angle}rad) 
+                rotateX(${twist}rad)
+            `;
+            
+            // Add a little glow pulse delay
+            tile.style.animation = `pulse 2s infinite alternate ${i * 0.05}s`;
+            
+            ring.appendChild(tile);
+        }
+
+        // Mouse interaction
+        const scene = document.getElementById('scene');
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 60;
+            const y = (e.clientY / window.innerHeight - 0.5) * -60;
+            scene.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+
+        // Add glow animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                from { border-color: rgba(0, 243, 255, 0.3); background: rgba(0, 243, 255, 0.05); }
+                to { border-color: rgba(0, 243, 255, 1); background: rgba(0, 243, 255, 0.2); box-shadow: 0 0 20px rgba(0, 243, 255, 0.4); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

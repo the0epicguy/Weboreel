@@ -37,17 +37,18 @@ function scan() {
     progress += 0.5;
     progressFill.style.width = progress + '%';
     
-    // Animate laser
-    const yPos = Math.sin(progress * 0.1) * 150 + window.innerHeight/2;
+    // Animate laser within fingerprint bounds
+    const rect = fp.getBoundingClientRect();
+    const yPos = rect.top + (rect.height * (0.5 + Math.sin(progress * 0.1) * 0.5));
+    
     laser.style.top = yPos + 'px';
-    scanLine.style.backgroundPosition = \`0 \${progress * 5}%\`;
+    scanLine.style.backgroundPosition = `0 ${progress * 5}%`;
     
     if(progress >= 100) {
         statusText.innerText = "VERIFIED";
         accessGranted.style.display = 'block';
         fp.style.pointerEvents = 'none';
         
-        // Flash screen
         document.body.style.backgroundColor = '#0f0';
         setTimeout(() => document.body.style.backgroundColor = '#051005', 100);
         return;

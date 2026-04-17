@@ -6,7 +6,7 @@ function setupRing(selector, count, radius) {
         const val = i === 0 && count === 12 ? 12 : i;
         const padded = val.toString().padStart(2, '0');
         // Position items in a circle
-        html += \`<div class="num" style="transform: rotate(\${angle}deg) translateY(\${-radius}px)">\${padded}</div>\`;
+        html += `<div class="num" style="transform: rotate(${angle}deg) translateY(${-radius}px)">${padded}</div>`;
     }
     ring.innerHTML = html;
     return ring;
@@ -16,17 +16,30 @@ const ringH = setupRing('.hours', 12, 250);
 const ringM = setupRing('.minutes', 60, 150);
 const ringS = setupRing('.seconds', 60, 75);
 
-function updateTime() {
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 40;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 40;
+});
+
+function animate() {
     const d = new Date();
-    const h = d.getHours() % 12; // 0-11
+    const h = d.getHours() % 12;
     const m = d.getMinutes();
     const s = d.getSeconds();
+    const ms = d.getMilliseconds();
     
-    // We rotate the ring backwards to align the current time at the top (0deg point)
-    ringH.style.transform = \`translate(-50%, -50%) rotate(\${-h * (360/12)}deg)\`;
-    ringM.style.transform = \`translate(-50%, -50%) rotate(\${-m * (360/60)}deg)\`;
-    ringS.style.transform = \`translate(-50%, -50%) rotate(\${-s * (360/60)}deg)\`;
+    // Smooth rotations
+    const sDeg = (s + ms/1000) * 6;
+    const mDeg = (m + s/60) * 6;
+    const hDeg = (h + m/60) * 30;
+    
+    // Apply time rotation + mouse offset
+    if(ringH) ringH.style.transform = `translate(calc(-50% + ${mouseX * 0.5}px), calc(-50% + ${mouseY * 0.5}px)) rotate(${-hDeg}deg)`;
+    if(ringM) ringM.style.transform = `translate(calc(-50% + ${mouseX}px), calc(-50% + ${mouseY}px)) rotate(${-mDeg}deg)`;
+    if(ringS) ringS.style.transform = `translate(calc(-50% + ${mouseX * 1.5}px), calc(-50% + ${mouseY * 1.5}px)) rotate(${-sDeg}deg)`;
+    
+    requestAnimationFrame(animate);
 }
 
-setInterval(updateTime, 1000);
-updateTime();
+animate();
