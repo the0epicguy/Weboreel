@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "weboreel",
+  "compatibility_date": "2026-04-06",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "Site 1"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
