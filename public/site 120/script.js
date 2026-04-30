@@ -2,11 +2,11 @@ const wall = document.getElementById('cctv-wall');
 
 let html = '';
 for(let i=0; i<20; i++) {
-    html += \`
+    html += `
         <div class="cam-feed">
-            <div class="camera-lens" id="cam-\${i}"></div>
+            <div class="camera-lens" id="cam-${i}"></div>
         </div>
-    \`;
+    `;
 }
 wall.innerHTML = html;
 
@@ -32,6 +32,6 @@ document.addEventListener('mousemove', (e) => {
         const tx = Math.cos(angle) * dist;
         const ty = Math.sin(angle) * dist;
         
-        lens.style.transform = \`translate(\${tx}px, \${ty}px)\`;
+        lens.style.transform = `translate(${tx}px, ${ty}px)`;
     });
 });

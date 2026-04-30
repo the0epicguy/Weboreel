@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;900&display=swap');
 
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -8,10 +9,9 @@ body, html {
     background-color: #ffffff;
     font-family: 'Montserrat', sans-serif;
     overflow: hidden;
-    cursor: none; /* Hide default cursor */
+    cursor: none;
 }
 
-/* Everything is white on white, so it's invisible by default */
 .content {
     position: relative;
     width: 100%;
@@ -20,7 +20,8 @@ body, html {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: #ffffff;
+    color: #000;
+    /* visible content */
     z-index: 1;
 }
 
@@ -40,7 +41,7 @@ p {
 
 .shape {
     position: absolute;
-    background: #ffffff;
+    background: #000;
 }
 
 .circle {
@@ -64,21 +65,17 @@ p {
     background: transparent;
     border-left: 100px solid transparent;
     border-right: 100px solid transparent;
-    border-bottom: 200px solid #ffffff;
-    top: 30%;
-    right: 30%;
+    border-bottom: 200px solid #000;
 }
 
-/* The magic spotlight */
-.spotlight {
+/* White overlay (the "whiteout") */
+.white-mask {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
+    background: white;
     pointer-events: none;
-    z-index: 100;
-    background: radial-gradient(circle 150px at center, transparent 0%, #000000 100%);
-    mix-blend-mode: difference;
-    transition: background 0.1s;
+    z-index: 10;
 }

@@ -15,7 +15,7 @@ window.addEventListener('scroll', () => {
     // G3 speed = G2 speed * (300/500) = 0.6x, inverted (so back to positive).
     const r3 = -(r2 * (300/500));
     
-    g1.style.transform = \`rotate(\${r}deg)\`;
-    g2.style.transform = \`rotate(\${r2}deg)\`;
-    g3.style.transform = \`rotate(\${r3}deg)\`;
+    g1.style.transform = `rotate(${r}deg)`;
+    g2.style.transform = `rotate(${r2}deg)`;
+    g3.style.transform = `rotate(${r3}deg)`;
 });

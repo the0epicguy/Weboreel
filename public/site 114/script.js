@@ -25,15 +25,15 @@ target.addEventListener('click', (e) => {
         // Size it roughly size of target
         frag.style.width = '200px';
         frag.style.height = '200px';
-        frag.style.left = \`\${targetX}px\`;
-        frag.style.top = \`\${targetY}px\`;
+        frag.style.left = `${targetX}px`;
+        frag.style.top = `${targetY}px`;
         
         // Random triangle coords
         const p1x = Math.random() * 100; const p1y = Math.random() * 100;
         const p2x = Math.random() * 100; const p2y = Math.random() * 100;
         const p3x = Math.random() * 100; const p3y = Math.random() * 100;
         
-        frag.style.clipPath = \`polygon(\${p1x}% \${p1y}%, \${p2x}% \${p2y}%, \${p3x}% \${p3y}%)\`;
+        frag.style.clipPath = `polygon(${p1x}% ${p1y}%, ${p2x}% ${p2y}%, ${p3x}% ${p3y}%)`;
         
         fragContainer.appendChild(frag);
         
@@ -60,7 +60,7 @@ target.addEventListener('click', (e) => {
                 f.x += f.vx;
                 f.y += f.vy;
                 f.rot += f.vRot;
-                f.el.style.transform = \`translate(\${f.x - targetX}px, \${f.y - targetY}px) rotate(\${f.rot}deg)\`;
+                f.el.style.transform = `translate(${f.x - targetX}px, ${f.y - targetY}px) rotate(${f.rot}deg)`;
             }
         });
         

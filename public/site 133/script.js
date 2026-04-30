@@ -8,11 +8,11 @@ for(let i=0; i < cols * rows; i++) {
     // Random initial rotation
     const rots = ['', 'rot-90', 'rot-180', 'rot-270'];
     const r = rots[Math.floor(Math.random() * rots.length)];
-    html += \`
+    html += `
         <div class="tess-cell">
-            <div class="tess-inner \${r}"></div>
+            <div class="tess-inner ${r}"></div>
         </div>
-    \`;
+    `;
 }
 grid.innerHTML = html;
 
@@ -44,7 +44,7 @@ function flipRandom() {
         currentY += 180;
     }
     
-    cell.style.transform = \`rotateX(\${currentX}deg) rotateY(\${currentY}deg)\`;
+    cell.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
     
     setTimeout(flipRandom, 50 + Math.random() * 100);
 }

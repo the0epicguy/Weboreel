@@ -9,11 +9,11 @@ for(let i=0; i<numSlices; i++) {
     // Rotate slice into position
     const rot = i * angle;
     
-    html += \`
-        <div class="slice" style="transform: rotate(\${rot}deg) scaleX(\${scaleX});">
-            <div class="slice-inner" id="inner-\${i}"></div>
+    html += `
+        <div class="slice" style="transform: rotate(${rot}deg) scaleX(${scaleX});">
+            <div class="slice-inner" id="inner-${i}"></div>
         </div>
-    \`;
+    `;
 }
 container.innerHTML = html;
 
@@ -28,6 +28,6 @@ document.addEventListener('mousemove', (e) => {
     const panY = ry * 100;
     
     inners.forEach(inner => {
-        inner.style.transform = \`translate(\${panX}%, \${panY}%)\`;
+        inner.style.transform = `translate(${panX}%, ${panY}%)`;
     });
 });

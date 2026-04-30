@@ -36,6 +36,6 @@ document.addEventListener('mousemove', (e) => {
         
         const finalHeight = baseline + (amplitude * heightMultiplier);
         
-        b.style.height = \`\${Math.max(10, finalHeight)}px\`;
+        b.style.height = `${Math.max(10, finalHeight)}px`;
     });
 });

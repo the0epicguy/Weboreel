@@ -43,8 +43,8 @@ function randomDecay() {
     // To detach it smoothly, we need its absolute bounds
     const rect = charEl.getBoundingClientRect();
     
-    charEl.style.left = \`\${rect.left}px\`;
-    charEl.style.top = \`\${rect.top}px\`;
+    charEl.style.left = `${rect.left}px`;
+    charEl.style.top = `${rect.top}px`;
     
     // Wait a tick for styles to apply before adding absolute positioning
     requestAnimationFrame(() => {
@@ -54,8 +54,8 @@ function randomDecay() {
             // Send it to bottom with random rotation
             const bottom = window.innerHeight - 40; // ground floor
             const rot = (Math.random() - 0.5) * 360; // random spin
-            charEl.style.top = \`\${bottom}px\`;
-            charEl.style.transform = \`rotate(\${rot}deg)\`;
+            charEl.style.top = `${bottom}px`;
+            charEl.style.transform = `rotate(${rot}deg)`;
         });
     });
     

@@ -19,12 +19,12 @@ document.addEventListener('mousemove', (e) => {
         const charEl = document.createElement('div');
         charEl.className = 'snake-char';
         charEl.innerText = text[textIndex];
-        charEl.style.left = \`\${x}px\`;
-        charEl.style.top = \`\${y}px\`;
+        charEl.style.left = `${x}px`;
+        charEl.style.top = `${y}px`;
         
         // Randomize slight rotation for organic feel
         const angle = (Math.random() - 0.5) * 20;
-        charEl.style.transform = \`translate(-50%, -50%) rotate(\${angle}deg)\`;
+        charEl.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
         
         document.body.appendChild(charEl);
         

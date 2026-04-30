@@ -10,7 +10,7 @@ document.addEventListener('mousedown', () => {
     // Aggressive jitter
     jitterInterval = setInterval(() => {
         const offset = (Math.random() - 0.5) * 20;
-        container.style.transform = \`translateX(\${offset}px)\`;
+        container.style.transform = `translateX(${offset}px)`;
     }, 50);
 });
 
@@ -19,5 +19,5 @@ document.addEventListener('mouseup', () => {
     status.innerText = "PLAY ►";
     
     clearInterval(jitterInterval);
-    container.style.transform = \`translateX(0px)\`;
+    container.style.transform = `translateX(0px)`;
 });

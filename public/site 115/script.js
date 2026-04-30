@@ -19,15 +19,15 @@ function renderEchoes() {
         const scale = 1 - (i * 0.05);
         const yOffset = -i * 20; // curve upwards slightly
         
-        d.style.transform = \`translateZ(\${depth}px) translateY(\${yOffset}px)\`;
+        d.style.transform = `translateZ(${depth}px) translateY(${yOffset}px)`;
         d.style.opacity = 1 - (i * 0.05); // fade
         
         // Colors shift slightly
         const hue = i * 15;
-        d.style.color = \`hsl(\${hue}, 80%, 60%)\`;
+        d.style.color = `hsl(${hue}, 80%, 60%)`;
         
         // Subtle blur for distant echoes
-        d.style.filter = \`blur(\${i}px)\`;
+        d.style.filter = `blur(${i}px)`;
         
         chamber.appendChild(d);
     }
@@ -40,5 +40,5 @@ document.addEventListener('mousemove', (e) => {
     const mx = (e.clientX - window.innerWidth/2) * 0.05;
     const my = (e.clientY - window.innerHeight/2) * 0.05;
     
-    chamber.style.transform = \`rotateY(\${mx}deg) rotateX(\${-my}deg)\`;
+    chamber.style.transform = `rotateY(${mx}deg) rotateX(${-my}deg)`;
 });

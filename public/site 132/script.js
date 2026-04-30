@@ -44,7 +44,7 @@ function updatePlasma() {
         }
         
         // Create 4-5 intermediate jagged points
-        let d = \`M \${startX} \${startY}\`;
+        let d = `M ${startX} ${startY}`;
         
         const segments = 5;
         for(let j=1; j<=segments; j++) {
@@ -57,9 +57,9 @@ function updatePlasma() {
             const jitterY = (Math.random() - 0.5) * 40;
             
             if(j === segments) {
-                d += \` L \${endX} \${endY}\`;
+                d += ` L ${endX} ${endY}`;
             } else {
-                d += \` L \${targetX + jitterX} \${targetY + jitterY}\`;
+                d += ` L ${targetX + jitterX} ${targetY + jitterY}`;
             }
         }
         

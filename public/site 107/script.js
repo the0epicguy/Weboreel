@@ -7,7 +7,7 @@ for(let i=0; i<150; i++) {
     bar.className = 'bar';
     // Random width initially
     const w = Math.random() > 0.5 ? Math.random() * 10 + 2 : 0;
-    bar.style.width = \`\${w}px\`;
+    bar.style.width = `${w}px`;
     const margin = Math.random() * 5;
     bar.style.marginRight = `${margin}px`;
     

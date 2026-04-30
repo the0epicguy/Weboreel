@@ -52,7 +52,7 @@ function defragTick() {
         
         // Update UI
         const pct = Math.floor((currentIndex / totalBlocks) * 100);
-        percentDisplay.innerText = \`\${pct}% COMPLETE\`;
+        percentDisplay.innerText = `${pct}% COMPLETE`;
         
         currentIndex++;
     }, 10);
