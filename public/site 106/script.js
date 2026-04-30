@@ -6,7 +6,7 @@ const b5 = document.querySelector('.b5');
 document.addEventListener('click', () => {
     // randomize speed on click for chaos
     const s = Math.random() * 0.5 + 0.5;
-    b1.style.animationDuration = \`\${s}s\`;
-    b5.style.animationDuration = \`\${s}s\`;
-    b5.style.animationDelay = \`\${s}s\`;
+    b1.style.animationDuration = `${s}s`;
+    b5.style.animationDuration = `${s}s`;
+    b5.style.animationDelay = `${s}s`;
 });

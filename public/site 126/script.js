@@ -6,7 +6,7 @@ const floors = [];
 for(let i=0; i<numFloors; i++) {
     const f = document.createElement('div');
     f.className = 'floor';
-    f.innerText = \`LEVEL \${numFloors - i}\`;
+    f.innerText = `LEVEL ${numFloors - i}`;
     
     // Reverse z-index so layer 0 (highest level) is on top initially
     f.style.zIndex = numFloors - i;
@@ -33,7 +33,7 @@ function updateFloors() {
         const zPos = floorZ - currentZ;
         
         // Add a bit of y transition for feel
-        f.style.transform = \`translate(-50%, calc(-50% + \${zPos * 0.5}px)) translateZ(\${zPos * 5}px)\`;
+        f.style.transform = `translate(-50%, calc(-50% + ${zPos * 0.5}px)) translateZ(${zPos * 5}px)`;
         
         // Opacity mapping. Fades out as it passes the camera (zPos > 0)
         // and fades in from deep background (zPos < -300)

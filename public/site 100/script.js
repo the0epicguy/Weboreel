@@ -10,16 +10,16 @@ document.addEventListener('mousemove', (e) => {
     for(let i=1; i<=depth; i++) {
         // base gold colors getting darker
         const lightness = 100 - (i * 3);
-        const color = \`hsl(51, 100%, \${lightness / 2}%)\`; // Gold hues
+        const color = `hsl(51, 100%, ${lightness / 2}%)`; // Gold hues
         
         const xOffset = -nx * i;
         const yOffset = -ny * i;
         
-        shadow += \`\${xOffset}px \${yOffset}px 0 \${color},\`;
+        shadow += `${xOffset}px ${yOffset}px 0 ${color},`;
     }
     
     // Add real blur shadow at the end
-    shadow += \`\${-nx * 50}px \${-ny * 50}px 30px rgba(0,0,0,0.9)\`;
+    shadow += `${-nx * 50}px ${-ny * 50}px 30px rgba(0,0,0,0.9)`;
     
     heading.style.textShadow = shadow;
 });

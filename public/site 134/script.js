@@ -9,8 +9,8 @@ for(let i=0; i<30; i++) {
     const x = Math.random() * window.innerWidth;
     const y = Math.random() * window.innerHeight;
     
-    p.style.left = \`\${x}px\`;
-    p.style.top = \`\${y}px\`;
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
     
     container.appendChild(p);
     pillars.push({ el: p, x, y });
@@ -20,11 +20,11 @@ document.addEventListener('mousemove', (e) => {
     const lx = e.clientX;
     const ly = e.clientY;
     
-    light.style.left = \`\${lx}px\`;
-    light.style.top = \`\${ly}px\`;
+    light.style.left = `${lx}px`;
+    light.style.top = `${ly}px`;
     
-    container.style.setProperty('--lx', \`\${lx}px\`);
-    container.style.setProperty('--ly', \`\${ly}px\`);
+    container.style.setProperty('--lx', `${lx}px`);
+    container.style.setProperty('--ly', `${ly}px`);
     
     // Calculate shadows
     pillars.forEach(p => {
@@ -51,7 +51,7 @@ document.addEventListener('mousemove', (e) => {
             // Farther steps are softer and darker
             const blur = i * 2;
             const opacity = 1 - (i / steps);
-            shadowCSS += \`\${stepX}px \${stepY}px \${blur}px rgba(0,0,0,\${opacity * 0.9})\`;
+            shadowCSS += `${stepX}px ${stepY}px ${blur}px rgba(0,0,0,${opacity * 0.9})`;
             if(i < steps) shadowCSS += ', ';
         }
         

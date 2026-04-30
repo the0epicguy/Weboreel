@@ -14,8 +14,8 @@ document.addEventListener('keydown', (e) => {
     // Start at center
     const x = window.innerWidth / 2;
     const y = window.innerHeight / 2;
-    el.style.left = \`\${x}px\`;
-    el.style.top = \`\${y}px\`;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
     
     document.body.appendChild(el);
     
@@ -53,9 +53,9 @@ function physicsLoop() {
             c.y = c.y <= 0 ? 1 : window.innerHeight - rect.height - 1;
         }
         
-        c.el.style.transform = \`translate(0, 0) rotate(\${c.rot}deg)\`;
-        c.el.style.left = \`\${c.x}px\`;
-        c.el.style.top = \`\${c.y}px\`;
+        c.el.style.transform = `translate(0, 0) rotate(${c.rot}deg)`;
+        c.el.style.left = `${c.x}px`;
+        c.el.style.top = `${c.y}px`;
     });
     
     requestAnimationFrame(physicsLoop);

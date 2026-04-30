@@ -9,14 +9,14 @@ document.addEventListener('mousemove', (e) => {
     const dy = e.clientY - cy;
     
     // Top Left (normal)
-    targets[0].style.transform = \`translate(calc(-50% + \${dx}px), calc(-50% + \${dy}px))\`;
+    targets[0].style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
     
     // Top Right (invert X)
-    targets[1].style.transform = \`translate(calc(-50% + \${-dx}px), calc(-50% + \${dy}px))\`;
+    targets[1].style.transform = `translate(calc(-50% + ${-dx}px), calc(-50% + ${dy}px))`;
     
     // Bottom Left (invert Y)
-    targets[2].style.transform = \`translate(calc(-50% + \${dx}px), calc(-50% + \${-dy}px))\`;
+    targets[2].style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${-dy}px))`;
     
     // Bottom Right (invert both)
-    targets[3].style.transform = \`translate(calc(-50% + \${-dx}px), calc(-50% + \${-dy}px))\`;
+    targets[3].style.transform = `translate(calc(-50% + ${-dx}px), calc(-50% + ${-dy}px))`;
 });

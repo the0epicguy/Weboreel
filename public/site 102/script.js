@@ -6,7 +6,7 @@ document.addEventListener('mousemove', (e) => {
     const x = e.clientX;
     const y = e.clientY;
     
-    glow.style.transform = \`translate(\${x - 125}px, \${y - 125}px)\`;
+    glow.style.transform = `translate(${x - 125}px, ${y - 125}px)`;
     
     // Proximity check for revealing borders and text
     cells.forEach(cell => {
@@ -19,7 +19,7 @@ document.addEventListener('mousemove', (e) => {
         
         if(dist < 100) {
             const intensity = 1 - (dist / 100);
-            cell.style.borderColor = \`rgba(255, 255, 255, \${intensity * 0.3})\`;
+            cell.style.borderColor = `rgba(255, 255, 255, ${intensity * 0.3})`;
             
             if(cell.classList.contains('text-cell')) {
                 cell.style.opacity = intensity;

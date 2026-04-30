@@ -51,7 +51,7 @@ function animate() {
         const opacity = Math.min(1, Math.max(0.1, (drop.z + 2000) / 2500));
         drop.el.style.opacity = opacity;
         
-        drop.el.style.transform = \`translate3d(\${drop.x}px, \${drop.y}px, \${drop.z}px)\`;
+        drop.el.style.transform = `translate3d(${drop.x}px, ${drop.y}px, ${drop.z}px)`;
     });
     
     requestAnimationFrame(animate);

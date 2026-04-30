@@ -12,7 +12,7 @@ function createLasers() {
         const l = document.createElement('div');
         l.className = 'laser-h laser-hover';
         const pos = Math.random() * 90 + 5;
-        l.style.top = \`\${pos}%\`;
+        l.style.top = `${pos}%`;
         container.appendChild(l);
         lasers.push({el: l, type: 'h'});
     }
@@ -21,7 +21,7 @@ function createLasers() {
         const l = document.createElement('div');
         l.className = 'laser-v laser-hover';
         const pos = Math.random() * 90 + 5;
-        l.style.left = \`\${pos}%\`;
+        l.style.left = `${pos}%`;
         container.appendChild(l);
         lasers.push({el: l, type: 'v'});
     }
@@ -42,9 +42,9 @@ function triggerAlarm() {
     // Scramble lasers
     lasers.forEach(l => {
         if(l.type === 'h') {
-            l.el.style.top = \`\${Math.random() * 90 + 5}%\`;
+            l.el.style.top = `${Math.random() * 90 + 5}%`;
         } else {
-            l.el.style.left = \`\${Math.random() * 90 + 5}%\`;
+            l.el.style.left = `${Math.random() * 90 + 5}%`;
         }
     });
     

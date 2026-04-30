@@ -23,13 +23,13 @@ function updateEffects() {
     const hue = normalizedAngle * 360;
     
     // Adjust body background subtly
-    document.body.style.backgroundColor = \`hsl(\${hue}, 50%, 15%)\`;
+    document.body.style.backgroundColor = `hsl(${hue}, 50%, 15%)`;
     
     // Arm glow color
-    arm.style.backgroundColor = \`hsl(\${hue}, 100%, 70%)\`;
-    arm.style.boxShadow = \`0 0 30px hsl(\${hue}, 100%, 70%)\`;
-    weight.style.backgroundColor = \`hsl(\${hue}, 100%, 70%)\`;
-    weight.style.boxShadow = \`0 0 30px hsl(\${hue}, 100%, 70%)\`;
+    arm.style.backgroundColor = `hsl(${hue}, 100%, 70%)`;
+    arm.style.boxShadow = `0 0 30px hsl(${hue}, 100%, 70%)`;
+    weight.style.backgroundColor = `hsl(${hue}, 100%, 70%)`;
+    weight.style.boxShadow = `0 0 30px hsl(${hue}, 100%, 70%)`;
     
     // Determine tick
     if(angle > 40) display.innerText = "T I C K";

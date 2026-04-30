@@ -10,7 +10,7 @@ let textPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*+=".split('');
 let html = '';
 for(let i=0; i < cols * rows; i++) {
     const char = textPool[Math.floor(Math.random() * textPool.length)];
-    html += \`<div class="t-char">\${char}</div>\`;
+    html += `<div class="t-char">${char}</div>`;
 }
 grid.innerHTML = html;
 
@@ -34,12 +34,12 @@ function updateScale() {
         if (dist < 150) {
             // scale up to 4x
             const scale = 1 + ( (150 - dist) / 150 ) * 3;
-            c.style.transform = \`scale(\${scale})\`;
+            c.style.transform = `scale(${scale})`;
             c.style.zIndex = Math.floor(scale * 10);
             c.style.fontWeight = '900';
             c.style.color = '#ff0055';
         } else {
-            c.style.transform = \`scale(1)\`;
+            c.style.transform = `scale(1)`;
             c.style.zIndex = 1;
             c.style.fontWeight = 'normal';
             c.style.color = '#111';

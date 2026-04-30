@@ -54,7 +54,7 @@ function drawJelly() {
     });
     
     // Draw smooth curve through points
-    let d = \`M \${points[0].x} \${points[0].y}\`;
+    let d = `M ${points[0].x} ${points[0].y}`;
     
     for(let i=0; i<=numPoints; i++) {
         const curr = points[i % numPoints];
@@ -63,7 +63,7 @@ function drawJelly() {
         const xc = (curr.x + next.x) / 2;
         const yc = (curr.y + next.y) / 2;
         
-        d += \` Q \${curr.x} \${curr.y}, \${xc} \${yc}\`;
+        d += ` Q ${curr.x} ${curr.y}, ${xc} ${yc}`;
     }
     
     path.setAttribute('d', d);

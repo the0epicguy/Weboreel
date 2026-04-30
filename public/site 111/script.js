@@ -15,8 +15,8 @@ for(let i=0; i<15; i++) {
     
     const b = document.createElement('div');
     b.className = 'blip';
-    b.style.left = \`\${bx}px\`;
-    b.style.top = \`\${by}px\`;
+    b.style.left = `${bx}px`;
+    b.style.top = `${by}px`;
     screen.appendChild(b);
     
     blips.push({ el: b, angle: angleDeg });

@@ -33,7 +33,7 @@ for(let x=0; x<cols; x++) {
 for(let y=0; y<rows; y++) {
     for(let x=0; x<cols; x++) {
         const val = map[x][y];
-        html += \`<div class="cell" data-x="\${x}" data-y="\${y}" data-val="\${val}"></div>\`;
+        html += `<div class="cell" data-x="${x}" data-y="${y}" data-val="${val}"></div>`;
     }
 }
 grid.innerHTML = html;
@@ -55,7 +55,7 @@ function reveal(cell) {
         cell.style.backgroundColor = 'red';
     } else if (val > 0) {
         cell.innerText = val;
-        cell.classList.add(\`c-\${val}\`);
+        cell.classList.add(`c-${val}`);
     } else {
         // chain reveal empty neighbors safely avoiding deep recursion limit by using tiny timeout
         const ox = parseInt(cell.dataset.x);
@@ -67,7 +67,7 @@ function reveal(cell) {
                     const nx = ox + dx;
                     const ny = oy + dy;
                     if(nx>=0 && nx<cols && ny>=0 && ny<rows) {
-                        const next = document.querySelector(\`.cell[data-x="\${nx}"][data-y="\${ny}"]\`);
+                        const next = document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
                         if(next) reveal(next);
                     }
                 }

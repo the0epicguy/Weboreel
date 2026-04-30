@@ -23,7 +23,7 @@ function animate() {
         const x = nucleusX + Math.cos(angle) * radius;
         const y = nucleusY + Math.sin(angle) * Math.cos(angle) * parseInt(radius * 0.5) + Math.sin(angle) * radius; // slight elliptical
         
-        electron.style.transform = \`translate(calc(-50% + \${x - nucleusX}px), calc(-50% + \${y - nucleusY}px))\`;
+        electron.style.transform = `translate(calc(-50% + ${x - nucleusX}px), calc(-50% + ${y - nucleusY}px))`;
         electron.style.opacity = 1;
     } else {
         // Quantum probability cloud tunneling
@@ -34,7 +34,7 @@ function animate() {
         const x = nucleusX + Math.cos(randAngle) * radius;
         const y = nucleusY + Math.sin(randAngle) * radius;
         
-        electron.style.transform = \`translate(calc(-50% + \${x - nucleusX}px), calc(-50% + \${y - nucleusY}px))\`;
+        electron.style.transform = `translate(calc(-50% + ${x - nucleusX}px), calc(-50% + ${y - nucleusY}px))`;
         electron.style.opacity = Math.random() > 0.5 ? 1 : 0.2;
     }
     

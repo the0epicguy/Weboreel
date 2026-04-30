@@ -4,14 +4,14 @@ const container = document.getElementById('topo-container');
 const cols = 20;
 const rows = 20;
 
-let svgHTML = \`<svg viewBox="0 0 1000 1000">\`;
+let svgHTML = `<svg viewBox="0 0 1000 1000">`;
 
 // Generate paths for each row.
 // We make them look somewhat isometric by offsetting X and Y.
 for(let y=0; y<rows; y++) {
-    svgHTML += \`<path id="row-\${y}"></path>\`;
+    svgHTML += `<path id="row-${y}"></path>`;
 }
-svgHTML += \`</svg>\`;
+svgHTML += `</svg>`;
 container.innerHTML = svgHTML;
 
 const paths = document.querySelectorAll('path');
@@ -40,10 +40,10 @@ function updateTopo() {
             const py = pyBase - Math.abs(h);
             
             if(x === 0) {
-                d += \`M \${px} \${py}\`;
+                d += `M ${px} ${py}`;
             } else {
                 // smooth curve to next point
-                d += \` L \${px} \${py}\`;
+                d += ` L ${px} ${py}`;
             }
         }
         paths[y].setAttribute('d', d);
