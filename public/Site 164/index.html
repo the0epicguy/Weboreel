@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURORA OS — System Interface</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --os-bg:#0f1117;
+    --os-surface:#161b27;
+    --os-border:#1e2536;
+    --os-accent:#5b8fff;
+    --os-green:#34d399;
+    --os-red:#f87171;
+    --os-yellow:#fbbf24;
+    --os-text:#c9d1e8;
+    --os-dim:#4a5580;
+  }
+
+  body{
+    background:var(--os-bg);
+    color:var(--os-text);
+    font-family:'IBM Plex Mono',monospace;
+    height:100vh;overflow:hidden;
+    cursor:default;
+  }
+
+  /* TASKBAR */
+  #taskbar{
+    position:fixed;top:0;left:0;right:0;height:36px;
+    background:rgba(15,17,23,0.95);
+    border-bottom:1px solid var(--os-border);
+    display:flex;align-items:center;padding:0 16px;
+    gap:16px;z-index:1000;backdrop-filter:blur(20px);
+    font-size:11px;color:var(--os-dim);
+  }
+  .taskbar-logo{
+    font-family:'IBM Plex Sans',sans-serif;font-weight:500;
+    color:var(--os-accent);font-size:12px;letter-spacing:0.1em;
+    margin-right:8px;
+  }
+  .taskbar-menu{display:flex;gap:12px;}
+  .taskbar-menu span{cursor:pointer;transition:color 0.2s;}
+  .taskbar-menu span:hover{color:var(--os-text);}
+  #taskbar-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+  #clock{font-size:11px;color:var(--os-text);}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--os-green);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}};
+
+  /* LAYOUT */
+  #desktop{
+    position:fixed;top:36px;left:0;right:0;bottom:28px;
+    display:grid;
+    grid-template-columns:240px 1fr 320px;
+    grid-template-rows:1fr 200px;
+    gap:1px;background:var(--os-border);
+  }
+
+  .panel{
+    background:var(--os-surface);
+    overflow:hidden;position:relative;
+  }
+  .panel-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 16px;border-bottom:1px solid var(--os-border);
+    font-size:10px;letter-spacing:0.1em;color:var(--os-dim);
+    text-transform:uppercase;
+  }
+  .panel-header span{display:flex;align-items:center;gap:8px;}
+  .dot{width:5px;height:5px;border-radius:50%;}
+
+  /* SIDEBAR — FILE TREE */
+  #sidebar{grid-column:1;grid-row:1/3;}
+  .file-tree{padding:8px 0;overflow-y:auto;height:calc(100%-37px);}
+  .tree-item{
+    display:flex;align-items:center;gap:8px;padding:5px 16px;
+    font-size:11px;cursor:pointer;transition:background 0.15s;
+    color:var(--os-dim);
+  }
+  .tree-item:hover,.tree-item.active{background:rgba(91,143,255,0.08);color:var(--os-text);}
+  .tree-item.active{border-left:2px solid var(--os-accent);}
+  .tree-item.folder{color:var(--os-accent);}
+  .tree-item .indent{width:16px;flex-shrink:0;}
+  .tree-badge{
+    margin-left:auto;font-size:9px;padding:1px 5px;
+    border-radius:10px;background:rgba(91,143,255,0.15);color:var(--os-accent);
+  }
+
+  /* MAIN VIEWPORT */
+  #viewport{grid-column:2;grid-row:1;}
+  #canvas3d{width:100%;height:100%;display:block;}
+
+  /* RIGHT PANEL */
+  #properties{grid-column:3;grid-row:1;}
+  .prop-section{padding:12px 16px;border-bottom:1px solid var(--os-border);}
+  .prop-label{font-size:9px;letter-spacing:0.15em;color:var(--os-dim);margin-bottom:6px;text-transform:uppercase;}
+  .prop-value{font-size:12px;color:var(--os-text);}
+  .prop-bar{height:3px;background:var(--os-border);border-radius:2px;margin-top:4px;overflow:hidden;}
+  .prop-fill{height:100%;background:var(--os-accent);border-radius:2px;transition:width 1s ease;}
+  .prop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .prop-stat{background:rgba(91,143,255,0.05);border:1px solid var(--os-border);padding:8px;border-radius:4px;}
+  .stat-val{font-size:20px;font-weight:500;color:var(--os-accent);}
+  .stat-lbl{font-size:9px;color:var(--os-dim);}
+
+  .tag-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+  .tag{font-size:9px;padding:2px 8px;border-radius:3px;background:rgba(52,211,153,0.1);
+    color:var(--os-green);border:1px solid rgba(52,211,153,0.2);}
+  .tag.red{background:rgba(248,113,113,0.1);color:var(--os-red);border-color:rgba(248,113,113,0.2);}
+
+  /* BOTTOM LOG */
+  #log-panel{grid-column:1/3;grid-row:2;}
+  #log-content{padding:8px 16px;overflow-y:auto;height:calc(100%-37px);font-size:10px;line-height:1.9;}
+  .log-line{display:flex;gap:12px;}
+  .log-time{color:var(--os-dim);flex-shrink:0;}
+  .log-level{flex-shrink:0;}
+  .log-level.info{color:var(--os-accent);}
+  .log-level.ok{color:var(--os-green);}
+  .log-level.warn{color:var(--os-yellow);}
+  .log-level.err{color:var(--os-red);}
+
+  /* BOTTOM CHART */
+  #chart-panel{grid-column:3;grid-row:2;}
+  #chart-canvas{display:block;}
+
+  /* STATUS BAR */
+  #statusbar{
+    position:fixed;bottom:0;left:0;right:0;height:28px;
+    background:var(--os-accent);display:flex;align-items:center;
+    padding:0 16px;gap:20px;font-size:10px;color:rgba(255,255,255,0.8);
+    letter-spacing:0.05em;
+  }
+  #statusbar span{display:flex;align-items:center;gap:6px;}
+  .sb-sep{opacity:0.3;}
+
+  /* CONTEXT MENU */
+  #ctx-menu{
+    position:fixed;background:var(--os-surface);border:1px solid var(--os-border);
+    padding:4px 0;font-size:11px;z-index:2000;display:none;min-width:160px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  }
+  .ctx-item{padding:6px 16px;cursor:pointer;color:var(--os-dim);}
+  .ctx-item:hover{background:rgba(91,143,255,0.1);color:var(--os-text);}
+  .ctx-sep{height:1px;background:var(--os-border);margin:4px 0;}
+
+  /* NOTIFICATION */
+  #notif{
+    position:fixed;top:46px;right:16px;z-index:3000;
+    background:var(--os-surface);border:1px solid var(--os-border);
+    border-left:3px solid var(--os-green);padding:10px 14px;
+    min-width:240px;transform:translateX(120%);
+    transition:transform 0.3s cubic-bezier(0.23,1,0.32,1);
+    font-size:11px;
+  }
+  #notif.show{transform:translateX(0);}
+  #notif-title{color:var(--os-green);margin-bottom:4px;}
+  #notif-body{color:var(--os-dim);}
+</style>
+</head>
+<body>
+
+<!-- TASKBAR -->
+<div id="taskbar">
+  <span class="taskbar-logo">⬡ AURORA OS</span>
+  <div class="taskbar-menu">
+    <span onclick="notify('File','New workspace created.')">File</span>
+    <span onclick="notify('Edit','Clipboard accessed.')">Edit</span>
+    <span onclick="notify('View','Switching layout...')">View</span>
+    <span onclick="notify('System','Running diagnostics...')">System</span>
+    <span onclick="notify('Help','Documentation opened.')">Help</span>
+  </div>
+  <div id="taskbar-right">
+    <div class="status-dot"></div>
+    <span>SYS: NOMINAL</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+
+<div id="desktop">
+  <!-- SIDEBAR -->
+  <div class="panel" id="sidebar">
+    <div class="panel-header">
+      <span><span class="dot" style="background:#5b8fff"></span>FILE SYSTEM</span>
+      <span>v2.7</span>
+    </div>
+    <div class="file-tree">
+      <div class="tree-item folder" onclick="selectItem(this,'ROOT')">📁 /root</div>
+      <div class="tree-item active" onclick="selectItem(this,'SYSTEM')" style="padding-left:24px">⚙️ system</div>
+      <div class="tree-item" onclick="selectItem(this,'KERNEL')" style="padding-left:40px">💾 kernel.core<span class="tree-badge">24mb</span></div>
+      <div class="tree-item" onclick="selectItem(this,'NET')" style="padding-left:40px">🌐 network.cfg</div>
+      <div class="tree-item" onclick="selectItem(this,'PROCS')" style="padding-left:40px">⚡ processes.db<span class="tree-badge">12</span></div>
+      <div class="tree-item folder" onclick="selectItem(this,'DATA')" style="padding-left:24px">📁 data</div>
+      <div class="tree-item" onclick="selectItem(this,'MODELS')" style="padding-left:40px">🧠 models.bin<span class="tree-badge">2.1gb</span></div>
+      <div class="tree-item" onclick="selectItem(this,'LOGS')" style="padding-left:40px">📋 system.log</div>
+      <div class="tree-item folder" onclick="selectItem(this,'USERS')" style="padding-left:24px">📁 users</div>
+      <div class="tree-item" onclick="selectItem(this,'ADMIN')" style="padding-left:40px">👤 admin.profile</div>
+      <div class="tree-item" onclick="selectItem(this,'GUEST')" style="padding-left:40px">👤 guest.profile</div>
+      <div class="tree-item folder" onclick="selectItem(this,'CACHE')" style="padding-left:24px">📁 cache</div>
+      <div class="tree-item" onclick="selectItem(this,'TEMP')" style="padding-left:40px">🗑️ temp.swap<span class="tree-badge">847mb</span></div>
+      <div class="tree-item folder" onclick="selectItem(this,'SECURE')" style="padding-left:24px">🔐 secure</div>
+      <div class="tree-item" onclick="selectItem(this,'KEYS')" style="padding-left:40px">🔑 keys.vault</div>
+      <div class="tree-item" onclick="selectItem(this,'CERTS')" style="padding-left:40px">📜 certs.pem</div>
+    </div>
+  </div>
+
+  <!-- MAIN 3D VIEWPORT -->
+  <div class="panel" id="viewport">
+    <div class="panel-header">
+      <span><span class="dot" style="background:#34d399"></span>3D SYSTEM VISUALIZER</span>
+      <span id="render-mode">WIREFRAME · 60FPS</span>
+    </div>
+    <canvas id="canvas3d"></canvas>
+  </div>
+
+  <!-- PROPERTIES -->
+  <div class="panel" id="properties">
+    <div class="panel-header">
+      <span><span class="dot" style="background:#fbbf24"></span>PROPERTIES</span>
+      <span>SYSTEM</span>
+    </div>
+    <div style="overflow-y:auto;height:calc(100%-37px);">
+      <div class="prop-section">
+        <div class="prop-label">Selected Object</div>
+        <div class="prop-value" id="sel-name">system.core</div>
+        <div class="tag-list">
+          <span class="tag">active</span><span class="tag">encrypted</span>
+          <span class="tag red">critical</span>
+        </div>
+      </div>
+      <div class="prop-section">
+        <div class="prop-label">CPU Usage</div>
+        <div class="prop-value" id="cpu-val">73%</div>
+        <div class="prop-bar"><div class="prop-fill" id="cpu-bar" style="width:73%"></div></div>
+      </div>
+      <div class="prop-section">
+        <div class="prop-label">Memory</div>
+        <div class="prop-value" id="mem-val">8.2 / 16 GB</div>
+        <div class="prop-bar"><div class="prop-fill" id="mem-bar" style="width:51%;background:#34d399"></div></div>
+      </div>
+      <div class="prop-section">
+        <div class="prop-label">Network I/O</div>
+        <div class="prop-value" id="net-val">↑ 2.4mb/s · ↓ 8.1mb/s</div>
+        <div class="prop-bar"><div class="prop-fill" id="net-bar" style="width:30%;background:#fbbf24"></div></div>
+      </div>
+      <div class="prop-section">
+        <div class="prop-grid">
+          <div class="prop-stat"><div class="stat-val" id="s1">12</div><div class="stat-lbl">Processes</div></div>
+          <div class="prop-stat"><div class="stat-val" id="s2">847</div><div class="stat-lbl">Threads</div></div>
+          <div class="prop-stat"><div class="stat-val" id="s3">0</div><div class="stat-lbl">Errors</div></div>
+          <div class="prop-stat"><div class="stat-val" id="s4">99.9</div><div class="stat-lbl">Uptime %</div></div>
+        </div>
+      </div>
+      <div class="prop-section">
+        <div class="prop-label">Description</div>
+        <div class="prop-value" style="font-size:11px;color:var(--os-dim);line-height:1.7" id="sel-desc">Core system module managing primary resource allocation and process scheduling across all virtual cores.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel" id="log-panel">
+    <div class="panel-header">
+      <span><span class="dot" style="background:#f87171"></span>SYSTEM LOG</span>
+      <span>LIVE</span>
+    </div>
+    <div id="log-content"></div>
+  </div>
+
+  <!-- CHART -->
+  <div class="panel" id="chart-panel">
+    <div class="panel-header">
+      <span><span class="dot" style="background:#5b8fff"></span>CPU HISTORY</span>
+    </div>
+    <canvas id="chart-canvas"></canvas>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span>⬡ AURORA OS 2.7.1</span>
+  <span class="sb-sep">|</span>
+  <span>BUILD 20241201</span>
+  <span class="sb-sep">|</span>
+  <span>KERNEL: 6.2.0-aurora</span>
+  <span class="sb-sep">|</span>
+  <span id="sb-node">NODE: system.core</span>
+  <span class="sb-sep">|</span>
+  <span>UPTIME: <span id="uptime">00:00:00</span></span>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx-menu">
+  <div class="ctx-item" onclick="notify('File','Opening in editor...')">Open in Editor</div>
+  <div class="ctx-item" onclick="notify('File','Properties loaded.')">Properties</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="notify('Process','Process restarted.')">Restart Process</div>
+  <div class="ctx-item" onclick="notify('Process','Process killed.')">Kill Process</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="notify('System','Diagnostics running...')">Run Diagnostics</div>
+</div>
+
+<!-- NOTIFICATION -->
+<div id="notif">
+  <div id="notif-title">System</div>
+  <div id="notif-body">Operation complete.</div>
+</div>
+
+<script>
+// CLOCK
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=now.toLocaleTimeString();
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// UPTIME
+let uptimeS=0;
+setInterval(()=>{
+  uptimeS++;
+  const h=String(Math.floor(uptimeS/3600)).padStart(2,'0');
+  const m=String(Math.floor((uptimeS%3600)/60)).padStart(2,'0');
+  const s=String(uptimeS%60).padStart(2,'0');
+  document.getElementById('uptime').textContent=`${h}:${m}:${s}`;
+},1000);
+
+// CONTEXT MENU
+document.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  const m=document.getElementById('ctx-menu');
+  m.style.display='block';
+  m.style.left=e.clientX+'px';
+  m.style.top=e.clientY+'px';
+});
+document.addEventListener('click',()=>document.getElementById('ctx-menu').style.display='none');
+
+// NOTIFICATION
+let notifTimer;
+function notify(title,body){
+  const n=document.getElementById('notif');
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  n.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>n.classList.remove('show'),2500);
+  addLog(title,body,'info');
+}
+
+// FILE SELECTION
+const fileData={
+  ROOT:{name:'/',desc:'Root filesystem. Contains all system directories and mounted volumes.'},
+  SYSTEM:{name:'system/',desc:'Core OS modules. Handles boot sequence, hardware abstraction, and service orchestration.'},
+  KERNEL:{name:'kernel.core',desc:'Monolithic kernel binary. Version 6.2.0-aurora. Manages memory, processes, and device drivers.'},
+  NET:{name:'network.cfg',desc:'Network configuration. Defines interfaces, routing tables, firewall rules, and DNS resolvers.'},
+  PROCS:{name:'processes.db',desc:'Live process database. Currently tracking 12 active processes across 847 threads.'},
+  DATA:{name:'data/',desc:'User data directory. Houses ML models, training datasets, and inference outputs.'},
+  MODELS:{name:'models.bin',desc:'Compiled neural network weights. 3 active models: vision-v4, lang-v7, audio-v2.'},
+  LOGS:{name:'system.log',desc:'Rolling system log. 30-day retention. Compressed with zstd. Currently 2.1GB.'},
+  USERS:{name:'users/',desc:'User profile store. 2 active accounts: admin (uid:0), guest (uid:1000).'},
+  ADMIN:{name:'admin.profile',desc:'Administrator account. Full system privileges. Last login: today 08:23.'},
+  GUEST:{name:'guest.profile',desc:'Guest sandbox account. Restricted filesystem access. Isolated process namespace.'},
+  CACHE:{name:'cache/',desc:'System cache directory. Contains swap files, DNS cache, and compiled shader binaries.'},
+  TEMP:{name:'temp.swap',desc:'Memory swap file. 847MB currently in use. Performance impact: minimal.'},
+  SECURE:{name:'secure/',desc:'Encrypted vault. AES-256-GCM. Requires biometric authentication to unlock.'},
+  KEYS:{name:'keys.vault',desc:'Cryptographic key store. 14 active keys. RSA-4096 and Ed25519 supported.'},
+  CERTS:{name:'certs.pem',desc:'TLS certificate bundle. 3 active certificates. Renewal in 47 days.'},
+};
+
+function selectItem(el,key){
+  document.querySelectorAll('.tree-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const d=fileData[key]||{name:key,desc:'No data.'};
+  document.getElementById('sel-name').textContent=d.name;
+  document.getElementById('sel-desc').textContent=d.desc;
+  document.getElementById('sb-node').textContent='NODE: '+d.name;
+  notify('File System',d.name+' selected.');
+}
+
+// LOG
+const logMsgs=[
+  ['info','kernel','IRQ balance adjusted. Spread: 14 cores'],
+  ['ok','network','Interface eth0: 1Gbit link up'],
+  ['info','memory','Page cache: 3.2GB. Reclaim threshold: 80%'],
+  ['ok','security','TLS handshake: OK (TLS 1.3 + ECDHE)'],
+  ['warn','disk','I/O wait spiked to 12% on /dev/nvme0'],
+  ['info','process','Worker pool expanded: +4 threads'],
+  ['ok','cache','DNS cache hit rate: 94.2%'],
+  ['info','gpu','VRAM usage: 2.1GB / 8GB'],
+  ['warn','cpu','Core 7 thermal: 72°C (threshold 85°C)'],
+  ['ok','auth','Biometric verification passed'],
+  ['info','net','BGP route update: 14,882 prefixes'],
+  ['err','disk','SMART warning: /dev/sdb reallocated sectors +1'],
+];
+let logIdx=0;
+function addLog(src,msg,level){
+  const lc=document.getElementById('log-content');
+  const now=new Date().toLocaleTimeString();
+  const line=document.createElement('div');
+  line.className='log-line';
+  line.innerHTML=`<span class="log-time">${now}</span><span class="log-level ${level}">[${level.toUpperCase()}]</span><span>${msg}</span>`;
+  lc.appendChild(line);
+  lc.scrollTop=lc.scrollHeight;
+}
+function autoLog(){
+  const [level,src,msg]=logMsgs[logIdx%logMsgs.length];
+  addLog(src,msg,level);
+  logIdx++;
+}
+autoLog();
+setInterval(autoLog,2200);
+
+// METRICS UPDATE
+function updateMetrics(){
+  const cpu=50+Math.random()*40;
+  const mem=45+Math.random()*20;
+  document.getElementById('cpu-val').textContent=Math.round(cpu)+'%';
+  document.getElementById('mem-val').textContent=(8+Math.random()*2).toFixed(1)+' / 16 GB';
+  document.getElementById('cpu-bar').style.width=cpu+'%';
+  document.getElementById('mem-bar').style.width=mem+'%';
+  document.getElementById('s1').textContent=10+Math.floor(Math.random()*6);
+  document.getElementById('s2').textContent=800+Math.floor(Math.random()*100);
+}
+updateMetrics();
+setInterval(updateMetrics,3000);
+
+// CHART (CPU history)
+const chartCanvas=document.getElementById('chart-canvas');
+const cc=chartCanvas.getContext('2d');
+const chartPanel=document.getElementById('chart-panel');
+let cpuHistory=new Array(60).fill(50);
+
+function resizeChart(){
+  chartCanvas.width=chartPanel.clientWidth;
+  chartCanvas.height=chartPanel.clientHeight-37;
+}
+resizeChart();
+window.addEventListener('resize',resizeChart);
+
+function drawChart(){
+  const W=chartCanvas.width,H=chartCanvas.height;
+  cc.clearRect(0,0,W,H);
+  cc.fillStyle='rgba(15,17,23,0)';cc.fillRect(0,0,W,H);
+
+  // Grid
+  cc.strokeStyle='rgba(30,37,54,0.8)';cc.lineWidth=1;
+  for(let i=0;i<5;i++){
+    const y=H*0.1+i*(H*0.8/4);
+    cc.beginPath();cc.moveTo(0,y);cc.lineTo(W,y);cc.stroke();
+    cc.fillStyle='rgba(74,85,128,0.5)';cc.font='8px IBM Plex Mono';
+    cc.fillText((100-i*25)+'%',2,y-2);
+  }
+
+  // Line
+  cc.beginPath();
+  cpuHistory.forEach((v,i)=>{
+    const x=i*(W/60);
+    const y=H-(v/100)*H*0.8-H*0.1;
+    i===0?cc.moveTo(x,y):cc.lineTo(x,y);
+  });
+  cc.strokeStyle='#5b8fff';cc.lineWidth=1.5;cc.stroke();
+
+  // Fill
+  cc.lineTo(W,H);cc.lineTo(0,H);cc.closePath();
+  const grad=cc.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(91,143,255,0.2)');
+  grad.addColorStop(1,'transparent');
+  cc.fillStyle=grad;cc.fill();
+}
+
+setInterval(()=>{
+  cpuHistory.push(50+Math.random()*40);
+  if(cpuHistory.length>60) cpuHistory.shift();
+  drawChart();
+},1000);
+drawChart();
+
+// 3D VIEWPORT
+const canvas3d=document.getElementById('canvas3d');
+const ctx3=canvas3d.getContext('2d');
+let W3,H3;
+function resizeViewport(){
+  const vp=document.getElementById('viewport');
+  W3=canvas3d.width=vp.clientWidth;
+  H3=canvas3d.height=vp.clientHeight-37;
+}
+resizeViewport();window.addEventListener('resize',resizeViewport);
+
+// 3D System nodes
+const sysNodes=[
+  {x:0,y:0,z:0,label:'KERNEL',color:'#5b8fff',size:14,children:[1,2,3,4,5]},
+  {x:200,y:0,z:100,label:'MEMORY',color:'#34d399',size:10,children:[]},
+  {x:-180,y:80,z:120,label:'NET',color:'#fbbf24',size:9,children:[]},
+  {x:80,y:-150,z:150,label:'DISK',color:'#f87171',size:8,children:[]},
+  {x:-200,y:-80,z:50,label:'GPU',color:'#a78bfa',size:11,children:[]},
+  {x:150,y:150,z:80,label:'PROC',color:'#fb923c',size:9,children:[]},
+];
+
+let angle=0;
+function draw3D(){
+  angle+=0.005;
+  ctx3.clearRect(0,0,W3,H3);
+  ctx3.fillStyle='#0f1117';ctx3.fillRect(0,0,W3,H3);
+
+  const cx=W3/2,cy=H3/2;
+  const fov=400;
+
+  function project3(x,y,z){
+    const cosA=Math.cos(angle),sinA=Math.sin(angle);
+    const rx=x*cosA-z*sinA;
+    const rz=x*sinA+z*cosA;
+    const ry=y;
+    const depth=rz+600;
+    if(depth<1) return null;
+    return{px:cx+rx*(fov/depth),py:cy+ry*(fov/depth),scale:fov/depth};
+  }
+
+  // Draw connections
+  sysNodes.forEach(n=>{
+    n.children.forEach(ci=>{
+      const other=sysNodes[ci];
+      const p1=project3(n.x,n.y,n.z);
+      const p2=project3(other.x,other.y,other.z);
+      if(!p1||!p2) return;
+      ctx3.beginPath();ctx3.moveTo(p1.px,p1.py);ctx3.lineTo(p2.px,p2.py);
+
+      // Animated packet
+      const t=(Date.now()/1000)%1;
+      const px=p1.px+(p2.px-p1.px)*t;
+      const py=p1.py+(p2.py-p1.py)*t;
+
+      ctx3.strokeStyle='rgba(91,143,255,0.12)';ctx3.lineWidth=1;ctx3.stroke();
+      ctx3.beginPath();ctx3.arc(px,py,2,0,Math.PI*2);
+      ctx3.fillStyle='rgba(91,143,255,0.8)';ctx3.fill();
+    });
+  });
+
+  // Draw nodes (back to front)
+  [...sysNodes]
+    .map(n=>({...n,proj:project3(n.x,n.y,n.z)}))
+    .filter(n=>n.proj)
+    .sort((a,b)=>(b.proj.scale)-(a.proj.scale))
+    .forEach(n=>{
+      const {px,py,scale}=n.proj;
+      const sz=n.size*scale;
+
+      const grad=ctx3.createRadialGradient(px,py,0,px,py,sz*2);
+      grad.addColorStop(0,n.color+'44');grad.addColorStop(1,'transparent');
+      ctx3.beginPath();ctx3.arc(px,py,sz*2,0,Math.PI*2);
+      ctx3.fillStyle=grad;ctx3.fill();
+
+      ctx3.beginPath();ctx3.arc(px,py,sz,0,Math.PI*2);
+      ctx3.fillStyle=n.color;ctx3.fill();
+
+      ctx3.fillStyle='rgba(201,209,232,0.7)';
+      ctx3.font=`${Math.min(sz*0.8,11)}px IBM Plex Mono`;
+      ctx3.textAlign='center';
+      ctx3.fillText(n.label,px,py-sz-4);
+    });
+
+  requestAnimationFrame(draw3D);
+}
+draw3D();
+document.getElementById('render-mode').textContent=`WIREFRAME · ${Math.floor(60+Math.random()*5)}FPS`;
+setInterval(()=>{document.getElementById('render-mode').textContent=`WIREFRAME · ${Math.floor(55+Math.random()*10)}FPS`;},2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID — Abstract Interface</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,300;0,6..96,400;1,6..96,300&family=Space+Mono&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:#f8f5f0;
+    color:#1a1a1a;
+    font-family:'Bodoni Moda',serif;
+    overflow:hidden;
+    height:100vh;
+    cursor:none;
+  }
+
+  #canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;}
+
+  /* CUSTOM CURSOR */
+  #cur{
+    position:fixed;pointer-events:none;z-index:9999;
+    width:1px;height:1px;
+    transition:transform 0.6s cubic-bezier(0.23,1,0.32,1);
+  }
+  #cur-inner{
+    width:6px;height:6px;background:#1a1a1a;border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  #cur-trail{
+    position:fixed;pointer-events:none;z-index:9998;
+    width:60px;height:60px;
+    border:1px solid rgba(26,26,26,0.2);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    transition:all 0.4s ease;
+  }
+
+  /* MINIMAL CHROME */
+  #top-left{
+    position:fixed;top:40px;left:48px;z-index:100;
+    font-size:10px;letter-spacing:0.5em;
+    color:rgba(26,26,26,0.35);
+    font-family:'Space Mono',monospace;
+    text-transform:uppercase;
+  }
+
+  #top-right{
+    position:fixed;top:40px;right:48px;z-index:100;
+    font-size:10px;letter-spacing:0.3em;
+    color:rgba(26,26,26,0.35);
+    font-family:'Space Mono',monospace;
+    text-align:right;
+  }
+
+  /* CENTER CONTENT — revealed on hover */
+  #center-content{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    z-index:50;text-align:center;pointer-events:none;
+    opacity:0;transition:opacity 2s ease;
+  }
+  #center-content.show{opacity:1;}
+
+  #center-content h1{
+    font-size:clamp(48px,6vw,80px);
+    font-weight:300;font-style:italic;
+    letter-spacing:-0.02em;
+    color:rgba(26,26,26,0.08);
+    line-height:1.1;
+  }
+
+  /* INTERACTIVE ZONES */
+  .zone{
+    position:fixed;
+    cursor:none;
+    z-index:30;
+  }
+
+  #zone-a{top:0;left:0;width:33.3%;height:100%;}
+  #zone-b{top:0;left:33.3%;width:33.4%;height:100%;}
+  #zone-c{top:0;right:0;width:33.3%;height:100%;}
+
+  /* SIDEBAR POEM */
+  #poem{
+    position:fixed;left:48px;bottom:48px;z-index:100;
+    font-size:13px;line-height:2.2;font-style:italic;
+    color:rgba(26,26,26,0.4);
+    max-width:200px;
+  }
+
+  #poem-right{
+    position:fixed;right:48px;bottom:48px;z-index:100;
+    font-size:10px;font-family:'Space Mono',monospace;
+    color:rgba(26,26,26,0.3);
+    text-align:right;line-height:2;
+  }
+
+  /* SHAPE DESCRIPTOR */
+  #descriptor{
+    position:fixed;top:50%;right:80px;transform:translateY(-50%);
+    z-index:100;writing-mode:vertical-rl;
+    font-size:9px;letter-spacing:0.5em;
+    color:rgba(26,26,26,0.2);
+    font-family:'Space Mono',monospace;
+    text-transform:uppercase;
+    transition:color 1s ease;
+  }
+
+  /* INSTRUCTIONS */
+  #instructions{
+    position:fixed;bottom:50px;left:50%;transform:translateX(-50%);
+    font-size:9px;letter-spacing:0.4em;color:rgba(26,26,26,0.25);
+    font-family:'Space Mono',monospace;text-transform:uppercase;
+    z-index:100;
+  }
+
+  /* AMBIENT PANEL */
+  #ambient{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:0;height:0;border-radius:50%;
+    background:radial-gradient(circle,rgba(26,26,26,0.03) 0%,transparent 70%);
+    pointer-events:none;z-index:2;
+    transition:width 3s ease,height 3s ease;
+  }
+
+  /* MODE INDICATOR */
+  #mode{
+    position:fixed;top:50%;left:48px;transform:translateY(-50%);
+    writing-mode:vertical-rl;font-size:9px;letter-spacing:0.5em;
+    color:rgba(26,26,26,0.2);font-family:'Space Mono',monospace;
+    text-transform:uppercase;z-index:100;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="cur"><div id="cur-inner"></div></div>
+<div id="cur-trail"></div>
+<div id="ambient"></div>
+
+<div id="top-left">VOID · 001</div>
+<div id="top-right">
+  <div id="shape-count">0 forms</div>
+  <div>abstract field</div>
+</div>
+
+<div id="mode">MODE · GENERATIVE</div>
+<div id="descriptor">SILENCE</div>
+
+<div id="center-content">
+  <h1>Nothing<br>contains<br>everything</h1>
+</div>
+
+<div id="poem">
+  <div>between the seen</div>
+  <div>and the unseen</div>
+  <div>the form</div>
+  <div>waits.</div>
+</div>
+
+<div id="poem-right">
+  <div id="coord-x">x: 000.00</div>
+  <div id="coord-y">y: 000.00</div>
+  <div id="entropy">e: 0.000</div>
+</div>
+
+<div id="instructions">move · click · breathe</div>
+
+<!-- Zones are just for interaction -->
+<div class="zone" id="zone-a"></div>
+<div class="zone" id="zone-b"></div>
+<div class="zone" id="zone-c"></div>
+
+<script>
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',()=>{resize();});
+
+// CURSOR
+let mx=W/2,my=H/2;
+let tx=mx,ty=my;
+const cur=document.getElementById('cur');
+const trail=document.getElementById('cur-trail');
+
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  document.getElementById('coord-x').textContent=`x: ${(mx/W*100).toFixed(2)}`;
+  document.getElementById('coord-y').textContent=`y: ${(my/H*100).toFixed(2)}`;
+});
+
+function animTrail(){
+  tx+=(mx-tx)*0.05;ty+=(my-ty)*0.05;
+  trail.style.left=tx+'px';trail.style.top=ty+'px';
+  requestAnimationFrame(animTrail);
+}
+animTrail();
+
+// SHAPES
+let shapes=[];
+let entropy=0;
+const descriptors=['SILENCE','TENSION','BREATH','DRIFT','RESONANCE','VOID','MASS','LIGHT'];
+
+class AbstractShape{
+  constructor(x,y,type){
+    this.x=x;this.y=y;
+    this.type=type||['circle','rect','line','ellipse'][Math.floor(Math.random()*4)];
+    this.size=20+Math.random()*200;
+    this.opacity=0;
+    this.targetOpacity=0.06+Math.random()*0.12;
+    this.rotation=Math.random()*Math.PI*2;
+    this.rotSpeed=(Math.random()-0.5)*0.003;
+    this.vx=(Math.random()-0.5)*0.3;
+    this.vy=(Math.random()-0.5)*0.3;
+    this.life=0;
+    this.maxLife=300+Math.random()*400;
+    this.hue=Math.random()*360;
+    this.born=Date.now();
+    this.weight=Math.random();
+  }
+  update(){
+    this.life++;
+    this.x+=this.vx;this.y+=this.vy;
+    this.rotation+=this.rotSpeed;
+    const progress=this.life/this.maxLife;
+    if(progress<0.1) this.opacity=this.targetOpacity*(progress/0.1);
+    else if(progress>0.7) this.opacity=this.targetOpacity*((1-progress)/0.3);
+    else this.opacity=this.targetOpacity;
+    return this.life<this.maxLife;
+  }
+  draw(){
+    ctx.save();
+    ctx.translate(this.x,this.y);
+    ctx.rotate(this.rotation);
+
+    const alpha=this.opacity;
+    // Monochrome with barely-there color
+    const h=this.hue, s=5, l=15;
+    ctx.strokeStyle=`hsla(${h},${s}%,${l}%,${alpha})`;
+    ctx.fillStyle=`hsla(${h},${s}%,${l}%,${alpha*0.3})`;
+    ctx.lineWidth=this.weight<0.3?0.5:1;
+
+    if(this.type==='circle'){
+      ctx.beginPath();ctx.arc(0,0,this.size/2,0,Math.PI*2);
+      ctx.stroke();if(this.weight>0.7)ctx.fill();
+    } else if(this.type==='rect'){
+      ctx.strokeRect(-this.size/2,-this.size/3,this.size,this.size*0.6);
+      if(this.weight>0.7)ctx.fillRect(-this.size/2,-this.size/3,this.size,this.size*0.6);
+    } else if(this.type==='line'){
+      ctx.beginPath();
+      ctx.moveTo(-this.size/2,0);ctx.lineTo(this.size/2,0);
+      ctx.stroke();
+      // Second line
+      ctx.beginPath();
+      ctx.moveTo(-this.size/3,-this.size*0.1);ctx.lineTo(this.size/3,-this.size*0.1);
+      ctx.globalAlpha=alpha*0.5;ctx.stroke();ctx.globalAlpha=1;
+    } else if(this.type==='ellipse'){
+      ctx.beginPath();ctx.ellipse(0,0,this.size/2,this.size/4,0,0,Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+// SPAWN
+function spawnShape(x,y){
+  if(shapes.length>80) return;
+  shapes.push(new AbstractShape(x||Math.random()*W,y||Math.random()*H));
+  entropy=Math.min(1,entropy+0.05);
+  document.getElementById('entropy').textContent=`e: ${entropy.toFixed(3)}`;
+  document.getElementById('shape-count').textContent=`${shapes.length} forms`;
+  document.getElementById('descriptor').textContent=descriptors[Math.floor(Math.random()*descriptors.length)];
+}
+
+// Click
+canvas.addEventListener('click',e=>{
+  for(let i=0;i<5;i++){
+    setTimeout(()=>{
+      spawnShape(e.clientX+(Math.random()-0.5)*100,e.clientY+(Math.random()-0.5)*100);
+    },i*80);
+  }
+  playTone();
+});
+
+// Mouse move spawn (slow)
+let lastSpawn=0;
+document.addEventListener('mousemove',e=>{
+  const now=Date.now();
+  if(now-lastSpawn>400&&Math.random()<0.3){
+    lastSpawn=now;
+    spawnShape(e.clientX+(Math.random()-0.5)*150,e.clientY+(Math.random()-0.5)*150);
+  }
+  // Show center content when near center
+  const distFromCenter=Math.sqrt((e.clientX-W/2)**2+(e.clientY-H/2)**2);
+  if(distFromCenter<150){
+    document.getElementById('center-content').classList.add('show');
+    document.getElementById('ambient').style.width='800px';
+    document.getElementById('ambient').style.height='800px';
+  } else {
+    document.getElementById('center-content').classList.remove('show');
+    document.getElementById('ambient').style.width='0';
+    document.getElementById('ambient').style.height='0';
+  }
+  // Trail size
+  const sz=40+distFromCenter*0.05;
+  trail.style.width=sz+'px';trail.style.height=sz+'px';
+});
+
+// Auto spawn
+setInterval(()=>{
+  if(shapes.length<20){
+    spawnShape();
+  }
+  entropy=Math.max(0,entropy-0.003);
+  document.getElementById('entropy').textContent=`e: ${entropy.toFixed(3)}`;
+},600);
+
+// DRAW LOOP
+let frameT=0;
+function draw(){
+  frameT++;
+  // Slow fade instead of clear
+  ctx.fillStyle='rgba(248,245,240,0.025)';
+  ctx.fillRect(0,0,W,H);
+
+  // Occasionally full clear for breathing
+  if(frameT%300===0){
+    ctx.fillStyle='rgba(248,245,240,0.5)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // Draw cursor influence
+  const grad=ctx.createRadialGradient(mx,my,0,mx,my,200);
+  grad.addColorStop(0,'rgba(26,26,26,0.01)');
+  grad.addColorStop(1,'transparent');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+  shapes=shapes.filter(s=>{
+    const alive=s.update();
+    if(alive) s.draw();
+    return alive;
+  });
+
+  // Shape count
+  if(shapes.length!==parseInt(document.getElementById('shape-count').textContent))
+    document.getElementById('shape-count').textContent=`${shapes.length} forms`;
+
+  // Subtle grid on idle
+  if(entropy<0.1){
+    ctx.strokeStyle='rgba(26,26,26,0.015)';ctx.lineWidth=0.5;
+    for(let i=0;i<W;i+=80){
+      ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke();
+    }
+    for(let i=0;i<H;i+=80){
+      ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke();
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+// AUDIO
+let audioCtx;
+function playTone(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const freqs=[261.63,329.63,392,523.25,659.25];
+  const freq=freqs[Math.floor(Math.random()*freqs.length)];
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  const reverb=audioCtx.createConvolver();
+
+  osc.type='sine';osc.frequency.value=freq;
+  gain.gain.setValueAtTime(0.03,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+3);
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.start();osc.stop(audioCtx.currentTime+3);
+}
+
+// Initial shapes
+setTimeout(()=>{
+  for(let i=0;i<12;i++) setTimeout(()=>spawnShape(),i*200);
+},300);
+</script>
+</body>
+</html>
