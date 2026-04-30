@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DATA COSMOS — Universe of Information</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#03060f;color:#e0e8ff;font-family:'Inter',sans-serif;overflow:hidden;height:100vh;cursor:none;}
+
+  #canvas{position:fixed;top:0;left:0;width:100%;height:100%;}
+
+  #cursor{position:fixed;width:12px;height:12px;pointer-events:none;z-index:9999;
+    border:1px solid #4fc3f7;border-radius:50%;transform:translate(-50%,-50%);
+    transition:all 0.15s ease;}
+  #cursor-dot{position:fixed;width:3px;height:3px;background:#4fc3f7;border-radius:50%;
+    pointer-events:none;z-index:10000;transform:translate(-50%,-50%);}
+
+  /* HEADER */
+  #header{position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:20px 32px;display:flex;align-items:center;gap:24px;
+    background:linear-gradient(180deg,rgba(3,6,15,0.9) 0%,transparent 100%);}
+  #logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:300;
+    letter-spacing:0.15em;color:#4fc3f7;display:flex;align-items:center;gap:10px;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:#4fc3f7;
+    box-shadow:0 0 12px #4fc3f7;animation:cosmicPulse 2s infinite;}
+  @keyframes cosmicPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.3);opacity:0.5;}}
+
+  #search-bar{
+    flex:1;max-width:400px;margin-left:auto;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(79,195,247,0.15);
+    padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;
+    color:#e0e8ff;outline:none;
+  }
+  #search-bar::placeholder{color:rgba(224,232,255,0.3);}
+
+  /* LEGEND */
+  #legend{position:fixed;top:70px;left:32px;z-index:100;}
+  .legend-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;
+    font-size:11px;color:rgba(224,232,255,0.5);cursor:pointer;transition:color 0.2s;}
+  .legend-item:hover{color:rgba(224,232,255,0.9);}
+  .legend-dot{width:10px;height:10px;border-radius:50%;}
+
+  /* DATA PANEL */
+  #data-panel{
+    position:fixed;right:0;top:0;bottom:0;width:320px;
+    background:rgba(3,6,15,0.95);border-left:1px solid rgba(79,195,247,0.1);
+    transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    z-index:200;overflow-y:auto;
+  }
+  #data-panel.open{transform:translateX(0);}
+  #panel-header{
+    padding:20px 24px;border-bottom:1px solid rgba(79,195,247,0.1);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  #panel-title{font-size:14px;font-weight:500;color:#4fc3f7;}
+  .close-x{background:none;border:none;color:rgba(224,232,255,0.4);cursor:pointer;font-size:18px;}
+  .data-block{padding:16px 24px;border-bottom:1px solid rgba(79,195,247,0.05);}
+  .data-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+    color:rgba(224,232,255,0.35);margin-bottom:6px;}
+  .data-value{font-family:'JetBrains Mono',monospace;font-size:13px;color:#e0e8ff;}
+  .data-bar{height:2px;background:rgba(255,255,255,0.06);margin-top:6px;border-radius:1px;overflow:hidden;}
+  .data-fill{height:100%;background:#4fc3f7;transition:width 0.8s ease;}
+
+  /* FILTERS */
+  #filters{
+    position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;z-index:100;
+    background:rgba(3,6,15,0.8);padding:10px 16px;
+    border:1px solid rgba(79,195,247,0.1);backdrop-filter:blur(12px);
+  }
+  .filter-btn{
+    padding:5px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.1em;background:transparent;border:1px solid rgba(79,195,247,0.2);
+    color:rgba(224,232,255,0.4);cursor:pointer;transition:all 0.2s;
+  }
+  .filter-btn:hover,.filter-btn.active{
+    background:rgba(79,195,247,0.1);color:#4fc3f7;border-color:rgba(79,195,247,0.5);
+  }
+
+  /* STATS */
+  #stats-bar{position:fixed;bottom:0;left:0;right:0;height:36px;
+    background:rgba(3,6,15,0.95);border-top:1px solid rgba(79,195,247,0.08);
+    display:flex;align-items:center;padding:0 32px;gap:32px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(224,232,255,0.3);}
+  .stat-item span{color:#4fc3f7;}
+
+  /* HOVER TOOLTIP */
+  #tooltip{
+    position:fixed;z-index:300;pointer-events:none;
+    background:rgba(3,6,15,0.95);border:1px solid rgba(79,195,247,0.3);
+    padding:8px 12px;font-size:11px;font-family:'JetBrains Mono',monospace;
+    color:#e0e8ff;display:none;
+  }
+  #tooltip.show{display:block;}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+<canvas id="canvas"></canvas>
+
+<div id="header">
+  <div id="logo"><div class="logo-dot"></div>DATA COSMOS · v4.2</div>
+  <input id="search-bar" placeholder="search data universe..." />
+</div>
+
+<div id="legend">
+  <div class="legend-item" onclick="filterType('technology')"><div class="legend-dot" style="background:#4fc3f7;box-shadow:0 0 8px #4fc3f7"></div>Technology</div>
+  <div class="legend-item" onclick="filterType('science')"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa"></div>Science</div>
+  <div class="legend-item" onclick="filterType('economy')"><div class="legend-dot" style="background:#34d399;box-shadow:0 0 8px #34d399"></div>Economy</div>
+  <div class="legend-item" onclick="filterType('culture')"><div class="legend-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b"></div>Culture</div>
+  <div class="legend-item" onclick="filterType('health')"><div class="legend-dot" style="background:#f87171;box-shadow:0 0 8px #f87171"></div>Health</div>
+</div>
+
+<div id="data-panel">
+  <div id="panel-header">
+    <span id="panel-title">NODE DATA</span>
+    <button class="close-x" onclick="document.getElementById('data-panel').classList.remove('open')">×</button>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Identifier</div>
+    <div class="data-value" id="p-id">—</div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Category</div>
+    <div class="data-value" id="p-cat">—</div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Data Mass</div>
+    <div class="data-value" id="p-mass">—</div>
+    <div class="data-bar"><div class="data-fill" id="p-mass-bar"></div></div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Connections</div>
+    <div class="data-value" id="p-connections">—</div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Influence Score</div>
+    <div class="data-value" id="p-influence">—</div>
+    <div class="data-bar"><div class="data-fill" id="p-inf-bar" style="background:#a78bfa"></div></div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Description</div>
+    <div class="data-value" id="p-desc" style="font-size:11px;color:rgba(224,232,255,0.6);line-height:1.8;font-family:'Inter',sans-serif;">—</div>
+  </div>
+  <div class="data-block">
+    <div class="data-label">Real-time Signal</div>
+    <canvas id="mini-chart" width="270" height="60"></canvas>
+  </div>
+</div>
+
+<div id="filters">
+  <button class="filter-btn active" onclick="setView('cosmos')">COSMOS</button>
+  <button class="filter-btn" onclick="setView('cluster')">CLUSTER</button>
+  <button class="filter-btn" onclick="setView('network')">NETWORK</button>
+  <button class="filter-btn" onclick="setView('timeline')">TIMELINE</button>
+</div>
+
+<div id="stats-bar">
+  <div class="stat-item">NODES: <span id="s-nodes">0</span></div>
+  <div class="stat-item">EDGES: <span id="s-edges">0</span></div>
+  <div class="stat-item">CLUSTERS: <span id="s-clusters">5</span></div>
+  <div class="stat-item">TOTAL MASS: <span id="s-mass">0</span> PB</div>
+  <div class="stat-item" style="margin-left:auto">RENDER: <span id="fps-counter">60</span> FPS</div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+// CURSOR
+const cur=document.getElementById('cursor');
+const dot=document.getElementById('cursor-dot');
+let mx=W/2,my=H/2;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+});
+
+// DATA NODES
+const categories={
+  technology:{color:'#4fc3f7',glow:'rgba(79,195,247,0.4)'},
+  science:{color:'#a78bfa',glow:'rgba(167,139,250,0.4)'},
+  economy:{color:'#34d399',glow:'rgba(52,211,153,0.4)'},
+  culture:{color:'#f59e0b',glow:'rgba(245,158,11,0.4)'},
+  health:{color:'#f87171',glow:'rgba(248,113,113,0.4)'},
+};
+const catKeys=Object.keys(categories);
+
+const nodeData=[
+  {name:'Artificial Intelligence',cat:'technology',mass:94,desc:'Machine learning systems reshaping computation, perception, and decision-making at unprecedented scale.',connections:8,influence:97},
+  {name:'Quantum Computing',cat:'science',mass:72,desc:'Harnessing quantum superposition to solve problems exponentially intractable for classical machines.',connections:5,influence:81},
+  {name:'Global GDP',cat:'economy',mass:88,desc:'$105 trillion aggregate output of all economic activity on Earth. Growing at 3.2% annually.',connections:12,influence:95},
+  {name:'CRISPR Gene Editing',cat:'health',mass:65,desc:'Precision genomic surgery enabling targeted modification of living DNA sequences.',connections:6,influence:78},
+  {name:'Social Media',cat:'culture',mass:91,desc:'5.4 billion connected humans producing 2.5 quintillion bytes of data daily.',connections:15,influence:92},
+  {name:'Dark Energy',cat:'science',mass:100,desc:'Unknown force comprising 68% of the universe, driving accelerating cosmic expansion.',connections:3,influence:100},
+  {name:'Cryptocurrency',cat:'economy',mass:58,desc:'$2.4 trillion decentralized value network operating outside traditional financial systems.',connections:7,influence:63},
+  {name:'mRNA Vaccines',cat:'health',mass:77,desc:'Programmable immune education technology. Deployed globally within 11 months of sequence identification.',connections:8,influence:88},
+  {name:'Neural Interfaces',cat:'technology',mass:45,desc:'Direct cortical communication bridges dissolving the boundary between mind and machine.',connections:4,influence:71},
+  {name:'Climate Systems',cat:'science',mass:96,desc:'Planetary thermostat in unprecedented perturbation. 1.2°C above preindustrial baseline.',connections:18,influence:99},
+  {name:'Supply Chains',cat:'economy',mass:83,desc:'Invisible logistics web. $19 trillion annual flow of goods across 195 nations.',connections:14,influence:89},
+  {name:'Streaming Culture',cat:'culture',mass:69,desc:'Narrative delivery systems consumed by 1.3 billion subscribers rewriting storytelling grammar.',connections:9,influence:74},
+  {name:'Longevity Science',cat:'health',mass:54,desc:'Senolytics, telomere restoration, and caloric mimetics targeting biological aging mechanisms.',connections:6,influence:67},
+  {name:'Edge Computing',cat:'technology',mass:61,desc:'Distributed processing at the periphery. Bringing intelligence latency to <1ms.',connections:7,influence:69},
+  {name:'Microbiome',cat:'health',mass:70,desc:'39 trillion microbial inhabitants shaping immunity, cognition, and metabolic function.',connections:8,influence:76},
+  {name:'Digital Twins',cat:'technology',mass:48,desc:'Real-time virtual replicas of physical systems enabling predictive simulation at industrial scale.',connections:5,influence:61},
+  {name:'Black Holes',cat:'science',mass:85,desc:'Singularities where spacetime curvature becomes infinite. 40+ million confirmed stellar-mass examples.',connections:4,influence:90},
+  {name:'Inflation',cat:'economy',mass:78,desc:'Global purchasing power erosion. Monetary policy battleground between growth and stability.',connections:11,influence:85},
+  {name:'Generative AI Art',cat:'culture',mass:63,desc:'Machine creativity challenging authorship, authenticity, and the economics of human creativity.',connections:10,influence:71},
+  {name:'Antibiotic Resistance',cat:'health',mass:82,desc:'700,000 annual deaths projected to reach 10 million by 2050 without intervention.',connections:7,influence:88},
+];
+
+// POSITION NODES in 3D space
+let rotX=0,rotY=0;
+let autoRotX=0,autoRotY=0;
+
+const nodes=nodeData.map((d,i)=>{
+  const angle=(i/nodeData.length)*Math.PI*2;
+  const layer=Math.floor(i/6);
+  const r=200+layer*120+Math.random()*60;
+  const theta=angle+Math.random()*0.5;
+  const phi=Math.random()*Math.PI-Math.PI/2;
+  return{
+    ...d,
+    x:r*Math.cos(theta)*Math.cos(phi),
+    y:r*Math.sin(phi)*0.6,
+    z:r*Math.sin(theta)*Math.cos(phi),
+    vx:(Math.random()-0.5)*0.2,
+    vy:(Math.random()-0.5)*0.1,
+    vz:(Math.random()-0.5)*0.2,
+    screenX:0,screenY:0,screenScale:0,
+    hover:false,pulseT:Math.random()*Math.PI*2,
+  };
+});
+
+// Build edges (connect nearby nodes by theme/random)
+const edges=[];
+nodes.forEach((n,i)=>{
+  const count=2+Math.floor(Math.random()*3);
+  for(let c=0;c<count;c++){
+    const j=(i+1+Math.floor(Math.random()*(nodes.length-1)))%nodes.length;
+    if(i!==j) edges.push({a:i,b:j});
+  }
+});
+
+document.getElementById('s-nodes').textContent=nodes.length;
+document.getElementById('s-edges').textContent=edges.length;
+document.getElementById('s-mass').textContent=(nodes.reduce((s,n)=>s+n.mass,0)/10).toFixed(1);
+
+// PROJECTION
+function project(x,y,z){
+  const cosX=Math.cos(rotX+autoRotX),sinX=Math.sin(rotX+autoRotX);
+  const cosY=Math.cos(rotY+autoRotY),sinY=Math.sin(rotY+autoRotY);
+  let rx=x*cosY+z*sinY;
+  let rz=-x*sinY+z*cosY;
+  let ry=y*cosX-rz*sinX;
+  let rz2=y*sinX+rz*cosX;
+  const depth=rz2+800;
+  if(depth<10) return null;
+  const fov=600;
+  return{px:W/2+(rx/depth)*fov,py:H/2+(ry/depth)*fov,scale:fov/depth,depth:rz2};
+}
+
+// MOUSE INTERACTION
+let isDragging=false,lastMX=0,lastMY=0;
+canvas.addEventListener('mousedown',e=>{isDragging=true;lastMX=e.clientX;lastMY=e.clientY;});
+canvas.addEventListener('mousemove',e=>{
+  if(isDragging){
+    rotY+=(e.clientX-lastMX)*0.005;
+    rotX+=(e.clientY-lastMY)*0.005;
+    lastMX=e.clientX;lastMY=e.clientY;
+    autoRotY=0;autoRotX=0;
+  }
+});
+canvas.addEventListener('mouseup',()=>isDragging=false);
+canvas.addEventListener('click',e=>{
+  let closest=null,closestD=40;
+  nodes.forEach(n=>{
+    const dx=e.clientX-n.screenX, dy=e.clientY-n.screenY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<closestD){closestD=d;closest=n;}
+  });
+  if(closest) openPanel(closest);
+});
+
+function openPanel(n){
+  const cat=categories[n.cat];
+  document.getElementById('panel-title').textContent=n.name;
+  document.getElementById('p-id').textContent=n.name.toUpperCase().replace(/ /g,'_');
+  document.getElementById('p-cat').textContent=n.cat.toUpperCase();
+  document.getElementById('p-cat').style.color=cat.color;
+  document.getElementById('p-mass').textContent=n.mass+' PB';
+  document.getElementById('p-mass-bar').style.width=n.mass+'%';
+  document.getElementById('p-mass-bar').style.background=cat.color;
+  document.getElementById('p-connections').textContent=n.connections+' active links';
+  document.getElementById('p-influence').textContent=n.influence+'/100';
+  document.getElementById('p-inf-bar').style.width=n.influence+'%';
+  document.getElementById('p-desc').textContent=n.desc;
+  document.getElementById('data-panel').classList.add('open');
+  drawMiniChart(n,cat.color);
+}
+
+function drawMiniChart(n,color){
+  const mc=document.getElementById('mini-chart');
+  const mctx=mc.getContext('2d');
+  mctx.clearRect(0,0,270,60);
+  mctx.strokeStyle=color;mctx.lineWidth=1.5;
+  mctx.beginPath();
+  for(let i=0;i<270;i++){
+    const v=30+Math.sin(i*0.1+n.mass*0.1)*10+Math.random()*5;
+    i===0?mctx.moveTo(i,v):mctx.lineTo(i,v);
+  }
+  mctx.stroke();
+}
+
+document.querySelector('.close-x').addEventListener('click',()=>{
+  document.getElementById('data-panel').classList.remove('open');
+});
+
+// Tooltip
+const tooltip=document.getElementById('tooltip');
+let hoveredNode=null;
+function checkHover(){
+  hoveredNode=null;
+  let closestD=30;
+  nodes.forEach(n=>{
+    const dx=mx-n.screenX,dy=my-n.screenY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<closestD+n.mass*n.screenScale*0.1){closestD=d;hoveredNode=n;}
+  });
+  if(hoveredNode){
+    tooltip.textContent=hoveredNode.name+' · '+hoveredNode.mass+'PB';
+    tooltip.style.left=(mx+15)+'px';tooltip.style.top=(my-10)+'px';
+    tooltip.className='show';
+    cur.style.transform='translate(-50%,-50%) scale(1.5)';
+    cur.style.borderColor=categories[hoveredNode.cat].color;
+  } else {
+    tooltip.className='';
+    cur.style.transform='translate(-50%,-50%) scale(1)';
+    cur.style.borderColor='#4fc3f7';
+  }
+}
+
+// STARS
+const stars=[];
+for(let i=0;i<400;i++) stars.push({x:(Math.random()-0.5)*4000,y:(Math.random()-0.5)*2000,z:(Math.random()-0.5)*4000});
+
+function drawStars(){
+  stars.forEach(s=>{
+    const p=project(s.x,s.y,s.z);
+    if(!p) return;
+    const sz=Math.max(0.3,p.scale*0.4);
+    ctx.beginPath();ctx.arc(p.px,p.py,sz,0,Math.PI*2);
+    ctx.fillStyle=`rgba(200,210,255,${Math.min(0.6,p.scale)})`;ctx.fill();
+  });
+}
+
+let t=0;
+let lastFPS=Date.now();let fpsCount=0;
+function draw(){
+  t++;
+  fpsCount++;
+  if(Date.now()-lastFPS>1000){
+    document.getElementById('fps-counter').textContent=fpsCount;
+    fpsCount=0;lastFPS=Date.now();
+  }
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#03060f';ctx.fillRect(0,0,W,H);
+
+  if(!isDragging){autoRotY+=0.001;autoRotX+=0.0002;}
+
+  drawStars();
+
+  // Sort nodes back to front
+  const sorted=[...nodes].map(n=>{
+    const p=project(n.x,n.y,n.z);
+    return{...n,proj:p};
+  }).filter(n=>n.proj).sort((a,b)=>b.proj.depth-a.proj.depth);
+
+  // Draw edges first
+  edges.forEach(e=>{
+    const a=nodes[e.a],b=nodes[e.b];
+    if(!a.proj||!b.proj) return;
+    const pa=project(a.x,a.y,a.z);
+    const pb=project(b.x,b.y,b.z);
+    if(!pa||!pb) return;
+    const grad=ctx.createLinearGradient(pa.px,pa.py,pb.px,pb.py);
+    const ca=categories[a.cat].color;
+    const cb=categories[b.cat].color;
+    grad.addColorStop(0,ca+'08');
+    grad.addColorStop(1,cb+'08');
+    ctx.beginPath();ctx.moveTo(pa.px,pa.py);ctx.lineTo(pb.px,pb.py);
+    ctx.strokeStyle=grad;ctx.lineWidth=0.5;ctx.stroke();
+
+    // Data packet
+    const pt=(t*0.008+e.a*0.3)%1;
+    const px=pa.px+(pb.px-pa.px)*pt;
+    const py=pa.py+(pb.py-pa.py)*pt;
+    ctx.beginPath();ctx.arc(px,py,1,0,Math.PI*2);
+    ctx.fillStyle=ca+'88';ctx.fill();
+  });
+
+  // Draw nodes
+  sorted.forEach(n=>{
+    const{proj}=n;
+    n.screenX=proj.px;n.screenY=proj.py;n.screenScale=proj.scale;
+    n.pulseT+=0.03;
+    const cat=categories[n.cat];
+    const pulse=Math.sin(n.pulseT)*0.15+1;
+    const baseSize=Math.max(2,(n.mass/100)*20*proj.scale*pulse);
+
+    // Outer glow
+    const grd=ctx.createRadialGradient(proj.px,proj.py,0,proj.px,proj.py,baseSize*3);
+    grd.addColorStop(0,cat.color+'22');grd.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(proj.px,proj.py,baseSize*3,0,Math.PI*2);
+    ctx.fillStyle=grd;ctx.fill();
+
+    // Core
+    ctx.beginPath();ctx.arc(proj.px,proj.py,baseSize,0,Math.PI*2);
+    ctx.fillStyle=cat.color;ctx.fill();
+
+    // Label
+    if(proj.scale>0.4){
+      ctx.fillStyle=`rgba(224,232,255,${Math.min(1,proj.scale*1.5)})`;
+      ctx.font=`${Math.min(11,baseSize*1.2)}px Inter`;
+      ctx.textAlign='center';
+      ctx.fillText(n.name,proj.px,proj.py-baseSize-4);
+    }
+  });
+
+  nodes.forEach(n=>{n.proj=project(n.x,n.y,n.z);});
+
+  checkHover();
+  requestAnimationFrame(draw);
+}
+draw();
+
+function filterType(type){
+  // Visual filter — dim others
+  nodes.forEach(n=>{
+    if(n.cat===type||type==='all'){n.pulseT=0;}
+  });
+}
+
+function setView(v){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  if(v==='cluster'){
+    // Cluster by category
+    const catPositions={technology:{x:-300,y:0,z:-200},science:{x:300,y:-100,z:-300},
+      economy:{x:0,y:200,z:-400},culture:{x:-200,y:-200,z:-300},health:{x:200,y:100,z:-100}};
+    nodes.forEach(n=>{
+      const cp=catPositions[n.cat];
+      n.x=cp.x+(Math.random()-0.5)*150;n.y=cp.y+(Math.random()-0.5)*100;n.z=cp.z+(Math.random()-0.5)*150;
+    });
+  } else if(v==='network'){
+    // Radial
+    nodes.forEach((n,i)=>{
+      const a=(i/nodes.length)*Math.PI*2;
+      n.x=Math.cos(a)*350;n.y=(Math.random()-0.5)*100;n.z=Math.sin(a)*350;
+    });
+  } else if(v==='timeline'){
+    nodes.forEach((n,i)=>{n.x=-600+(i/nodes.length)*1200;n.y=(Math.random()-0.5)*200;n.z=(Math.random()-0.5)*100;});
+  } else {
+    // Cosmos
+    nodes.forEach((n,i)=>{
+      const a=(i/nodes.length)*Math.PI*2;const r=200+Math.floor(i/6)*100;
+      const phi=Math.random()*Math.PI-Math.PI/2;
+      n.x=r*Math.cos(a)*Math.cos(phi);n.y=r*Math.sin(phi)*0.6;n.z=r*Math.sin(a)*Math.cos(phi);
+    });
+  }
+}
+</script>
+</body>
+</html>
